@@ -79,18 +79,24 @@ describe("Deposit", function () {
     expect(await owner.getBalance()).to.be.below(initialBalance);
   })
 
-  // it("Rejects small deposits", async function () {
-  //   await hardhatPool.create_index(
-  //     [1000000000],  // uint256[] _allocation,
-  //     [UNI_TOKEN] // address[] _tokens
-  //   );
+  it("Rejects 200 deposits without buying", async function () {
+    const initialBalance = await owner.getBalance();
 
-  //   let overrides = { value: ethers.utils.parseEther("0.009999999999") };
+    // DEPOSIT
+    let overrides = { value: ethers.utils.parseEther("1.1") };
 
-  //   await expect(hardhatPool.deposit(
-  //     0, // _index_id
-  //     overrides
-  //   )).to.be.revertedWith('DEPOSIT NEEDS TO BE AT LEAST 0.01');
-  // })
+    for (var i = 0; i < 200; i++) {
+      await hardhatPool.deposit(
+        0, // _index_id
+        overrides
+      );
+    }
+
+    await expect(hardhatPool.deposit(
+      0, // _index_id
+      overrides
+    )).to.be.revertedWith('NO MORE THAN 200 PENDING TRANSACTIONS ALLOWED FOR A GIVEN ASSET');
+  })
+
 })
 

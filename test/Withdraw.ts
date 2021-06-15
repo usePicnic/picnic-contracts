@@ -105,4 +105,17 @@ describe("Withdraw", function () {
             1001, // _sell_pct
         )).to.be.revertedWith("CAN'T SELL MORE THAN 100% OF FUNDS");        
     })
+
+    it("Rejects Withdrawals without shares bought", async function () {
+        await hardhatPool.create_index(
+            [1000000000],  // uint256[] _allocation,
+            [UNI_TOKEN] // address[] _tokens
+        );
+
+        // WITHDRAW
+        await expect(hardhatPool.withdraw(
+            1,   // _index_id
+            1000, // _sell_pct
+        )).to.be.revertedWith('NEEDS TO HAVE SHARES OF THE INDEX');
+    })
 });

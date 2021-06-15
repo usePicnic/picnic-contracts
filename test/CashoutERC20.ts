@@ -64,5 +64,12 @@ describe("Cash-out ERC20 tokens", function () {
       await expect(await hardhatPool.get_token_balance(0, token, hardhatPool.address)).to.be.equal(0);
     })
   })
+
+  it("Rejects withdraw of 100.1%", async function () {
+    await expect(hardhatPool.cash_out_erc20(
+      0,   // _index_id
+      1001, // _sell_pct
+    )).to.be.revertedWith('INSUFFICIENT FUNDS'); 
+  })
 })
 

@@ -61,6 +61,20 @@ describe("Pool", function () {
       )).to.be.revertedWith('MISMATCH IN LENGTH BETWEEN TOKENS AND ALLOCATION');
     })
 
+    it("Should not create Index with 33 tokens", async () => {
+      await expect(hardhatPool.create_index(
+        Array(513).fill(1000000000),  // uint256[] _allocation,
+        Array(513).fill(UNI_TOKEN)  // address[] _tokens
+      )).to.be.revertedWith("NO MORE THAN 32 TOKENS ALLOWED IN A SINGLE INDEX");
+    })
+
+    it("Allocation amount is too small", async () => {
+      await expect(hardhatPool.create_index(
+        Array(1).fill(1),  // uint256[] _allocation,
+        Array(1).fill(UNI_TOKEN)  // address[] _tokens
+      )).to.be.revertedWith("ALLOCATION AMOUNT IS TOO SMALL, NEEDS TO BE AT LEAST EQUIVALENT TO 100,000 WEI");
+    })
+
     it("Should not create Index with repeat tokens", async () => {
       await expect(hardhatPool.create_index(
         [1000000000, 1000000000],  // uint256[] _allocation,

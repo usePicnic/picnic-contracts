@@ -7,12 +7,13 @@ describe("Fees", function () {
   let Pool;
   let hardhatPool;
   let owner;
+  let addr1;
 
   const UNI_ROUTER = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
   const UNI_TOKEN = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984";
 
   beforeEach(async function () {
-    [owner] = await ethers.getSigners();
+    [owner, addr1] = await ethers.getSigners();
 
     // Get the ContractFactory
     Pool = await ethers.getContractFactory("Pool");
@@ -66,6 +67,15 @@ describe("Fees", function () {
     )).to.be.revertedWith('FEE WITHDRAW LIMIT EXCEEDED');
   })
 
+  it("Rejects creator fee withdraws from other address", async function () {
+    let contractAsSigner0 = hardhatPool.connect(addr1);
+
+    await expect(contractAsSigner0.pay_creator_fee(
+      0, // Index ID
+      1001 // Withdraw Percentage
+    )).to.be.revertedWith('ONLY INDEX CREATOR CAN WITHDRAW FEES');
+  })
+
   it("Check fee - protocol", async function () {
     expect(await hardhatPool.get_available_protocol_fee(
       0, // Index ID
@@ -79,9 +89,7 @@ describe("Fees", function () {
       0, // Index ID
       1000 // Withdraw Percentage
     );
-
-    console.log('first')
-
+    
     expect(await owner.getBalance()).to.be.above(initialBalance);
   })
 
@@ -98,5 +106,15 @@ describe("Fees", function () {
       1001 // Withdraw Percentage
     )).to.be.revertedWith('FEE WITHDRAW LIMIT EXCEEDED');
   })
+
+  it("Rejects protocol fee withdraws from other address", async function () {
+    let contractAsSigner0 = hardhatPool.connect(addr1);
+
+    await expect(contractAsSigner0.pay_protocol_fee(
+      0, // Index ID
+      1001 // Withdraw Percentage
+    )).to.be.revertedWith('ONLY INDEXPOOL CAN WITHDRAW FEES');
+  })
+ 
 })
 
