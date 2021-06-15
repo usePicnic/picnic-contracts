@@ -215,10 +215,8 @@ contract Pool {
                 "ALLOCATION AMOUNT IS TOO SMALL, NEEDS TO BE AT LEAST EQUIVALENT TO 100,000 WEI"
             );
         }
-        // Hack References
-        // https://stackoverflow.com/questions/63835302/solidity-error-struct-containing-a-nested-mapping-cannot-be-constructed
-        // https://ethereum.stackexchange.com/questions/88047/workaround-for-typeerror-struct-containing-a-nested-mapping-cannot-be-constru
-
+        
+        // Workaround to solve for struct with nested mappings       
         Index storage index = indexes.push();
         index.allocation = _allocation;
         index.creator = msg.sender;
