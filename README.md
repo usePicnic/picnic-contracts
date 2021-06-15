@@ -1,4 +1,4 @@
-<p align="center">IndexPool is a portfolio sharing platform with a simple design. Check our prototype at <a href="https://indexpool.org">indexpool.org</a></p>
+<p align="center">IndexPool is a portfolio sharing platform with a simple design. Check our prototype at <a href="https://indexpool.org">indexpool.org</a>.</p>
 
 <p align="center">
   <a href="https://hardhat.org">
@@ -17,6 +17,8 @@
     <img src="https://img.shields.io/badge/license-GPL--3-blue" alt="License GPL-3">
   </a>
 </p>
+
+
 ---
 
 ## Compile
