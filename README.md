@@ -1,34 +1,8 @@
-**Full Documentation at [docs.indexpool.org](https://docs.indexpool.org)**
-
-## Table of Contents
-
- - [Documentation](#documentation)
- - [Compile](#compile)
- - [Contracts](#contracts)
- - [Development](#development)
- - [Testing](#testing)
- - [Maintainers](#maintainers)
- - [Contributing](#contributing)
- - [License](#license)
-
-## Documentation
-
-Check out our full documentation at [docs.indexpool.org](https://docs.indexpool.org)
-
 ## Compile
 
 ```bash
 $ yarn compile
 ```
-
-## Contracts
-
-Checkout our full addresses list [here](https://indexpool.org)
-
-
-## Development
-
-
 
 ## Testing
 
@@ -58,8 +32,8 @@ npx hardhat setupLocal --network local
 
 ## Contributing
 
-We highly encourage participation from the community to help shape the development of Pods. If you are interested in
-contributing or have any questions, ping us on [Twitter](https://twitter.com/indexpool) or [Discord](https://discord.com);
+We highly encourage participation from the community to help shape the development of IndexPool. If you are interested in
+contributing or have any questions, ping us on [Twitter](https://twitter.com/indexpool) or [Discord](https://discord.gg/MyfRfmGn);
 
 We use [Yarn](https://yarnpkg.com/) as a dependency manager and [Hardhat](https://hardhat.org/)
 as a development environment for compiling, testing, and deploying our contracts. The contracts were written in [Solidity v0.8.4](https://github.com/ethereum/solidity).
@@ -68,8 +42,8 @@ as a development environment for compiling, testing, and deploying our contracts
 
  - **Pedro Guerra Brandão**
  [@pgbrandao](https://github.com/pgbrandao)
- [`pedro@indexpool.org`](mailto:pedro@indexpool.org)
+ [`pgbrandao@gmail.com`](mailto:pgbrandao@gmail.com)
 
  - **João Alexandre Vaz Ferreira**
  [@joaoavf](https://github.com/joaoavf)
- [`joao@indexpool.org`](mailto:joao@indexpool.org)
+ [`joao.avf@gmail.com`](mailto:joao.avf@gmail.com)
