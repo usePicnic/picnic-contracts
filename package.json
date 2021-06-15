@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "hardhat test --network hardhat"
+    "test": "hardhat test --network hardhat",
+    "lint": "./node_modules/.bin/solhint -f table contracts/**/*.sol"
   },
   "repository": {
     "type": "git",
@@ -36,6 +37,7 @@
   },
   "dependencies": {
     "node-fetch": "^2.6.1",
+    "solhint": "^3.3.6",
     "zeppelin-solidity": "^1.12.0"
   }
 }

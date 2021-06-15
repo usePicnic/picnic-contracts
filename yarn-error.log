@@ -1,0 +1,72 @@
+Arguments: 
+  /usr/bin/node /home/joao/.yarn/bin/yarn.js install
+
+PATH: 
+  /home/joao/.yarn/bin:/home/joao/.config/yarn/global/node_modules/.bin:/home/joao/.cargo/bin:/home/joao/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+
+Yarn version: 
+  1.22.5
+
+Node version: 
+  10.19.0
+
+Platform: 
+  linux x64
+
+Trace: 
+  SyntaxError: /home/joao/indexpool/contracts/package.json: Unexpected token } in JSON at position 1072
+      at JSON.parse (<anonymous>)
+      at /home/joao/.yarn/lib/cli.js:1625:59
+      at Generator.next (<anonymous>)
+      at step (/home/joao/.yarn/lib/cli.js:310:30)
+      at /home/joao/.yarn/lib/cli.js:321:13
+
+npm manifest: 
+  {
+    "name": "crypto_index_fund",
+    "version": "0.0.1",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+      "test": "hardhat test --network hardhat",
+      "lint": "./node_modules/.bin/solhint -f table contracts/**/*.sol"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/pgbrandao/crypto_index_fund.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+      "url": "https://github.com/pgbrandao/crypto_index_fund/issues"
+    },
+    "homepage": "https://github.com/pgbrandao/crypto_index_fund#readme",
+    "devDependencies": {
+      "@nomiclabs/hardhat-ethers": "^2.0.2",
+      "@nomiclabs/hardhat-waffle": "^2.0.1",
+      "@types/chai": "^4.2.15",
+      "@types/mocha": "^8.2.2",
+      "@types/node": "^14.14.35",
+      "@uniswap/v2-core": "^1.0.1",
+      "@uniswap/v2-periphery": "^1.1.0-beta.0",
+      "chai": "^4.3.4",
+      "ethereum-waffle": "^3.3.0",
+      "ethers": "^5.0.32",
+      "hardhat": "^2.1.1",
+      "hardhat-gas-reporter": "^1.0.4",
+      "solc": "^0.8.4",
+      "solidity-coverage": "^0.7.16",
+      "ts-node": "^9.1.1",
+      "typescript": "^4.2.3",
+    },
+    "dependencies": {
+      "node-fetch": "^2.6.1",
+      "zeppelin-solidity": "^1.12.0"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
