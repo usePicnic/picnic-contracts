@@ -195,8 +195,8 @@ contract Pool {
         );
 
         require(
-            _tokens.length <= 512,
-            "NO MORE THAN 512 TOKENS ALLOWED IN A SINGLE INDEX"
+            _tokens.length <= 32,
+            "NO MORE THAN 32 TOKENS ALLOWED IN A SINGLE INDEX"
         );
 
         require(check_not_duplicates(_tokens), "DUPLICATED TOKENS"); // import security feature
@@ -658,7 +658,7 @@ contract Pool {
                 shares_pct;
 
             require(
-                indexes[index_id].shares[token][msg.sender] > amount,
+                indexes[index_id].shares[token][msg.sender] >= amount,
                 "INSUFFICIENT FUNDS"
             );
             indexes[index_id].shares[token][msg.sender] -= amount;
