@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "hardhat test --network hardhat",
-    "lint": "./node_modules/.bin/solhint -f table contracts/**/*.sol"
+    "lint": "./node_modules/.bin/solhint -f table contracts/**/*.sol",
+    "compile": "hardhat compile",
+    "coverage": "hardhat coverage"
   },
   "repository": {
     "type": "git",
