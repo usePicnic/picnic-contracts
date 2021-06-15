@@ -4,8 +4,6 @@ import { ethers } from "hardhat";
 
 const hre = require('hardhat');
 
-import { BINANCE_ADDRESS, BINANCE7_ADDRESS, DAI_RICH_ADDRESS } from '../Constants';
-
 describe("Pool", function () {
     let Pool;
     let hardhatPool;
@@ -33,11 +31,7 @@ describe("Pool", function () {
         COMPOUND_TOKEN, GRAPH_TOKEN, DEV_TOKEN, RLC_TOKEN, SUSHI_TOKEN]
 
     beforeEach(async function () {
-        await hre.network.provider.request({
-            method: 'hardhat_impersonateAccount',
-            params: [BINANCE_ADDRESS],
-        });
-        owner = await ethers.provider.getSigner(BINANCE_ADDRESS);
+        [owner] = await ethers.getSigners();
 
         // Get the ContractFactory
         Pool = await ethers.getContractFactory("Pool");
