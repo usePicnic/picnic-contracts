@@ -1,3 +1,24 @@
+<p align="center">Pods is a decentralized non-custodial options protocol on Ethereum. Read this <a href="https://medium.com/podsfinance/understanding-options-5c47004f4c4" target="_blank">article</a> if you want to learn more!.</p>
+
+<p align="center">
+  <a href="https://hardhat.org">
+    <img src="https://img.shields.io/badge/built with-Hardhat-f9c937" alt="Build with Hardhat">
+  </a>
+
+  <a href="https://github.com/indexpool/contracts/actions/workflows/main.yml">
+    <img src="https://github.com/indexpool/contracts/workflows/lint+compile+test/badge.svg" alt="test"/>
+  </a>
+  
+  <a href='https://coveralls.io/github/indexpool/contracts?branch=main'>
+    <img src='https://coveralls.io/repos/github/indexpool/contracts/badge.svg?branch=main' alt='Coverage Status' />
+  </a>
+
+  <a href="https://github.com/indexpool/contracts/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/license-GPL--3-blue" alt="License GPL-3">
+  </a>
+</p>
+---
+
 ## Compile
 
 ```bash
