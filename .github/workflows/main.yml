@@ -1,0 +1,41 @@
+name: lint+compile+test
+on:
+  push
+
+jobs:
+  coverage:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v1
+      - name: setup-node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
+      - name: install yarn
+        run: npm install yarn
+      - name: install packages
+        run: yarn
+      - name: lint
+        run: yarn lint
+      - name: compile
+        run: yarn compile
+        env:
+          COINMARKETCAP_KEY: ${{ secrets.COINMARKETCAP_KEY }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }} 
+      - name: test
+        run: yarn test --no-compile
+        env:
+          COINMARKETCAP_KEY: ${{ secrets.COINMARKETCAP_KEY }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }} 
+      - name: coverage
+        run: yarn run coverage
+        env:
+          COINMARKETCAP_KEY: ${{ secrets.COINMARKETCAP_KEY }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }} 
+      - name: "Upload report to Coveralls"
+        uses: "coverallsapp/github-action@master"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: "./coverage/lcov.info"    
