@@ -1,4 +1,4 @@
-<p align="center">Pods is a decentralized non-custodial options protocol on Ethereum. Read this <a href="https://medium.com/podsfinance/understanding-options-5c47004f4c4" target="_blank">article</a> if you want to learn more!.</p>
+<p align="center">IndexPool is a portfolio sharing platform with a simple design. Check our prototype at <a href="https://indexpool.org">indexpool.org</a></p>
 
 <p align="center">
   <a href="https://hardhat.org">
