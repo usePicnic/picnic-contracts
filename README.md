@@ -39,20 +39,6 @@ yarn test
 yarn coverage
 ```
 
-## Running Locally
-
-You will first need to run a local node in your machine. You can do that with Hardhat using:
-
-```
-npx hardhat node
-```
-
-After that, you can run our script responsible for deploying all our contracts with a default configuration. It will be created some initial options and pools with liquidity there.
-
-```
-npx hardhat setupLocal --network local
-```
-
 ## Contributing
 
 We highly encourage participation from the community to help shape the development of IndexPool. If you are interested in
