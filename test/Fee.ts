@@ -37,6 +37,13 @@ describe("Fees", function () {
       [[WETH, UNI_TOKEN]], // Paths
       overrides
     );
+
+    // Preparing to withdraw zero fee
+    await hardhatPool.create_index(
+      [1000000000],  // uint256[] _allocation,
+      [UNI_TOKEN], // address[] _tokens
+      [[UNI_TOKEN, WETH]] // PATHS
+    );
   });
 
   it("Check fee - creator", async function () {
@@ -45,7 +52,7 @@ describe("Fees", function () {
     )).to.be.equal(ethers.utils.parseEther("0.001"));
   })
 
-  it("Pay fee - creator", async function () {    
+  it("Pay fee - creator", async function () {
     const initialBalance = await owner.getBalance();
 
     await hardhatPool.pay_creator_fee(
@@ -63,19 +70,25 @@ describe("Fees", function () {
     )).to.be.revertedWith('ONLY INDEX CREATOR CAN WITHDRAW FEES');
   })
 
+  it("Rejects creator withdraw when there is no fee available", async function () {
+    await expect(hardhatPool.pay_creator_fee(
+      1, // Index ID
+    )).to.be.revertedWith('NO FEE TO WITHDRAW');
+  })
+
   it("Check fee - protocol", async function () {
     expect(await hardhatPool.get_available_protocol_fee(
       0, // Index ID
     )).to.be.equal(ethers.utils.parseEther("0.001"));
   })
 
-  it("Pay fee - protocol", async function () {    
+  it("Pay fee - protocol", async function () {
     const initialBalance = await owner.getBalance();
 
     await hardhatPool.pay_protocol_fee(
       0, // Index ID
     );
-    
+
     expect(await owner.getBalance()).to.be.above(initialBalance);
   })
 
@@ -85,6 +98,12 @@ describe("Fees", function () {
     await expect(contractAsSigner0.pay_protocol_fee(
       0, // Index ID
     )).to.be.revertedWith('ONLY INDEXPOOL CAN CALL THIS FUNCTION');
-  }) 
+  })
+
+  it("Rejects creator withdraw when there is no fee available", async function () {
+    await expect(hardhatPool.pay_creator_fee(
+      1, // Index ID
+    )).to.be.revertedWith('NO FEE TO WITHDRAW');
+  })
 })
 
