@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 
 const hre = require('hardhat');
 
-describe("Pool", function () {
+describe("NFTs", function () {
     let Pool;
     let hardhatPool;
     let owner;
@@ -88,4 +88,17 @@ describe("Pool", function () {
         await expect(await pool721.balanceOf(owner.address)).to.be.equal(0);
         await expect(await hardhatPool.get_token_balance(0, UNI_TOKEN, owner.getAddress())).to.above(0);
     });
+    
+    it("Rejects calls from other addresses", async () => {
+        await expect( pool721.generatePool721(
+            owner.getAddress(),
+            0, // index_id
+            [2, 3] // allocation
+          )).to.be.revertedWith("ONLY INDEXPOOL CAN CALL THIS FUNCTION");
+
+          await expect(pool721.burnPool721(
+            0
+          )).to.be.revertedWith("ONLY INDEXPOOL CAN CALL THIS FUNCTION");
+       
+    });    
 });

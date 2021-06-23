@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-describe("Deposit", function () {
+describe("ERC721", function () {
 
   let owner;
   let NFT;
