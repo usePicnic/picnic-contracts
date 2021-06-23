@@ -88,5 +88,13 @@ describe("Pool", function () {
         [[UNI_TOKEN, WETH]] // paths
       )).to.be.revertedWith("ALLOCATION AMOUNT IS TOO SMALL, NEEDS TO BE AT LEAST EQUIVALENT TO 100,000 WEI");
     })
+
+    it("Rejects wrong path", async () => {
+      await expect(hardhatPool.create_index(
+        [1],  // uint256[] _allocation,
+        [UNI_TOKEN],  // address[] _tokens
+        [[WETH, UNI_TOKEN]] // paths
+      )).to.be.revertedWith("WRONG PATH: TOKEN NEEDS TO BE PART OF PATH");
+    })
   });
 });

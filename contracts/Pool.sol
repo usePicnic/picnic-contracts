@@ -248,7 +248,7 @@ contract Pool is IPool {
             if (address(0) != _tokens[i]) {
                 require(
                     _tokens[i] == path[0],
-                    "TOKEN NEEDS TO BE PART OF PATH"
+                    "WRONG PATH: TOKEN NEEDS TO BE PART OF PATH"
                 );
 
                 // checks if not network asset
@@ -343,7 +343,7 @@ contract Pool is IPool {
 
             require(
                 tokens[i] == path[path.length - 1],
-                "TOKEN NEEDS TO BE PART OF PATH"
+                "WRONG PATH: TOKEN NEEDS TO BE PART OF PATH"
             );
 
             if (address(0) == tokens[i]) {
@@ -429,7 +429,7 @@ contract Pool is IPool {
             if (address(0) != tokens[i]) {
                 require(
                     tokens[i] == path[0],
-                    "TOKEN NEEDS TO BE PART OF PATH"
+                    "WRONG PATH: TOKEN NEEDS TO BE PART OF PATH"
                 );
 
                 result = trade_from_tokens({

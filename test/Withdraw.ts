@@ -98,6 +98,15 @@ describe("Withdraw", function () {
         )).to.be.revertedWith("CAN'T SELL MORE THAN 100% OF FUNDS");
     })
 
+    it("Rejects wrong path", async function () {
+        // WITHDRAW
+        await expect(hardhatPool.withdraw(
+            0,   // _index_id
+            1000, // _sell_pct
+            tokens.map(x => [WETH, x]) // paths
+        )).to.be.revertedWith("WRONG PATH: TOKEN NEEDS TO BE PART OF PATH");
+    })
+
     it("Rejects Withdrawals without shares bought", async function () {
         await hardhatPool.create_index(
             [1000000000],  // uint256[] _allocation,

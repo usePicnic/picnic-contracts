@@ -76,6 +76,16 @@ describe("Deposit", function () {
     )).to.be.revertedWith('EXCEEDED MAXIMUM ALLOWED DEPOSIT VALUE');  
   })
 
+  it("Rejects wrong path", async function () {
+    // DEPOSIT
+    let overrides = { value: ethers.utils.parseEther("10") };
+    await expect(hardhatPool.deposit(
+      0, // _index_id
+      [[UNI_TOKEN, WETH]], // paths
+      overrides
+    )).to.be.revertedWith('WRONG PATH: TOKEN NEEDS TO BE PART OF PATH');  
+  })
+
   it("Increase deposit limit", async function () {   
     let overrides = { value: ethers.utils.parseEther("101") };
     await hardhatPool.set_max_deposit(BigInt(200) * BASE_ASSET);
