@@ -246,6 +246,11 @@ contract Pool is IPool {
             path = paths[i];
 
             if (address(0) != _tokens[i]) {
+                require(
+                    _tokens[i] == path[0],
+                    "TOKEN NEEDS TO BE PART OF PATH"
+                );
+
                 // checks if not network asset
                 amount = uniswap_router.getAmountsOut(_allocation[i], path)[1];
                 require(
@@ -254,9 +259,6 @@ contract Pool is IPool {
                 );
             }
         }
-        // References on how to deal with array of struct with nested mappings
-        // https://stackoverflow.com/questions/63835302/solidity-error-struct-containing-a-nested-mapping-cannot-be-constructed
-        // https://ethereum.stackexchange.com/questions/88047/workaround-for-typeerror-struct-containing-a-nested-mapping-cannot-be-constru
 
         Index storage index = indexes.push();
         index.allocation = _allocation;
@@ -338,6 +340,12 @@ contract Pool is IPool {
         uint256 quota_price = 0;
         for (uint8 i = 0; i < allocation.length; i++) {
             path = paths[i];
+
+            require(
+                tokens[i] == path[path.length - 1],
+                "TOKEN NEEDS TO BE PART OF PATH"
+            );
+
             if (address(0) == tokens[i]) {
                 amount = allocation[i];
             } else {
@@ -419,6 +427,11 @@ contract Pool is IPool {
             path = paths[i];
 
             if (address(0) != tokens[i]) {
+                require(
+                    tokens[i] == path[0],
+                    "TOKEN NEEDS TO BE PART OF PATH"
+                );
+
                 result = trade_from_tokens({
                     from_token: _token,
                     shares_amount: shares_amount,
