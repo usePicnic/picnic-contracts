@@ -75,9 +75,9 @@ describe("Pool", function () {
 
     it("Should not create Index with 33 tokens", async () => {
       await expect(hardhatPool.create_index(
-        Array(513).fill(1000000000),  // uint256[] _allocation,
-        Array(513).fill(UNI_TOKEN),  // address[] _tokens
-        Array(513).fill([UNI_TOKEN, WETH]),  // paths
+        Array(33).fill(1000000000),  // uint256[] _allocation,
+        Array(33).fill(UNI_TOKEN),  // address[] _tokens
+        Array(33).fill([UNI_TOKEN, WETH]),  // paths
       )).to.be.revertedWith("NO MORE THAN 32 TOKENS ALLOWED IN A SINGLE INDEX");
     })
 
