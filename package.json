@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pgbrandao/crypto_index_fund.git"
+    "url": "git+https://github.com/indexpool/contracts.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/pgbrandao/crypto_index_fund/issues"
+    "url": "https://github.com/indexpool/contracts/issues"
   },
-  "homepage": "https://github.com/pgbrandao/crypto_index_fund#readme",
+  "homepage": "https://indexpool.org",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",

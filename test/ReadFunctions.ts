@@ -10,6 +10,7 @@ describe("Read", function () {
 
   const UNI_ROUTER = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
   const UNI_TOKEN = "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984";
+  const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 
   beforeEach(async function () {
     [owner] = await ethers.getSigners();
@@ -24,18 +25,16 @@ describe("Read", function () {
 
     await hardhatPool.create_index(
       [1000000000],  // uint256[] _allocation,
-      [UNI_TOKEN] // address[] _tokens
+      [UNI_TOKEN], // address[] _tokens
+      [[UNI_TOKEN, WETH]] // paths
     );
 
     // DEPOSIT
     let overrides = { value: ethers.utils.parseEther("1.") };
     await hardhatPool.deposit(
       0, // _index_id
+      [[WETH, UNI_TOKEN]], // paths
       overrides
-    );
-
-    await hardhatPool.buy(
-      0, // _index_id
     );
   });
 
