@@ -101,7 +101,7 @@ describe("Fees", function () {
   })
 
   it("Rejects creator withdraw when there is no fee available", async function () {
-    await expect(hardhatPool.pay_creator_fee(
+    await expect(hardhatPool.pay_protocol_fee(
       1, // Index ID
     )).to.be.revertedWith('NO FEE TO WITHDRAW');
   })
