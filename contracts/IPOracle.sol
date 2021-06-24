@@ -1,20 +1,22 @@
 pragma solidity =0.6.6;
+
 import "hardhat/console.sol";
 import "./OraclePair.sol";
+
 contract IPOracle {
+    uint256 constant ORACLE_UNIT = 1000000000;
+    OraclePair oracle; 
+    OraclePair[] oracleList;
+    address[] path;
 
-    constructor(address factory, address[] _path) public { 
-        OraclePair oracle; 
-
-        uint256 constant ORACLE_UNIT = 1000000000
-
+    constructor(address factory, address[] memory _path) public { 
         path = _path; 
-        oracleList = new IUniswapV2Pair[](path.length - 1);
+        oracleList = new OraclePair[](path.length - 1);
 
         for (uint256 i = 0; i < path.length - 1; i++) {
-            oracle = OraclePair(factory, path[i], path[i + 1]);
+            oracle = new OraclePair(factory, path[i], path[i + 1]);
             oracle.update();
-            oracleList.push(oracle);
+            oracleList[i] = oracle;
         }
     }
   
@@ -25,7 +27,7 @@ contract IPOracle {
 
         for (uint256 i = 0; i < oracleList.length; i++) {
             oracle = oracleList[i];
-            amount = oracle.consult(path[i], amountIn);
+            amount = oracle.consult(path[i], amount);
         }
 
         return amount;
