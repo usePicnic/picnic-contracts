@@ -239,15 +239,18 @@ contract Pool is IPool {
         require(check_not_duplicates(_tokens), "DUPLICATED TOKENS"); // import security feature
 
         address[] memory path = new address[](2);
-
+        address token;
         uint256 amount;
+
         // Allocation size
         for (uint8 i = 0; i < _allocation.length; i++) {
             path = paths[i];
+            token = _tokens[i];
 
-            if (address(0) != _tokens[i]) {
+            if (address(0) != token) {
+                
                 require(
-                    _tokens[i] == path[0],
+                    token == path[0],
                     "WRONG PATH: TOKEN NEEDS TO BE PART OF PATH"
                 );
 
@@ -256,7 +259,7 @@ contract Pool is IPool {
                 require(
                     amount > 100000,
                     "ALLOCATION AMOUNT IS TOO SMALL, NEEDS TO BE AT LEAST EQUIVALENT TO 100,000 WEI"
-                );
+                );     
             }
         }
 
