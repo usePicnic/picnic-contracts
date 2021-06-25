@@ -12,7 +12,7 @@ import '@uniswap/v2-periphery/contracts/libraries/UniswapV2Library.sol';
 contract OraclePair {
     using FixedPoint for *;
 
-    uint public constant PERIOD = 2 hours;
+    uint public constant PERIOD = 1 seconds; // TODO we need to set this to how much we would like to.
 
     IUniswapV2Pair immutable pair;
     address public immutable token0;

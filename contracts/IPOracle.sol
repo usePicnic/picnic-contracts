@@ -5,31 +5,39 @@ import "./OraclePair.sol";
 
 contract IPOracle {
     uint256 constant ORACLE_UNIT = 1000000000;
-    OraclePair oracle; 
-    OraclePair[] oracleList;
-    address[] path;
+    address factory;
 
-    constructor(address factory, address[] memory _path) public { 
-        path = _path; 
-        oracleList = new OraclePair[](path.length - 1);
+    mapping(address => mapping(address => OraclePair)) pathToOracle;
 
-        for (uint256 i = 0; i < path.length - 1; i++) {
-            oracle = new OraclePair(factory, path[i], path[i + 1]);
-            oracle.update();
-            oracleList[i] = oracle;
-        }
+    constructor(address _factory) public { 
+        factory = _factory;
     }
   
     // note this will always return 0 before update has been called successfully for the first time.
-    function consult() external view returns (uint amountOut) {
+    function consult(address[] memory path) public returns (uint amountOut) {
         OraclePair oracle; 
         uint amount = ORACLE_UNIT;
 
-        for (uint256 i = 0; i < oracleList.length; i++) {
-            oracle = oracleList[i];
+        for (uint256 i = 0; i < path.length - 1; i++) {
+            oracle = pathToOracle[path[i]][path[i + 1]];
+
+            if (oracle == pathToOracle[address(1)][address(2)]){
+                console.log('ORACLE ZERO');
+                oracle = instantiateOracle(path[i], path[i + 1]);
+            }
+
             amount = oracle.consult(path[i], amount);
         }
 
+        console.log(amount);
+
         return amount;
+    }
+
+    function instantiateOracle(address tokenA, address tokenB) public returns (OraclePair) {
+         OraclePair oracle = new OraclePair(factory, tokenA, tokenB);
+         oracle.update();
+         pathToOracle[tokenA][tokenB] = oracle;
+         return oracle;
     }
 }
