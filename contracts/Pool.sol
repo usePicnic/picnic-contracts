@@ -1,4 +1,4 @@
-pragma solidity >= 0.8.6;
+pragma solidity >=0.8.6;
 
 import "hardhat/console.sol";
 import "./interfaces/IPool.sol";
@@ -244,14 +244,13 @@ contract Pool is IPool {
         address[] memory path = new address[](2);
         address token;
         uint256 amount;
-        
+
         // Allocation size
         for (uint8 i = 0; i < _allocation.length; i++) {
             path = paths[i];
             token = _tokens[i];
 
             if (address(0) != token) {
-                
                 require(
                     token == path[0],
                     "WRONG PATH: TOKEN NEEDS TO BE PART OF PATH"
@@ -262,7 +261,9 @@ contract Pool is IPool {
                 require(
                     amount > 100000,
                     "ALLOCATION AMOUNT IS TOO SMALL, NEEDS TO BE AT LEAST EQUIVALENT TO 100,000 WEI"
-                );     
+                );
+
+                oracle.updateOracles(path);
             }
         }
 
@@ -355,9 +356,14 @@ contract Pool is IPool {
             if (address(0) == tokens[i]) {
                 amount = allocation[i];
             } else {
-                amount = uniswap_router.getAmountsOut(allocation[i], path)[
-                    path.length - 1
-                ];
+                oracle.updateOracles(path);
+                amount = oracle.consult(path);
+
+                if (amount == 0) {
+                    amount = uniswap_router.getAmountsOut(allocation[i], path)[
+                        path.length - 1
+                    ];
+                }
             }
             amounts[i] = amount;
             quota_price += amount;

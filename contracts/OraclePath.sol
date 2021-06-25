@@ -22,7 +22,6 @@ contract OraclePath {
             oracle = pathToOracle[path[i]][path[i + 1]];
             amount = oracle.consult(path[i], amount);
         }
-        console.log(amount);
         return amount;
     }
 
