@@ -16,13 +16,13 @@ import "../libraries/DataStructures.sol";
  */
 
 interface IPool {
-    /**
-     * @notice Counts how many indexes have been created.
-     *
-     * @dev Each index is appended into the `indexes` array, so to know how
-     * many indexes have been created you only need to check its lenght.
-     *
-     */
+/**
+ * @notice Counts how many indexes have been created.
+ *
+ * @dev Each index is appended into the `indexes` array, so to know how
+ * many indexes have been created you only need to check its lenght.
+ *
+ */
     function get_indexes_length() external view returns (uint256);
 
     /**

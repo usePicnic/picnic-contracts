@@ -23,65 +23,64 @@ import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
  */
 
 contract Pool is IPool {
-    Index[] private indexes;
-    IOraclePath oracle;
+    address public creator;
 
-    IUniswapV2Router02 uniswap_router;
-    address creator;
+    Index[] private _indexes;
+    IOraclePath private _oracle;
+    IUniswapV2Router02 private _uniswapRouter;
+    Pool721 private _pool721;
 
-    uint256 constant BASE_ASSET = 1000000000000000000;
-    uint256 max_deposit = 100 * BASE_ASSET;
+    uint256 private constant BASE_ASSET = 1000000000000000000;
+    uint256 public maxDeposit = 100 * BASE_ASSET;
 
-    Pool721 pool721;
-
-    constructor(address _uniswap_factory, address oracleAddress) {
-        uniswap_router = IUniswapV2Router02(_uniswap_factory);
+    constructor(address uniswapRouter, address oracleAddress) {
+        _uniswapRouter = IUniswapV2Router02(uniswapRouter);
         creator = msg.sender;
-        pool721 = new Pool721();
-        oracle = IOraclePath(oracleAddress);
+        _pool721 = new Pool721();
+        _oracle = IOraclePath(oracleAddress);
     }
 
-    modifier _indexpool_only_() {
+    modifier _indexpoolOnly_() {
         require(msg.sender == creator, "ONLY INDEXPOOL CAN CALL THIS FUNCTION");
         _;
     }
 
     event LOG_CREATE_INDEX(
-        uint256 indexed index_id,
-        address indexed creator,
+        uint256 indexed indexId,
+        address indexed creatorAddress,
         address[] tokens,
         uint256[] allocation
     );
 
     event LOG_DEPOSIT(
-        address indexed user_id,
-        uint256 indexed index_id,
+        address indexed userAddress,
+        uint256 indexed indexId,
         uint256 amount_in
     );
 
     event LOG_WITHDRAW(
-        address indexed user_id,
-        uint256 indexed index_id,
+        address indexed userAddress,
+        uint256 indexed indexId,
         uint256 percentage,
         uint256 amount_out
     );
 
     event LOG_ERC20_WITHDRAW(
-        address indexed user_id,
-        uint256 indexed index_id,
+        address indexed userAddress,
+        uint256 indexed indexId,
         uint256 percentage,
         uint256[] amounts
     );
 
     event LOG_FEE_WITHDRAW(
-        address indexed user_id,
-        uint256 indexed index_id,
-        uint256 amount_out
+        address indexed userAddress,
+        uint256 indexed indexId,
+        uint256 amountOut
     );
 
     event Received(address sender, uint256 amount);
 
-    receive() external payable {
+    receive() external payable override {
         emit Received(msg.sender, msg.value);
     }
 
@@ -92,8 +91,8 @@ contract Pool is IPool {
      * many indexes have been created you only need to check its lenght.
      *
      */
-    function get_indexes_length() external view override returns (uint256) {
-        return indexes.length;
+    function getIndexesLength() external view override returns (uint256) {
+        return _indexes.length;
     }
 
     /**
@@ -104,16 +103,16 @@ contract Pool is IPool {
      *
      */
     // TODO evaluate if this is being used somewhere.
-    function get_indexes_creators()
-        external
-        view
-        override
-        returns (address[] memory)
+    function getIndexesCreators()
+    external
+    view
+    override
+    returns (address[] memory)
     {
-        address[] memory addresses = new address[](indexes.length);
+        address[] memory addresses = new address[](_indexes.length);
 
-        for (uint256 i = 0; i < indexes.length; i++) {
-            addresses[i] = indexes[i].creator;
+        for (uint256 i = 0; i < _indexes.length; i++) {
+            addresses[i] = _indexes[i].creator;
         }
 
         return addresses;
@@ -124,16 +123,16 @@ contract Pool is IPool {
      *
      * @dev Access the mapping that control holdings for index -> token -> user.
      *
-     * @param index_id Index Id (position in `indexes` array)
-     * @param token Token address
-     * @param user_id User address
+     * @param indexId Index Id (position in `indexes` array)
+     * @param tokenAddress Token address
+     * @param userAddress User address
      */
-    function get_token_balance(
-        uint256 index_id,
-        address token,
-        address user_id
+    function getTokenBalance(
+        uint256 indexId,
+        address tokenAddress,
+        address userAddress
     ) external view override returns (uint256) {
-        return indexes[index_id].shares[token][user_id];
+        return _indexes[indexId].shares[tokenAddress][userAddress];
     }
 
     /**
@@ -142,15 +141,15 @@ contract Pool is IPool {
      * @dev Simply access the `allocation` array in the Index struct, note that
      * order is the same as the `tokens` array.
      *
-     * @param index_id Index Id (position in `indexes` array)
+     * @param indexId Index Id (position in `indexes` array)
      */
-    function get_index_allocation(uint256 index_id)
-        external
-        view
-        override
-        returns (uint256[] memory)
+    function getIndexAllocation(uint256 indexId)
+    external
+    view
+    override
+    returns (uint256[] memory)
     {
-        return indexes[index_id].allocation;
+        return _indexes[indexId].allocation;
     }
 
     /**
@@ -158,15 +157,15 @@ contract Pool is IPool {
      *
      * @dev Simply access the `tokens` array in the Index struct.
      *
-     * @param index_id Index Id (position in `indexes` array)
+     * @param indexId Index Id (position in `indexes` array)
      */
-    function get_index_tokens(uint256 index_id)
-        external
-        view
-        override
-        returns (address[] memory)
+    function getIndexTokens(uint256 indexId)
+    external
+    view
+    override
+    returns (address[] memory)
     {
-        return indexes[index_id].tokens;
+        return _indexes[indexId].tokens;
     }
 
     /**
@@ -175,21 +174,21 @@ contract Pool is IPool {
      * @dev Uses a struct type called `OutputIndex` which is `Index` withouts
      * the mappings.
      *
-     * @param index_id Index Id (position in `indexes` array)
+     * @param indexId Index Id (position in `indexes` array)
      */
-    function get_index(uint256 index_id)
-        external
-        view
-        override
-        returns (OutputIndex memory)
+    function getIndex(uint256 indexId)
+    external
+    view
+    override
+    returns (OutputIndex memory)
     {
         OutputIndex memory output = OutputIndex({
-            creator: indexes[index_id].creator,
-            allocation: indexes[index_id].allocation,
-            tokens: indexes[index_id].tokens,
-            fee: indexes[index_id].fee,
-            creator_fee_cash_out: indexes[index_id].creator_fee_cash_out,
-            protocol_fee_cash_out: indexes[index_id].protocol_fee_cash_out
+        creator : _indexes[indexId].creator,
+        allocation : _indexes[indexId].allocation,
+        tokens : _indexes[indexId].tokens,
+        fee : _indexes[indexId].fee,
+        creator_fee_cash_out : _indexes[indexId].creator_fee_cash_out,
+        protocol_fee_cash_out : _indexes[indexId].protocol_fee_cash_out
         });
 
         return output;
@@ -203,12 +202,12 @@ contract Pool is IPool {
      *
      * @param _max_deposit Max deposit value in wei
      */
-    function set_max_deposit(uint256 _max_deposit)
-        external
-        override
-        _indexpool_only_
+    function setMaxDeposit(uint256 newMaxDeposit)
+    external
+    override
+    _indexpool_only_
     {
-        max_deposit = _max_deposit;
+        maxDeposit = newMaxDeposit;
     }
 
     /**
@@ -219,70 +218,72 @@ contract Pool is IPool {
      * Token addresses and allocations are set at this moment and will be 
      * immutable for the rest of the contract's life.
      *
-     * @param _allocation Array of allocations (ordered by token addresses)
-     * @param _tokens Array of token addresses
+     * @param allocation Array of allocations (ordered by token addresses)
+     * @param tokens Array of token addresses
      * @param paths Paths to be used respective to each token on DEX
      */
     // TODO switch order (tokens should be first)
-    function create_index(
-        uint256[] memory _allocation,
-        address[] memory _tokens,
+    function createIndex(
+        uint256[] memory allocation,
+        address[] memory tokens,
         address[][] memory paths
     ) external override {
         require(
-            _allocation.length == _tokens.length,
+            allocation.length == tokens.length,
             "MISMATCH IN LENGTH BETWEEN TOKENS AND ALLOCATION"
         );
 
         require(
-            _tokens.length <= 32,
+            tokens.length <= 32,
             "NO MORE THAN 32 TOKENS ALLOWED IN A SINGLE INDEX"
         );
 
-        require(check_not_duplicates(_tokens), "DUPLICATED TOKENS"); // import security feature
+        require(checkNotDuplicated(tokens), "DUPLICATED TOKENS");
+        // import security feature
         address[] memory path;
-        address token;
+        address tokenAddress;
         uint256 amount;
 
-        // Allocation size
-        for (uint8 i = 0; i < _allocation.length; i++) {
+        for (uint8 i = 0; i < allocation.length; i++) {
+            // Set temp variables
             path = paths[i];
-
             address[] memory invPath = new address[](path.length);
+            tokenAddress = tokens[i];
 
-            token = _tokens[i];
-
-            if (address(0) != token) {
+            if (address(0) != tokenAddress) {
                 require(
-                    token == path[0],
+                    tokenAddress == path[0],
                     "WRONG PATH: TOKEN NEEDS TO BE PART OF PATH"
                 );
 
-                // checks if not network asset
-                amount = uniswap_router.getAmountsOut(_allocation[i], path)[1];
+                // Checks if amount is too small
+                amount = _uniswapRouter.getAmountsOut(allocation[i], path)[1];
                 require(
                     amount > 100000,
                     "ALLOCATION AMOUNT IS TOO SMALL, NEEDS TO BE AT LEAST EQUIVALENT TO 100,000 WEI"
                 );
 
+                // Calculate inverse path and instantiate Oracles
                 for (uint8 j = 0; j < path.length; j++) {
                     invPath[path.length - 1 - j] = path[j];
                 }
-
-                oracle.updateOracles(invPath);
+                _oracle.updateOracles(invPath);
             }
         }
 
-        Index storage index = indexes.push();
-        index.allocation = _allocation;
+        // Get index pointer
+        Index storage index = _indexes.push();
+
+        // Set index data
+        index.allocation = allocation;
         index.creator = msg.sender;
-        index.tokens = _tokens;
+        index.tokens = tokens;
 
         emit LOG_CREATE_INDEX(
-            indexes.length - 1,
+            _indexes.length - 1,
             creator,
-            _tokens,
-            _allocation
+            tokens,
+            allocation
         );
     }
 
@@ -294,10 +295,10 @@ contract Pool is IPool {
      *
      * @param tokens Array of token addresses
      */
-    function check_not_duplicates(address[] memory tokens)
-        internal
-        pure
-        returns (bool)
+    function checkNotDuplicated(address[] memory tokens)
+    internal
+    pure
+    returns (bool)
     {
         for (uint256 i = 1; i < tokens.length; i++) {
             for (uint256 j = 0; j < i; j++) {
@@ -318,16 +319,16 @@ contract Pool is IPool {
      * As per this current version no swaps are made at this point. There will need
      * to be an external call to a buy function in order to execute swaps.
      *
-     * @param _index_id Index Id (position in `indexes` array)
+     * @param indexId Index Id (position in `indexes` array)
      * @param paths Paths to be used respective to each token on DEX
      */
-    function deposit(uint256 _index_id, address[][] memory paths)
-        external
-        payable
-        override
+    function deposit(uint256 indexId, address[][] memory paths)
+    external
+    payable
+    override
     {
         require(
-            msg.value <= max_deposit,
+            msg.value <= maxDeposit,
             "EXCEEDED MAXIMUM ALLOWED DEPOSIT VALUE"
         );
 
@@ -336,8 +337,8 @@ contract Pool is IPool {
             "MINIMUM DEPOSIT OF 0.001 MATIC"
         );
 
-        address[] memory tokens = indexes[_index_id].tokens;
-        uint256[] memory allocation = indexes[_index_id].allocation;
+        address[] memory tokens = _indexes[indexId].tokens;
+        uint256[] memory allocation = _indexes[indexId].allocation;
         uint256[] memory amounts = new uint256[](tokens.length);
         uint256 amount;
         address[] memory path;
@@ -345,12 +346,45 @@ contract Pool is IPool {
 
         // Pay fees
         uint256 fee = msg.value / 500;
-        indexes[_index_id].fee += fee;
+        _indexes[indexId].fee += fee;
 
-        uint256 free_amount = msg.value - fee; // Prepare for deposit fee
+        uint256 freeAmount = msg.value - fee;
 
-        // Allocation size
-        uint256 quota_price = 0;
+        uint256 quotaPrice = calculateQuotaPrice(allocation, paths, tokens);
+
+        uint256 nQuotas = freeAmount / quotaPrice;
+
+        uint256 bought;
+        // TODO how to remove storage from here
+        Index storage index = _indexes[indexId];
+
+        // Register operations
+        for (uint8 i = 0; i < tokens.length; i++) {
+            address _token = tokens[i];
+            uint256 _amount = amounts[i] * nQuotas;
+            path = paths[i];
+
+            if (address(0) != tokens[i]) {
+                result = tradeFromETH({
+                to_token : _token,
+                eth_amount : _amount,
+                path : path
+                });
+                bought = result[result.length - 1];
+            } else {
+                bought = _amount;
+            }
+
+            index.shares[_token][msg.sender] += bought;
+        }
+
+        emit LOG_DEPOSIT(msg.sender, indexId, msg.value);
+    }
+
+    function calculateQuotaPrice(uint256[] memory allocation, address[][] paths, address[] tokens)
+    internal returns (uint256) {
+        uint256 quotaPrice = 0;
+
         for (uint8 i = 0; i < allocation.length; i++) {
             path = paths[i];
 
@@ -362,46 +396,19 @@ contract Pool is IPool {
             if (address(0) == tokens[i]) {
                 amount = allocation[i];
             } else {
-                oracle.updateOracles(path);
-                amount = oracle.consult(path);
+                _oracle.updateOracles(path);
+                amount = _oracle.consult(path);
 
                 if (amount == 0) {
-                    amount = uniswap_router.getAmountsOut(allocation[i], path)[
-                        path.length - 1
+                    amount = _uniswapRouter.getAmountsOut(allocation[i], path)[
+                    path.length - 1
                     ];
                 }
             }
             amounts[i] = amount;
-            quota_price += amount;
+            quotaPrice += amount;
         }
-
-        uint256 n_quotas = free_amount / quota_price;
-
-        uint256 bought;
-        // TODO how to remove storage from here
-        Index storage index = indexes[_index_id];
-
-        // Register operations
-        for (uint8 i = 0; i < tokens.length; i++) {
-            address _token = tokens[i];
-            uint256 _amount = amounts[i] * n_quotas;
-            path = paths[i];
-
-            if (address(0) != tokens[i]) {
-                result = trade_from_eth({
-                    to_token: _token,
-                    eth_amount: _amount,
-                    path: path
-                });
-                bought = result[result.length - 1];
-            } else {
-                bought = _amount;
-            }
-
-            index.shares[_token][msg.sender] += bought;
-        }
-
-        emit LOG_DEPOSIT(msg.sender, _index_id, msg.value);
+        return quotaPrice;
     }
 
     /**
@@ -411,36 +418,30 @@ contract Pool is IPool {
      * according to the amounts that the user holds and the percentage he wants to
      * withdraw.
      *
-     * @param _index_id Index Id (position in `indexes` array)
-     * @param _sell_pct Percentage of shares to be cashed out (1000 = 100%)
+     * @param indexId Index Id (position in `indexes` array)
+     * @param sellPct Percentage of shares to be cashed out (1000 = 100%)
      * @param paths Execution paths
      */
     function withdraw(
-        uint256 _index_id,
-        uint256 _sell_pct,
+        uint256 indexId,
+        uint256 sellPct,
         address[][] memory paths
     ) external override {
-        uint256 eth_amount = 0;
+        uint256 ethAmount = 0;
         address[] memory path;
-        address[] memory tokens = indexes[_index_id].tokens;
+        address[] memory tokens = _indexes[indexId].tokens;
         uint256[] memory result;
 
-        require(_sell_pct > 0, "SELL PCT NEEDS TO BE GREATER THAN ZERO");
+        require(sellPct > 0, "SELL PCT NEEDS TO BE GREATER THAN ZERO");
         require(
-            indexes[_index_id].shares[tokens[0]][msg.sender] > 0,
+            _indexes[indexId].shares[tokens[0]][msg.sender] > 0,
             "NEEDS TO HAVE SHARES OF THE INDEX"
         );
-        require(_sell_pct <= 1000, "CAN'T SELL MORE THAN 100% OF FUNDS");
-
-        indexes[_index_id].pending_tx_counter[msg.sender] += indexes[_index_id]
-        .tokens
-        .length;
+        require(sellPct <= 1000, "CAN'T SELL MORE THAN 100% OF FUNDS");
 
         for (uint256 i = 0; i < tokens.length; i++) {
-            address _token = tokens[i];
-            uint256 shares_amount = (indexes[_index_id].shares[_token][
-                msg.sender
-            ] * _sell_pct) / 1000;
+            address tokenAddress = tokens[i];
+            uint256 sharesAmount = (_indexes[indexId].shares[tokenAddress][msg.sender] * sellPct) / 1000;
 
             path = paths[i];
 
@@ -450,20 +451,20 @@ contract Pool is IPool {
                     "WRONG PATH: TOKEN NEEDS TO BE PART OF PATH"
                 );
 
-                result = trade_from_tokens({
-                    from_token: _token,
-                    shares_amount: shares_amount,
-                    path: path
+                result = tradeFromTokens({
+                fromToken : tokenAddress,
+                sharesAmount : sharesAmount,
+                path : path
                 });
-                indexes[_index_id].shares[_token][msg.sender] -= result[0];
-                eth_amount += result[result.length - 1];
+                _indexes[indexId].shares[tokenAddress][msg.sender] -= result[0];
+                ethAmount += result[result.length - 1];
             } else {
-                indexes[_index_id].shares[_token][msg.sender] -= shares_amount;
-                eth_amount += shares_amount;
+                _indexes[indexId].shares[tokenAddress][msg.sender] -= sharesAmount;
+                ethAmount += sharesAmount;
             }
         }
-        payable(msg.sender).transfer(eth_amount);
-        emit LOG_WITHDRAW(msg.sender, _index_id, _sell_pct, eth_amount);
+        payable(msg.sender).transfer(ethAmount);
+        emit LOG_WITHDRAW(msg.sender, indexId, sellPct, ethAmount);
     }
 
     /**
@@ -474,19 +475,18 @@ contract Pool is IPool {
      * @param to_token Address of token to be traded
      * @param eth_amount Amount in ETH
      */
-    // TODO set optimal Uniswap path
-    function trade_from_eth(
+    function tradeFromETH(
         address to_token,
         uint256 eth_amount,
         address[] memory path
     ) private returns (uint256[] memory) {
         return
-            uniswap_router.swapExactETHForTokens{value: eth_amount}(
-                1, // amountOutMin TODO use oracle
-                path, // path
-                address(this), // to
-                block.timestamp + 100000 // deadline
-            );
+        _uniswapRouter.swapExactETHForTokens{value : eth_amount}(
+            1, // amountOutMin
+            path, // path
+            address(this), // to
+            block.timestamp + 100000 // deadline
+        );
     }
 
     /**
@@ -494,28 +494,27 @@ contract Pool is IPool {
      *
      * @dev Sets path of the trade and send the order to Uniswap.
      *
-     * @param from_token Address of token to be traded
-     * @param shares_amount Amount in token
+     * @param fromToken Address of token to be traded
+     * @param sharesAmount Amount in token
      */
-    // TODO set optimal Uniswap path
-    function trade_from_tokens(
-        address from_token,
-        uint256 shares_amount,
+    function tradeFromTokens(
+        address fromToken,
+        uint256 sharesAmount,
         address[] memory path
     ) private returns (uint256[] memory) {
         require(
-            IERC20(from_token).approve(address(uniswap_router), shares_amount),
+            IERC20(fromToken).approve(address(_uniswapRouter), sharesAmount),
             "approve failed."
         );
 
         return
-            uniswap_router.swapExactTokensForETH(
-                shares_amount,
-                1, // amountOutMin TODO use oracle
-                path, // path
-                address(this), // to
-                block.timestamp + 100000 // deadline
-            );
+        _uniswapRouter.swapExactTokensForETH(
+            sharesAmount,
+            1, // amountOutMin
+            path, // path
+            address(this), // to
+            block.timestamp + 100000 // deadline
+        );
     }
 
     /**
@@ -530,25 +529,25 @@ contract Pool is IPool {
      * @param shares_pct Percentage of shares to be cashed out (1000 = 100%)
      */
 
-    function cash_out_erc20_internal(
+    function cashOutERC20Internal(
         address user,
-        uint256 index_id,
-        uint256 shares_pct
+        uint256 indexId,
+        uint256 sharesPct
     ) internal {
         uint256 amount;
-        uint256[] memory amounts;
+        uint256[] memory amounts = new uint256[](_indexes[indexId].tokens[i].length);
         address token;
 
-        for (uint256 i = 0; i < indexes[index_id].tokens.length; i++) {
-            token = indexes[index_id].tokens[i];
-            amount = ((indexes[index_id].shares[token][user] * shares_pct) /
-                1000);
+        for (uint256 i = 0; i < _indexes[indexId].tokens.length; i++) {
+            token = _indexes[indexId].tokens[i];
+            amount = ((_indexes[indexId].shares[token][user] * sharesPct) /
+            1000);
 
             require(
-                indexes[index_id].shares[token][user] >= amount,
+                _indexes[indexId].shares[token][user] >= amount,
                 "INSUFFICIENT FUNDS"
             );
-            indexes[index_id].shares[token][user] -= amount;
+            _indexes[indexId].shares[token][user] -= amount;
 
             require(amount > 0, "AMOUNT TO CASH OUT IS TOO SMALL");
 
@@ -558,14 +557,14 @@ contract Pool is IPool {
                     "ERC20 APPROVE FAILED"
                 );
                 IERC20(token).transfer(user, amount);
-                // TODO figure out how to collect this data
+                // TODO figure out how to log this data
                 // amounts[i] = amount;
             } else {
                 payable(user).transfer(amount);
             }
         }
 
-        emit LOG_ERC20_WITHDRAW(user, index_id, shares_pct, amounts);
+        emit LOG_ERC20_WITHDRAW(user, indexId, sharesPct, amounts);
     }
 
     /**
@@ -573,53 +572,55 @@ contract Pool is IPool {
      *
      * @dev This is to be used whenever users want to cash out their ERC20 tokens.
      *
-     * @param index_id Index Id (position in `indexes` array)
-     * @param shares_pct Percentage of shares to be cashed out (1000 = 100%)
+     * @param indexId Index Id (position in `indexes` array)
+     * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
-    function cash_out_erc20(uint256 index_id, uint256 shares_pct)
-        external
-        override
+    function cashOutERC20(uint256 indexId, uint256 sharesPct)
+    external
+    override
     {
-        cash_out_erc20_internal(msg.sender, index_id, shares_pct);
+        cashOutERC20Internal(msg.sender, indexId, sharesPct);
     }
 
     /**
-     * @notice Admin-force cashout ERC20 tokens directly to wallet.
+     * @notice Admin-force cash-out ERC20 tokens directly to wallet.
      *
      * @dev This is a security measure, basically giving us the ability to eject users
      * from the contract in case some vulnerability is found on the withdrawal method.
      *
-     * @param index_id Index Id (position in `indexes` array)
-     * @param shares_pct Percentage of shares to be cashed out (1000 = 100%)
+     * @param indexId Index Id (position in `indexes` array)
+     * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
-    function cash_out_erc20_admin(
+    function cashOutERC20Admin(
         address user,
-        uint256 index_id,
-        uint256 shares_pct
+        uint256 indexId,
+        uint256 sharesPct
     ) external override _indexpool_only_ {
-        cash_out_erc20_internal(user, index_id, shares_pct);
+        cashOutERC20Internal(user, indexId, sharesPct);
     }
 
     /**
      * @notice Mint a specific NFT token.
      *
      * @dev Mints a specific NFT token remove assigned contracts from contract and into token.
+     *
+     * @param indexId Index Id (position in `indexes` array)
      */
-    function mint_Pool721(
-        uint256 index_id // TODO add shares pct?
+    function mintPool721(
+        uint256 indexId // TODO add shares pct?
     ) external override {
         address token;
-        address[] memory tokens = indexes[index_id].tokens;
+        address[] memory tokens = _indexes[indexId].tokens;
         uint256[] memory allocation = new uint256[](tokens.length);
 
         for (uint256 i = 0; i < tokens.length; i++) {
             token = tokens[i];
-            allocation[i] = indexes[index_id].shares[token][msg.sender];
+            allocation[i] = _indexes[indexId].shares[token][msg.sender];
             require(allocation[i] > 0, "NOT ENOUGH FUNDS");
-            indexes[index_id].shares[token][msg.sender] = 0;
+            _indexes[indexId].shares[token][msg.sender] = 0;
         }
 
-        pool721.generatePool721(msg.sender, index_id, allocation);
+        _pool721.generatePool721(msg.sender, indexId, allocation);
     }
 
     /**
@@ -627,24 +628,26 @@ contract Pool is IPool {
      *
      * @dev Burns a specific NFT token and assigns assets back to NFT owner.
      * Only callable by whoever holds the token.
+     *
+     * @param indexId Index Id (position in `indexes` array)
      */
-    function burn_Pool721(uint256 tokenId) external override {
-        uint256 index_id;
+    function burnPool721(uint256 tokenId) external override {
+        uint256 indexId;
         uint256[] memory allocation;
 
         require(
-            pool721.ownerOf(tokenId) == msg.sender,
+            _pool721.ownerOf(tokenId) == msg.sender,
             "ONLY CALLABLE BY TOKEN OWNER"
         );
 
-        (index_id, allocation) = pool721.burnPool721(tokenId);
+        (indexId, allocation) = _pool721.burnPool721(tokenId);
 
-        address[] memory tokens = indexes[index_id].tokens;
+        address[] memory tokens = _indexes[indexId].tokens;
         address token;
 
         for (uint256 i = 0; i < tokens.length; i++) {
             token = tokens[i];
-            indexes[index_id].shares[token][msg.sender] += allocation[i];
+            _indexes[indexId].shares[token][msg.sender] += allocation[i];
         }
     }
 
@@ -653,8 +656,8 @@ contract Pool is IPool {
      *
      * @dev Get the address of the NFT contract minted by this Pool.
      */
-    function get_pool721_address() external view override returns (address) {
-        return address(pool721);
+    function getPool721Address() external view override returns (address) {
+        return address(_pool721);
     }
 
     /**
@@ -663,24 +666,24 @@ contract Pool is IPool {
      * @dev Only callable by the creator. Cashes out ETH funds that are due to
      * a 0.1% in all deposits on the created index.
      *
-     * @param _index_id Index Id (position in `indexes` array)
+     * @param indexId Index Id (position in `indexes` array)
      */
-    function pay_creator_fee(uint256 _index_id) external override {
+    function payCreatorFee(uint256 indexId) external override {
         require(
-            msg.sender == indexes[_index_id].creator,
+            msg.sender == _indexes[indexId].creator,
             "ONLY INDEX CREATOR CAN WITHDRAW FEES"
         );
 
-        uint256 creator_fee = indexes[_index_id].fee / 2;
-        uint256 withdraw_amount = creator_fee -
-            indexes[_index_id].creator_fee_cash_out;
+        uint256 creatorFee = _indexes[indexId].fee / 2;
+        uint256 withdrawAmount = creatorFee -
+        _indexes[indexId].creator_fee_cash_out;
 
-        require(withdraw_amount > 0, "NO FEE TO WITHDRAW");
+        require(withdrawAmount > 0, "NO FEE TO WITHDRAW");
 
-        indexes[_index_id].creator_fee_cash_out += withdraw_amount;
+        _indexes[indexId].creator_fee_cash_out += withdrawAmount;
 
-        payable(msg.sender).transfer(withdraw_amount);
-        emit LOG_FEE_WITHDRAW(msg.sender, _index_id, withdraw_amount);
+        payable(msg.sender).transfer(withdrawAmount);
+        emit LOG_FEE_WITHDRAW(msg.sender, indexId, withdrawAmount);
     }
 
     /**
@@ -688,19 +691,19 @@ contract Pool is IPool {
      *
      * @dev Check how much is owed to the creator.
      *
-     * @param _index_id Index Id (position in `indexes` array)
+     * @param indexId Index Id (position in `indexes` array)
      */
-    function get_available_creator_fee(uint256 _index_id)
-        external
-        view
-        override
-        returns (uint256)
+    function getAvailableCreatorFee(uint256 indexId)
+    external
+    view
+    override
+    returns (uint256)
     {
-        uint256 creator_fee = indexes[_index_id].fee / 2;
-        uint256 creator_available_fee = creator_fee -
-            indexes[_index_id].creator_fee_cash_out;
+        uint256 creatorFee = _indexes[indexId].fee / 2;
+        uint256 creatorAvailableFee = creatorFee -
+        _indexes[indexId].creator_fee_cash_out;
 
-        return creator_available_fee;
+        return creatorAvailableFee;
     }
 
     /**
@@ -709,23 +712,23 @@ contract Pool is IPool {
      * @dev Only callable by the protocol creator. Cashes out ETH funds that are due to
      * a 0.1% in all deposits on the created index.
      *
-     * @param _index_id Index Id (position in `indexes` array)
+     * @param indexId Index Id (position in `indexes` array)
      */
-    function pay_protocol_fee(uint256 _index_id)
-        external
-        override
-        _indexpool_only_
+    function payProtocolFee(uint256 indexId)
+    external
+    override
+    _indexpool_only_
     {
-        uint256 protocol_fee = indexes[_index_id].fee / 2;
-        uint256 withdraw_amount = protocol_fee -
-            indexes[_index_id].protocol_fee_cash_out;
+        uint256 protocolFee = _indexes[indexId].fee / 2;
+        uint256 withdrawAmount = protocolFee -
+        _indexes[indexId].protocol_fee_cash_out;
 
-        require(withdraw_amount > 0, "NO FEE TO WITHDRAW");
+        require(withdrawAmount > 0, "NO FEE TO WITHDRAW");
 
-        indexes[_index_id].protocol_fee_cash_out += withdraw_amount;
+        _indexes[indexId].protocol_fee_cash_out += withdrawAmount;
 
-        payable(msg.sender).transfer(withdraw_amount);
-        emit LOG_FEE_WITHDRAW(msg.sender, _index_id, withdraw_amount);
+        payable(msg.sender).transfer(withdrawAmount);
+        emit LOG_FEE_WITHDRAW(msg.sender, indexId, withdrawAmount);
     }
 
     /**
@@ -733,18 +736,18 @@ contract Pool is IPool {
      *
      * @dev Check how much is owed to the protocol.
      *
-     * @param _index_id Index Id (position in `indexes` array)
+     * @param indexId Index Id (position in `indexes` array)
      */
-    function get_available_protocol_fee(uint256 _index_id)
-        external
-        view
-        override
-        returns (uint256)
+    function getAvailableProtocolFee(uint256 indexId)
+    external
+    view
+    override
+    returns (uint256)
     {
-        uint256 protocol_fee = indexes[_index_id].fee / 2;
-        uint256 protocol_available_fee = protocol_fee -
-            indexes[_index_id].protocol_fee_cash_out;
+        uint256 protocolFee = _indexes[indexId].fee / 2;
+        uint256 protocolAvailableFee = protocolFee -
+        _indexes[indexId].protocol_fee_cash_out;
 
-        return protocol_available_fee;
+        return protocolAvailableFee;
     }
 }
