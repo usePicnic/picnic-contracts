@@ -43,11 +43,6 @@ describe("OraclePair", function () {
     oracle.update();
 
     expect(await oracle.consult(UNI_TOKEN, 1000000)).to.be.above(0);    
-  })
-
-  // it("Updates", async function () {   
-  //   oracle.update(); 
-  //   console.log(await oracle.consult(UNI_TOKEN, 10000000));
-  // })  
+  }) 
 })
 
