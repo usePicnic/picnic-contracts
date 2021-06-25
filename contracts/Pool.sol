@@ -1,9 +1,10 @@
-pragma solidity 0.8.6;
+pragma solidity >= 0.8.6;
 
 import "hardhat/console.sol";
 import "./interfaces/IPool.sol";
 import "./libraries/DataStructures.sol";
 import "./Pool721.sol";
+import "./interfaces/IOraclePath.sol";
 
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
@@ -23,6 +24,7 @@ import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
 
 contract Pool is IPool {
     Index[] private indexes;
+    IOraclePath oracle;
 
     IUniswapV2Router02 uniswap_router;
     address creator;
@@ -32,10 +34,11 @@ contract Pool is IPool {
 
     Pool721 pool721;
 
-    constructor(address _uniswap_factory) {
+    constructor(address _uniswap_factory, address oracleAddress) {
         uniswap_router = IUniswapV2Router02(_uniswap_factory);
         creator = msg.sender;
         pool721 = new Pool721();
+        oracle = IOraclePath(oracleAddress);
     }
 
     modifier _indexpool_only_() {
