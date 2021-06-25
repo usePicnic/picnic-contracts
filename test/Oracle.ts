@@ -34,11 +34,6 @@ describe("Oracle", function () {
 
     oracle = (await Oracle.deploy(UNI_FACTORY)).connect(owner);
 
-    await oracle.updateOracles([WETH, UNI_TOKEN]);
-    await oracle.updateOracles([WETH, UNI_TOKEN]);
-
-    await oracle.consult([WETH, UNI_TOKEN]);
-
     Pool = await ethers.getContractFactory("Pool");
 
     hardhatPool = (await Pool.deploy(UNI_ROUTER, oracle.address)).connect(owner)

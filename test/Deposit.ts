@@ -5,7 +5,9 @@ describe("Deposit", function () {
   let Pool;
   let hardhatPool;
   let owner;
+  let oracle;
 
+  const UNI_FACTORY = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
   const UNI_ROUTER = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
   const UNI_TOKEN = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984";
   const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
@@ -15,13 +17,17 @@ describe("Deposit", function () {
   beforeEach(async function () {
     [owner] = await ethers.getSigners();
 
+    let Oracle = await ethers.getContractFactory("OraclePath");
+
+    oracle = (await Oracle.deploy(UNI_FACTORY)).connect(owner);
+
     // Get the ContractFactory
     Pool = await ethers.getContractFactory("Pool");
 
     // To deploy our contract, we just have to call Pool.deploy() and await
     // for it to be deployed(), which happens onces its transaction has been
     // mined.
-    hardhatPool = (await Pool.deploy(UNI_ROUTER)).connect(owner)
+    hardhatPool = (await Pool.deploy(UNI_ROUTER, oracle.address)).connect(owner)
 
     await hardhatPool.create_index(
       [1000000000],  // uint256[] _allocation,

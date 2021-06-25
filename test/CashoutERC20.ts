@@ -6,7 +6,9 @@ describe("Cash-out ERC20 tokens", function () {
   let hardhatPool;
   let owner;
   let addr1;
+  let oracle;
 
+  const UNI_FACTORY = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
   const UNI_ROUTER = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
   const UNI_TOKEN = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984";
   const ONEINCH_TOKEN = "0x111111111117dc0aa78b770fa6a738034120c302";
@@ -25,15 +27,20 @@ describe("Cash-out ERC20 tokens", function () {
     COMPOUND_TOKEN, GRAPH_TOKEN, DEV_TOKEN, RLC_TOKEN, SUSHI_TOKEN, ETH]
 
   beforeEach(async function () {
-    [owner, addr1] = await ethers.getSigners()
+    [owner, addr1] = await ethers.getSigners();
 
-    // Get the ContractFactory
+    let Oracle = await ethers.getContractFactory("OraclePath");
+
+    oracle = (await Oracle.deploy(UNI_FACTORY)).connect(owner);
+
+    await oracle.updateOracles([WETH, UNI_TOKEN]);
+    await oracle.updateOracles([WETH, UNI_TOKEN]);
+
+    await oracle.consult([WETH, UNI_TOKEN]);
+
     Pool = await ethers.getContractFactory("Pool");
 
-    // To deploy our contract, we just have to call Pool.deploy() and await
-    // for it to be deployed(), which happens onces its transaction has been
-    // mined.
-    hardhatPool = (await Pool.deploy(UNI_ROUTER)).connect(owner)
+    hardhatPool = (await Pool.deploy(UNI_ROUTER, oracle.address)).connect(owner)
 
     await hardhatPool.create_index(
       tokens.map(() => 1000000000),  // uint256[] _allocation,
@@ -48,6 +55,7 @@ describe("Cash-out ERC20 tokens", function () {
       tokens.map(x => [WETH, x]), // paths
       overrides
     );
+
   });
 
   it("Checks if there is positive balance for all tokens", async function () {
