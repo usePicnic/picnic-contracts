@@ -1,4 +1,4 @@
-pragma solidity 0.8.4;
+pragma solidity 0.8.6;
 
 import "hardhat/console.sol";
 import "./interfaces/IPool.sol";
@@ -241,7 +241,7 @@ contract Pool is IPool {
         address[] memory path = new address[](2);
         address token;
         uint256 amount;
-
+        
         // Allocation size
         for (uint8 i = 0; i < _allocation.length; i++) {
             path = paths[i];
