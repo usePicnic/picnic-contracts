@@ -240,14 +240,16 @@ contract Pool is IPool {
         );
 
         require(check_not_duplicates(_tokens), "DUPLICATED TOKENS"); // import security feature
-
-        address[] memory path = new address[](2);
+        address[] memory path;
         address token;
         uint256 amount;
 
         // Allocation size
         for (uint8 i = 0; i < _allocation.length; i++) {
             path = paths[i];
+
+            address[] memory invPath = new address[](path.length);
+
             token = _tokens[i];
 
             if (address(0) != token) {
@@ -263,7 +265,11 @@ contract Pool is IPool {
                     "ALLOCATION AMOUNT IS TOO SMALL, NEEDS TO BE AT LEAST EQUIVALENT TO 100,000 WEI"
                 );
 
-                oracle.updateOracles(path);
+                for (uint8 j = 0; j < path.length; j++) {
+                    invPath[path.length - 1 - j] = path[j];
+                }
+
+                oracle.updateOracles(invPath);
             }
         }
 
