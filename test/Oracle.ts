@@ -4,8 +4,7 @@ import { ethers } from "hardhat";
 describe("Oracle", function () {
 
   let owner;
-  let NFT;
-  let indexpoolNFT;
+  let oracle;
 
     const UNI_FACTORY = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
     const UNI_TOKEN = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984";
@@ -14,9 +13,14 @@ describe("Oracle", function () {
   beforeEach(async function () {
     [owner] = await ethers.getSigners();
 
-    NFT = await ethers.getContractFactory("IPOracle");
+    let Oracle = await ethers.getContractFactory("OraclePath");
 
-    indexpoolNFT = (await NFT.deploy(UNI_FACTORY, WETH, UNI_TOKEN)).connect(owner); 
+    oracle = (await Oracle.deploy(UNI_FACTORY)).connect(owner); 
+
+    await oracle.updateOracles([WETH, UNI_TOKEN]);
+
+    await oracle.consult([WETH, UNI_TOKEN]);
+    await oracle.consult([WETH, UNI_TOKEN]);
   });
 
   it("Oracle", async function () {
