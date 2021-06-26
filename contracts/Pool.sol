@@ -222,10 +222,9 @@ contract Pool is IPool {
      * @param tokens Array of token addresses
      * @param paths Paths to be used respective to each token on DEX
      */
-    // TODO switch order (tokens should be first)
     function createIndex(
-        uint256[] memory allocation,
         address[] memory tokens,
+        uint256[] memory allocation,
         address[][] memory paths
     ) external override {
         require(
@@ -355,8 +354,8 @@ contract Pool is IPool {
         uint256 nQuotas = freeAmount / quotaPrice;
 
         uint256 bought;
-        // TODO how to remove storage from here
-        Index storage index = _indexes[indexId];
+
+        Index memory index = _indexes[indexId];
 
         // Register operations
         for (uint8 i = 0; i < tokens.length; i++) {
@@ -534,31 +533,31 @@ contract Pool is IPool {
         uint256 indexId,
         uint256 sharesPct
     ) internal {
-        uint256 amount;
-        uint256[] memory amounts = new uint256[](_indexes[indexId].tokens[i].length);
-        address token;
+        address tokenAddress;
+        address[] tokens = _indexes[indexId].tokens;
 
-        for (uint256 i = 0; i < _indexes[indexId].tokens.length; i++) {
-            token = _indexes[indexId].tokens[i];
-            amount = ((_indexes[indexId].shares[token][user] * sharesPct) /
-            1000);
+        uint256 amount;
+        uint256[] memory amounts = new uint256[](tokens.length);
+
+        for (uint256 i = 0; i < tokens.length; i++) {
+            tokenAddress = tokens[i];
+            amount = ((_indexes[indexId].shares[tokenAddress][user] * sharesPct) / 1000);
 
             require(
-                _indexes[indexId].shares[token][user] >= amount,
+                _indexes[indexId].shares[tokenAddress][user] >= amount,
                 "INSUFFICIENT FUNDS"
             );
-            _indexes[indexId].shares[token][user] -= amount;
+            _indexes[indexId].shares[tokenAddress][user] -= amount;
 
             require(amount > 0, "AMOUNT TO CASH OUT IS TOO SMALL");
 
-            if (address(0) != token) {
+            if (address(0) != tokenAddress) {
                 require(
-                    IERC20(token).approve(address(user), amount),
+                    IERC20(tokenAddress).approve(address(user), amount),
                     "ERC20 APPROVE FAILED"
                 );
-                IERC20(token).transfer(user, amount);
-                // TODO figure out how to log this data
-                // amounts[i] = amount;
+                IERC20(tokenAddress).transfer(user, amount);
+                amounts[i] = amount;
             } else {
                 payable(user).transfer(amount);
             }
@@ -568,7 +567,7 @@ contract Pool is IPool {
     }
 
     /**
-     * @notice Cashout ERC20 tokens directly to wallet.
+     * @notice Cash-out ERC20 tokens directly to wallet.
      *
      * @dev This is to be used whenever users want to cash out their ERC20 tokens.
      *
@@ -605,9 +604,11 @@ contract Pool is IPool {
      * @dev Mints a specific NFT token remove assigned contracts from contract and into token.
      *
      * @param indexId Index Id (position in `indexes` array)
+     * @param sharesPct Percentage of shares to be minted as NFT (1000 = 100%)
      */
     function mintPool721(
-        uint256 indexId // TODO add shares pct?
+        uint256 indexId,
+        uint256 sharesPct
     ) external override {
         address token;
         address[] memory tokens = _indexes[indexId].tokens;
@@ -615,9 +616,9 @@ contract Pool is IPool {
 
         for (uint256 i = 0; i < tokens.length; i++) {
             token = tokens[i];
-            allocation[i] = _indexes[indexId].shares[token][msg.sender];
+            allocation[i] = (_indexes[indexId].shares[token][msg.sender] * sharesPct) / 1000;
             require(allocation[i] > 0, "NOT ENOUGH FUNDS");
-            _indexes[indexId].shares[token][msg.sender] = 0;
+            _indexes[indexId].shares[token][msg.sender] -= allocation[i];
         }
 
         _pool721.generatePool721(msg.sender, indexId, allocation);
@@ -675,12 +676,11 @@ contract Pool is IPool {
         );
 
         uint256 creatorFee = _indexes[indexId].fee / 2;
-        uint256 withdrawAmount = creatorFee -
-        _indexes[indexId].creator_fee_cash_out;
+        uint256 withdrawAmount = creatorFee - _indexes[indexId].creatorFeeCashOut;
 
         require(withdrawAmount > 0, "NO FEE TO WITHDRAW");
 
-        _indexes[indexId].creator_fee_cash_out += withdrawAmount;
+        _indexes[indexId].creatorFeeCashOut += withdrawAmount;
 
         payable(msg.sender).transfer(withdrawAmount);
         emit LOG_FEE_WITHDRAW(msg.sender, indexId, withdrawAmount);
@@ -700,8 +700,7 @@ contract Pool is IPool {
     returns (uint256)
     {
         uint256 creatorFee = _indexes[indexId].fee / 2;
-        uint256 creatorAvailableFee = creatorFee -
-        _indexes[indexId].creator_fee_cash_out;
+        uint256 creatorAvailableFee = creatorFee - _indexes[indexId].creatorFeeCashOut;
 
         return creatorAvailableFee;
     }
@@ -721,11 +720,11 @@ contract Pool is IPool {
     {
         uint256 protocolFee = _indexes[indexId].fee / 2;
         uint256 withdrawAmount = protocolFee -
-        _indexes[indexId].protocol_fee_cash_out;
+        _indexes[indexId].protocolFeeCashOut;
 
         require(withdrawAmount > 0, "NO FEE TO WITHDRAW");
 
-        _indexes[indexId].protocol_fee_cash_out += withdrawAmount;
+        _indexes[indexId].protocolFeeCashOut += withdrawAmount;
 
         payable(msg.sender).transfer(withdrawAmount);
         emit LOG_FEE_WITHDRAW(msg.sender, indexId, withdrawAmount);
@@ -745,8 +744,7 @@ contract Pool is IPool {
     returns (uint256)
     {
         uint256 protocolFee = _indexes[indexId].fee / 2;
-        uint256 protocolAvailableFee = protocolFee -
-        _indexes[indexId].protocol_fee_cash_out;
+        uint256 protocolAvailableFee = protocolFee - _indexes[indexId].protocolFeeCashOut;
 
         return protocolAvailableFee;
     }
