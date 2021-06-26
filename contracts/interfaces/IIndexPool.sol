@@ -49,10 +49,9 @@ interface IIndexPool {
      *
      * @dev This is to be used whenever users want to cash out their ERC20 tokens.
      *
-     * @param indexId Index Id (position in `indexes` array)
      * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
-    function cashOutERC20(uint256 indexId, uint256 sharesPct)
+    function cashOutERC20(uint256 sharesPct)
     external;
 
     /**
@@ -61,12 +60,10 @@ interface IIndexPool {
      * @dev This is a security measure, basically giving us the ability to eject users
      * from the contract in case some vulnerability is found on the withdrawal method.
      *
-     * @param indexId Index Id (position in `indexes` array)
      * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
     function cashOutERC20Admin(
         address user,
-        uint256 indexId,
         uint256 sharesPct
     ) external;
 
@@ -75,11 +72,9 @@ interface IIndexPool {
      *
      * @dev Mints a specific NFT token remove assigned contracts from contract and into token.
      *
-     * @param indexId Index Id (position in `indexes` array)
      * @param sharesPct Percentage of shares to be minted as NFT (1000 = 100%)
      */
     function mintPool721(
-        uint256 indexId,
         uint256 sharesPct
     ) external;
 
@@ -105,19 +100,15 @@ interface IIndexPool {
      *
      * @dev Only callable by the creator. Cashes out ETH funds that are due to
      * a 0.1% in all deposits on the created index.
-     *
-     * @param indexId Index Id (position in `indexes` array)
      */
-    function payCreatorFee(uint256 indexId) external;
+    function payCreatorFee() external;
 
     /**
      * @notice Reads available creator fee.
      *
      * @dev Check how much is owed to the creator.
-     *
-     * @param indexId Index Id (position in `indexes` array)
      */
-    function getAvailableCreatorFee(uint256 indexId)
+    function getAvailableCreatorFee()
     external
     view
     returns (uint256);
@@ -127,21 +118,16 @@ interface IIndexPool {
      *
      * @dev Only callable by the protocol creator. Cashes out ETH funds that are due to
      * a 0.1% in all deposits on the created index.
-     *
-     * @param indexId Index Id (position in `indexes` array)
      */
-    function payProtocolFee(uint256 indexId)
-    external
-    _indexpool_only_;
+    function payProtocolFee()
+    external;
 
     /**
      * @notice Reads available protocol fee.
      *
      * @dev Check how much is owed to the protocol.
-     *
-     * @param indexId Index Id (position in `indexes` array)
      */
-    function getAvailableProtocolFee(uint256 indexId)
+    function getAvailableProtocolFee()
     external
     view
     returns (uint256);

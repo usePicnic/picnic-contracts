@@ -2,11 +2,10 @@ pragma solidity >=0.8.6;
 
 import "hardhat/console.sol";
 import "./interfaces/IIndexPool.sol";
+import "./interfaces/IIndexPoolFactory.sol";
 import "./libraries/DataStructures.sol";
-import "./PortfolioNFT.sol";
-import "./interfaces/IOraclePath.sol";
+import "./IndexPoolNFT.sol";
 
-import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
 
 /**
@@ -22,7 +21,8 @@ import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
  * 3. Control fees due to index creator and IndexPool protocol
  */
 
-contract Pool is IPool {
+contract IndexPool is IIndexPool {
+    IIndexpoolFactory _indexpoolFactory;
     address public creator;
     uint256[] public allocation;
     address[] public tokens;
@@ -33,36 +33,25 @@ contract Pool is IPool {
 
     uint256 private constant BASE_ASSET = 1000000000000000000;
 
-    event LOG_CREATE_INDEX(
-        uint256 indexed indexId,
-        address indexed creatorAddress,
-        address[] tokens,
-        uint256[] allocation
-    );
-
     event LOG_DEPOSIT(
         address indexed userAddress,
-        uint256 indexed indexId,
         uint256 amount_in
     );
 
     event LOG_WITHDRAW(
         address indexed userAddress,
-        uint256 indexed indexId,
         uint256 percentage,
         uint256 amount_out
     );
 
     event LOG_ERC20_WITHDRAW(
         address indexed userAddress,
-        uint256 indexed indexId,
         uint256 percentage,
         uint256[] amounts
     );
 
     event LOG_FEE_WITHDRAW(
         address indexed userAddress,
-        uint256 indexed indexId,
         uint256 amountOut
     );
 
@@ -72,24 +61,35 @@ contract Pool is IPool {
         emit Received(msg.sender, msg.value);
     }
 
+    modifier _indexpoolOnly_() {
+        require(msg.sender == _indexpoolFactory.creator, "ONLY INDEXPOOL CAN CALL THIS FUNCTION");
+        _;
+    }
+
     constructor(
-        address uniswapRouter,
-        address oracleAddress,
+        address indexpoolFactoryAddress,
         address[] tokens,
         uint256[] allocation,
         address[][] paths)
     {
-        require(
-            allocation.length == tokens.length,
-            "MISMATCH IN LENGTH BETWEEN TOKENS AND ALLOCATION"
-        );
+        creator = msg.sender;
+        tokens = tokens;
+        allocation = allocation;
 
-        require(
-            tokens.length <= 32,
-            "NO MORE THAN 32 TOKENS ALLOWED IN A SINGLE INDEX"
-        );
+        checkValidIndex(paths);
+
+        _indexpoolFactory = IIndexpoolFactory(indexpoolFactoryAddress);
+    }
+
+    function checkValidIndex(address[][] paths) internal {
+        require(allocation.length == tokens.length,
+            "MISMATCH IN LENGTH BETWEEN TOKENS AND ALLOCATION");
+
+        require(tokens.length <= 32,
+            "NO MORE THAN 32 TOKENS ALLOWED IN A SINGLE INDEX");
 
         require(checkNotDuplicated(tokens), "DUPLICATED TOKENS");
+
         // import security feature
         address[] memory path;
         address tokenAddress;
@@ -108,7 +108,7 @@ contract Pool is IPool {
                 );
 
                 // Checks if amount is too small
-                amount = _uniswapRouter.getAmountsOut(allocation[i], path)[1];
+                amount = _indexpoolFactory.uniswapRouter.getAmountsOut(allocation[i], path)[1];
                 require(
                     amount > 100000,
                     "ALLOCATION AMOUNT IS TOO SMALL, NEEDS TO BE AT LEAST EQUIVALENT TO 100,000 WEI"
@@ -118,18 +118,9 @@ contract Pool is IPool {
                 for (uint8 j = 0; j < path.length; j++) {
                     invPath[path.length - 1 - j] = path[j];
                 }
-                _oracle.updateOracles(invPath);
+                _indexpoolFactory.oracle.updateOracles(invPath);
             }
         }
-
-        // Set index data
-        index.allocation = allocation;
-        index.creator = msg.sender;
-        index.tokens = tokens;
-
-        creator = msg.sender;
-        _tokens = tokens;
-        _allocation = allocation;
     }
 
     /**
@@ -172,7 +163,7 @@ contract Pool is IPool {
     override
     {
         require(
-            msg.value <= maxDeposit, // TODO connect with factory;
+            msg.value <= _indexpoolFactory.maxDeposit(),
             "EXCEEDED MAXIMUM ALLOWED DEPOSIT VALUE"
         );
 
@@ -192,9 +183,9 @@ contract Pool is IPool {
         uint256 quotaPrice = calculateQuotaPrice(allocation, paths, tokens);
         uint256 nQuotas = freeAmount / quotaPrice;
 
-        buy(tokens, indexId, nQuotas);
+        buy(nQuotas);
 
-        emit LOG_DEPOSIT(msg.sender, indexId, msg.value);
+        emit LOG_DEPOSIT(msg.sender, msg.value);
     }
 
     function calculateQuotaPrice(address[][] paths)
@@ -213,11 +204,11 @@ contract Pool is IPool {
             if (address(0) == tokens[i]) {
                 amount = allocation[i];
             } else {
-                _oracle.updateOracles(path);
-                amount = _oracle.consult(path);
+                _indexpoolFactory.oracle.updateOracles(path);
+                amount = _indexpoolFactory.oracle.consult(path);
 
                 if (amount == 0) {
-                    amount = _uniswapRouter.getAmountsOut(allocation[i], path)[
+                    amount = _indexpoolFactory.uniswapRouter.getAmountsOut(allocation[i], path)[
                     path.length - 1
                     ];
                 }
@@ -228,7 +219,7 @@ contract Pool is IPool {
         return quotaPrice;
     }
 
-    function buy(uint256 nQuotas) {
+    function buy(uint256 nQuotas) internal {
         uint256 bought;
         uint256[] memory amounts = new uint256[](tokens.length);
         address tokenAddress;
@@ -274,12 +265,13 @@ contract Pool is IPool {
         uint256[] memory result;
 
         require(sellPct > 0, "SELL PCT NEEDS TO BE GREATER THAN ZERO");
-        require(shares[tokens[0]][msg.sender] > 0, "NEEDS TO HAVE SHARES OF THE INDEX");
+        require(_shares[tokens[0]][msg.sender] > 0, "NEEDS TO HAVE SHARES OF THE INDEX");
         require(sellPct <= 1000, "CAN'T SELL MORE THAN 100% OF FUNDS");
 
+        // TODO Create sell function
         for (uint256 i = 0; i < tokens.length; i++) {
             address tokenAddress = tokens[i];
-            uint256 sharesAmount = (shares[tokenAddress][msg.sender] * sellPct) / 1000;
+            uint256 sharesAmount = (_shares[tokenAddress][msg.sender] * sellPct) / 1000;
 
             path = paths[i];
 
@@ -294,15 +286,15 @@ contract Pool is IPool {
                 sharesAmount : sharesAmount,
                 path : path
                 });
-                shares[tokenAddress][msg.sender] -= result[0];
+                _shares[tokenAddress][msg.sender] -= result[0];
                 ethAmount += result[result.length - 1];
             } else {
-                shares[tokenAddress][msg.sender] -= sharesAmount;
+                _shares[tokenAddress][msg.sender] -= sharesAmount;
                 ethAmount += sharesAmount;
             }
         }
         payable(msg.sender).transfer(ethAmount);
-        emit LOG_WITHDRAW(msg.sender, indexId, sellPct, ethAmount);
+        emit LOG_WITHDRAW(msg.sender, sellPct, ethAmount);
     }
 
     /**
@@ -310,15 +302,15 @@ contract Pool is IPool {
      *
      * @dev Sets path of the trade and send the order to Uniswap.
      *
-     * @param to_token Address of token to be traded
-     * @param eth_amount Amount in ETH
+     * @param ethAmount Amount in ETH
+     * @param path Trade path to be executed in the DEX contract
      */
     function tradeFromETH(
         uint256 ethAmount,
         address[] memory path
     ) private returns (uint256[] memory) {
         return
-        _uniswapRouter.swapExactETHForTokens{value : ethAmount}(
+        _indexpoolFactory.uniswapRouter.swapExactETHForTokens{value : ethAmount}(
             1, // amountOutMin
             path, // path
             address(this), // to
@@ -340,12 +332,12 @@ contract Pool is IPool {
         address[] memory path
     ) private returns (uint256[] memory) {
         require(
-            IERC20(fromToken).approve(address(_uniswapRouter), sharesAmount),
+            IERC20(fromToken).approve(address(_indexpoolFactory.uniswapRouter), sharesAmount),
             "approve failed."
         );
 
         return
-        _uniswapRouter.swapExactTokensForETH(
+        _indexpoolFactory.uniswapRouter.swapExactTokensForETH(
             sharesAmount,
             1, // amountOutMin
             path, // path
@@ -361,14 +353,12 @@ contract Pool is IPool {
      * their ERC20 tokens in case one of the dependencies on this contract
      * goes amiss.
      *
-     * @param user Address of user to have ERC20 tokens withdrawn
-     * @param index_id Index Id (position in `indexes` array)
-     * @param shares_pct Percentage of shares to be cashed out (1000 = 100%)
+     * @param userAddress Address of user to have ERC20 tokens withdrawn
+     * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
 
     function cashOutERC20Internal(
-        address user,
-        uint256 indexId,
+        address userAddress,
         uint256 sharesPct
     ) internal {
         address tokenAddress;
@@ -377,26 +367,26 @@ contract Pool is IPool {
 
         for (uint256 i = 0; i < tokens.length; i++) {
             tokenAddress = tokens[i];
-            amount = (shares[tokenAddress][user] * sharesPct) / 1000;
+            amount = (_shares[tokenAddress][userAddress] * sharesPct) / 1000;
 
-            require(shares[tokenAddress][user] >= amount, "INSUFFICIENT FUNDS");
-            shares[tokenAddress][user] -= amount;
+            require(_shares[tokenAddress][userAddress] >= amount, "INSUFFICIENT FUNDS");
+            _shares[tokenAddress][userAddress] -= amount;
 
             require(amount > 0, "AMOUNT TO CASH OUT IS TOO SMALL");
 
             if (address(0) != tokenAddress) {
                 require(
-                    IERC20(tokenAddress).approve(address(user), amount),
+                    IERC20(tokenAddress).approve(address(userAddress), amount),
                     "ERC20 APPROVE FAILED"
                 );
-                IERC20(tokenAddress).transfer(user, amount);
+                IERC20(tokenAddress).transfer(userAddress, amount);
                 amounts[i] = amount;
             } else {
-                payable(user).transfer(amount);
+                payable(userAddress).transfer(amount);
             }
         }
 
-        emit LOG_ERC20_WITHDRAW(user, indexId, sharesPct, amounts);
+        emit LOG_ERC20_WITHDRAW(userAddress, sharesPct, amounts);
     }
 
     /**
@@ -404,14 +394,13 @@ contract Pool is IPool {
      *
      * @dev This is to be used whenever users want to cash out their ERC20 tokens.
      *
-     * @param indexId Index Id (position in `indexes` array)
      * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
-    function cashOutERC20(uint256 indexId, uint256 sharesPct)
+    function cashOutERC20(uint256 sharesPct)
     external
     override
     {
-        cashOutERC20Internal(msg.sender, indexId, sharesPct);
+        cashOutERC20Internal(msg.sender, sharesPct);
     }
 
     /**
@@ -420,15 +409,13 @@ contract Pool is IPool {
      * @dev This is a security measure, basically giving us the ability to eject users
      * from the contract in case some vulnerability is found on the withdrawal method.
      *
-     * @param indexId Index Id (position in `indexes` array)
      * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
     function cashOutERC20Admin(
         address user,
-        uint256 indexId,
         uint256 sharesPct
-    ) external override _indexpool_only_ {
-        cashOutERC20Internal(user, indexId, sharesPct);
+    ) external override _indexpoolOnly_ {
+        cashOutERC20Internal(user, sharesPct);
     }
 
     /**
@@ -436,11 +423,9 @@ contract Pool is IPool {
      *
      * @dev Mints a specific NFT token remove assigned contracts from contract and into token.
      *
-     * @param indexId Index Id (position in `indexes` array)
      * @param sharesPct Percentage of shares to be minted as NFT (1000 = 100%)
      */
     function mintPool721(
-        uint256 indexId,
         uint256 sharesPct
     ) external override {
         address token;
@@ -448,12 +433,12 @@ contract Pool is IPool {
 
         for (uint256 i = 0; i < tokens.length; i++) {
             token = tokens[i];
-            allocationNFT[i] = (shares[token][msg.sender] * sharesPct) / 1000;
+            allocationNFT[i] = (_shares[token][msg.sender] * sharesPct) / 1000;
             require(allocationNFT[i] > 0, "NOT ENOUGH FUNDS");
-            shares[token][msg.sender] -= allocationNFT[i];
+            _shares[token][msg.sender] -= allocationNFT[i];
         }
 
-        _pool721.generatePool721(msg.sender, indexId, allocationNFT);
+        _pool721.generatePool721(msg.sender, allocationNFT);
     }
 
     /**
@@ -462,9 +447,10 @@ contract Pool is IPool {
      * @dev Burns a specific NFT token and assigns assets back to NFT owner.
      * Only callable by whoever holds the token.
      *
-     * @param indexId Index Id (position in `indexes` array)
+     * @param tokenId Token Id (position in `tokens` array)
      */
     function burnPool721(uint256 tokenId) external override {
+        // TODO make burnPool work on new architecture
         uint256 indexId;
 
         require(
@@ -478,7 +464,7 @@ contract Pool is IPool {
 
         for (uint256 i = 0; i < tokens.length; i++) {
             token = tokens[i];
-            shares[token][msg.sender] += allocationNFT[i];
+            _shares[token][msg.sender] += allocationNFT[i];
         }
     }
 
@@ -496,11 +482,9 @@ contract Pool is IPool {
      *
      * @dev Only callable by the creator. Cashes out ETH funds that are due to
      * a 0.1% in all deposits on the created index.
-     *
-     * @param indexId Index Id (position in `indexes` array)
      */
-    function payCreatorFee(uint256 indexId) external override {
-        require(            msg.sender == creator,            "ONLY INDEX CREATOR CAN WITHDRAW FEES"        );
+    function payCreatorFee() external override {
+        require(msg.sender == creator, "ONLY INDEX CREATOR CAN WITHDRAW FEES");
 
         uint256 creatorFee = fee / 2;
         uint256 withdrawAmount = creatorFee - creatorFeeCashOut;
@@ -510,17 +494,15 @@ contract Pool is IPool {
         creatorFeeCashOut += withdrawAmount;
 
         payable(msg.sender).transfer(withdrawAmount);
-        emit LOG_FEE_WITHDRAW(msg.sender, indexId, withdrawAmount);
+        emit LOG_FEE_WITHDRAW(msg.sender, withdrawAmount);
     }
 
     /**
      * @notice Reads available creator fee.
      *
      * @dev Check how much is owed to the creator.
-     *
-     * @param indexId Index Id (position in `indexes` array)
      */
-    function getAvailableCreatorFee(uint256 indexId)
+    function getAvailableCreatorFee()
     external
     view
     override
@@ -537,13 +519,11 @@ contract Pool is IPool {
      *
      * @dev Only callable by the protocol creator. Cashes out ETH funds that are due to
      * a 0.1% in all deposits on the created index.
-     *
-     * @param indexId Index Id (position in `indexes` array)
      */
-    function payProtocolFee(uint256 indexId)
+    function payProtocolFee()
     external
     override
-    _indexpool_only_
+    _indexpoolOnly_
     {
         uint256 protocolFee = fee / 2;
         uint256 withdrawAmount = protocolFee - protocolFeeCashOut;
@@ -553,17 +533,15 @@ contract Pool is IPool {
         protocolFeeCashOut += withdrawAmount;
 
         payable(msg.sender).transfer(withdrawAmount);
-        emit LOG_FEE_WITHDRAW(msg.sender, indexId, withdrawAmount);
+        emit LOG_FEE_WITHDRAW(msg.sender, withdrawAmount);
     }
 
     /**
      * @notice Reads available protocol fee.
      *
      * @dev Check how much is owed to the protocol.
-     *
-     * @param indexId Index Id (position in `indexes` array)
      */
-    function getAvailableProtocolFee(uint256 indexId)
+    function getAvailableProtocolFee()
     external
     view
     override
