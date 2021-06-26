@@ -23,7 +23,7 @@ interface IPool {
  * many indexes have been created you only need to check its lenght.
  *
  */
-    function get_indexes_length() external view returns (uint256);
+    function getIndexesLength() external view override returns (uint256)
 
     /**
      * @notice Lists all index creators.
@@ -32,22 +32,21 @@ interface IPool {
      * to iterate across indexes and pull the creator address.
      *
      */
-    // TODO evaluate if this is being used somewhere.
-    function get_indexes_creators() external view returns (address[] memory);
+    function getIndexesCreators() external view returns (address[] memory);
 
     /**
      * @notice List a user balance for a specific token in an specific index.
      *
      * @dev Access the mapping that control holdings for index -> token -> user.
      *
-     * @param index_id Index Id (position in `indexes` array)
-     * @param token Token address
-     * @param user_id User address
+     * @param indexId Index Id (position in `indexes` array)
+     * @param tokenAddress Token address
+     * @param userAddress User address
      */
-    function get_token_balance(
-        uint256 index_id,
-        address token,
-        address user_id
+    function getTokenBalance(
+        uint256 indexId,
+        address tokenAddress,
+        address userAddress
     ) external view returns (uint256);
 
     /**
@@ -56,9 +55,9 @@ interface IPool {
      * @dev Simply access the `allocation` array in the Index struct, note that
      * order is the same as the `tokens` array.
      *
-     * @param index_id Index Id (position in `indexes` array)
+     * @param indexId Index Id (position in `indexes` array)
      */
-    function get_index_allocation(uint256 index_id)
+    function getIndexAllocation(uint256 indexId)
         external
         view
         returns (uint256[] memory);
@@ -68,9 +67,9 @@ interface IPool {
      *
      * @dev Simply access the `tokens` array in the Index struct.
      *
-     * @param index_id Index Id (position in `indexes` array)
+     * @param indexId Index Id (position in `indexes` array)
      */
-    function get_index_tokens(uint256 index_id)
+    function getIndexTokens(uint256 indexId)
         external
         view
         returns (address[] memory);
@@ -81,14 +80,14 @@ interface IPool {
      * @dev Uses a struct type called `OutputIndex` which is `Index` withouts
      * the mappings.
      *
-     * @param index_id Index Id (position in `indexes` array)
+     * @param indexId Index Id (position in `indexes` array)
      */
-    function get_index(uint256 index_id)
+    function getIndex(uint256 indexId)
         external
         view
         returns (OutputIndex memory);
 
-    function set_max_deposit(uint256 _max_deposit) external;
+    function setMaxDeposit(uint256 newMaxDeposit) external;
 
     /**
      * @notice Creates a new index.
@@ -98,14 +97,13 @@ interface IPool {
      * Token addresses and allocations are set at this moment and will be 
      * immutable for the rest of the contract's life.
      *
-     * @param _allocation Array of allocations (ordered by token addresses)
-     * @param _tokens Array of token addresses
+     * @param tokens Array of token addresses
+     * @param allocation Array of allocations (ordered by token addresses)
      * @param paths Paths to be used respective to each token on DEX
      */
-    // TODO switch order (tokens should be first)
-    function create_index(
-        uint256[] memory _allocation,
-        address[] memory _tokens,
+    function createIndex(
+        address[] memory tokens,
+        uint256[] memory allocation,
         address[][] memory paths
     ) external;
 
@@ -118,11 +116,17 @@ interface IPool {
      * As per this current version no swaps are made at this point. There will need
      * to be an external call to a buy function in order to execute swaps.
      *
-     * @param _index_id Index Id (position in `indexes` array)
+     * @param indexId Index Id (position in `indexes` array)
      */
-    function deposit(uint256 _index_id, address[][] memory paths)
+    function deposit(uint256 indexId, address[][] memory paths)
         external
         payable;
+
+    function calculateQuotaPrice(
+        uint256[] memory allocation,
+        address[][] paths,
+        address[] tokens
+    ) internal returns (uint256);
 
     /**
      * @notice Withdraw tokens and convert them into ETH.
@@ -131,38 +135,38 @@ interface IPool {
      * according to the amounts that the user holds and the percentage he wants to
      * withdraw.
      *
-     * @param _index_id Index Id (position in `indexes` array)
-     * @param _sell_pct Percentage of shares to be cashed out (1000 = 100%)
+     * @param indexId Index Id (position in `indexes` array)
+     * @param sellPct Percentage of shares to be cashed out (1000 = 100%)
      */
     function withdraw(
-        uint256 _index_id,
-        uint256 _sell_pct,
+        uint256 indexId,
+        uint256 sellPct,
         address[][] memory paths
     ) external;
 
         /**
-     * @notice Cashout ERC20 tokens directly to wallet.
+     * @notice Cash-out ERC20 tokens directly to wallet.
      *
      * @dev This is to be used whenever users want to cash out their ERC20 tokens.
      *
-     * @param index_id Index Id (position in `indexes` array)
-     * @param shares_pct Percentage of shares to be cashed out (1000 = 100%)
+     * @param indexId Index Id (position in `indexes` array)
+     * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
-    function cash_out_erc20(uint256 index_id, uint256 shares_pct) external;
+    function cashOutERC20(uint256 indexId, uint256 sharesPct) external;
 
     /**
-     * @notice Admin-force cashout ERC20 tokens directly to wallet.
+     * @notice Admin-force cash-out ERC20 tokens directly to wallet.
      *
      * @dev This is a security measure, basically giving us the ability to eject users 
      * from the contract in case some vulnerability is found on the withdrawal method.
      *
-     * @param index_id Index Id (position in `indexes` array)
-     * @param shares_pct Percentage of shares to be cashed out (1000 = 100%)
+     * @param indexId Index Id (position in `indexes` array)
+     * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
-    function cash_out_erc20_admin(
+    function cashOutERC20Admin(
         address user,
-        uint256 index_id,
-        uint256 shares_pct
+        uint256 indexId,
+        uint256 sharesPct
     ) external;
 
     /**
@@ -170,7 +174,7 @@ interface IPool {
      *
      * @dev Mints a specific NFT token remove assigned contracts from contract and into token.
      */
-    function mint_Pool721(uint256 index_id) external;
+    function mintPool721(uint256 indexId) external;
 
     /**
      * @notice Burn a specific NFT token.
@@ -178,14 +182,14 @@ interface IPool {
      * @dev Burns a specific NFT token and assigns assets back to NFT owner.
      * Only callable by whoever holds the token.
      */
-    function burn_Pool721(uint256 tokenId) external;
+    function burnPool721(uint256 tokenId) external;
 
     /**
      * @notice Get Pool721 (NFT contract) address.
      *
      * @dev Get the address of the NFT contract minted by this Pool.
      */
-    function get_pool721_address() external view returns (address);
+    function getPool721Address() external view returns (address);
 
     /**
      * @notice Pay creator fee.
@@ -193,9 +197,9 @@ interface IPool {
      * @dev Only callable by the creator. Cashes out ETH funds that are due to
      * a 0.1% in all deposits on the created index.
      *
-     * @param _index_id Index Id (position in `indexes` array)
+     * @param indexId Index Id (position in `indexes` array)
      */
-    function pay_creator_fee(uint256 _index_id) external;
+    function payCreatorFee(uint256 indexId) external;
 
     /**
      * @notice Reads available creator fee.
@@ -204,7 +208,7 @@ interface IPool {
      *
      * @param _index_id Index Id (position in `indexes` array)
      */
-    function get_available_creator_fee(uint256 _index_id)
+    function getAvailableCreatorFee(uint256 indexId)
         external
         view
         returns (uint256);
@@ -215,18 +219,18 @@ interface IPool {
      * @dev Only callable by the protocol creator. Cashes out ETH funds that are due to
      * a 0.1% in all deposits on the created index.
      *
-     * @param _index_id Index Id (position in `indexes` array)
+     * @param indexId Index Id (position in `indexes` array)
      */
-    function pay_protocol_fee(uint256 _index_id) external;
+    function payProtocolFee(uint256 indexId) external;
 
     /**
      * @notice Reads available protocol fee.
      *
      * @dev Check how much is owed to the protocol.
      *
-     * @param _index_id Index Id (position in `indexes` array)
+     * @param indexId Index Id (position in `indexes` array)
      */
-    function get_available_protocol_fee(uint256 _index_id)
+    function getAvailableProtocolFee(uint256 indexId)
         external
         view
         returns (uint256);
