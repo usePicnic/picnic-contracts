@@ -74,9 +74,9 @@ interface IIndexPool {
      *
      * @param sharesPct Percentage of shares to be minted as NFT (1000 = 100%)
      */
-    function mintPool721(
-        uint256 sharesPct
-    ) external;
+//    function mintPool721(
+//        uint256 sharesPct
+//    ) external;
 
     /**
      * @notice Burn a specific NFT token.
@@ -86,14 +86,14 @@ interface IIndexPool {
      *
      * @param tokenId Token Id (position in `tokens` array)
      */
-    function burnPool721(uint256 tokenId) external;
+//    function burnPool721(uint256 tokenId) external;
 
     /**
      * @notice Get Pool721 (NFT contract) address.
      *
      * @dev Get the address of the NFT contract minted by this Pool.
      */
-    function getPool721Address() external view returns (address);
+//    function getPool721Address() external view returns (address);
 
     /**
      * @notice Pay creator fee.

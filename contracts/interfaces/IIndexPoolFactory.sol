@@ -19,4 +19,6 @@ interface IIndexpoolFactory {
     function setMaxDeposit(uint256 newMaxDeposit) external;
 
     function getCreator() external returns (address);
+
+    function getMaxDeposit() external returns (uint256);
 }

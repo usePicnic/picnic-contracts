@@ -7,7 +7,7 @@ import "./interfaces/IIndexPoolFactory.sol";
 import "./interfaces/IOraclePath.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 
-contract IndexpoolFactory is IIndexpoolFactory{
+contract IndexpoolFactory is IIndexpoolFactory {
     address public creator;
     address[] private _indexes;
     address public oracleAddress;
@@ -42,7 +42,7 @@ contract IndexpoolFactory is IIndexpoolFactory{
         uint256[] memory allocation,
         address[][] memory paths
     ) external override {
-        IndexPool indexPool = new IndexPool(tokens, allocation, paths);
+        IndexPool indexPool = new IndexPool(address(this), tokens, allocation, paths, oracleAddress, uniswapRouterAddress);
 
         _indexes.push(address(indexPool));
 
@@ -72,5 +72,9 @@ contract IndexpoolFactory is IIndexpoolFactory{
 
     function getCreator() external override returns (address){
         return creator;
+    }
+
+    function getMaxDeposit() external override returns (uint256){
+        return maxDeposit;
     }
 }

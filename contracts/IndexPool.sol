@@ -84,7 +84,7 @@ contract IndexPool is IIndexPool {
         tokens = _tokens;
         allocation = _allocation;
 
-        _uniswapRouter = IUniswapV2Router02(uniswapRouter);
+        _uniswapRouter = IUniswapV2Router02(uniswapRouterAddress);
         _oracle = IOraclePath(oracleAddress);
 
         checkValidIndex(paths);
@@ -119,7 +119,7 @@ contract IndexPool is IIndexPool {
                 );
 
                 // Checks if amount is too small
-                amount = _indexpoolFactory.uniswapRouter.getAmountsOut(allocation[i], path)[1];
+                amount = _uniswapRouter.getAmountsOut(allocation[i], path)[1];
                 require(
                     amount > 100000,
                     "ALLOCATION AMOUNT IS TOO SMALL, NEEDS TO BE AT LEAST EQUIVALENT TO 100,000 WEI"
@@ -129,7 +129,7 @@ contract IndexPool is IIndexPool {
                 for (uint8 j = 0; j < path.length; j++) {
                     invPath[path.length - 1 - j] = path[j];
                 }
-                _indexpoolFactory.oracle.updateOracles(invPath);
+                _oracle.updateOracles(invPath);
             }
         }
     }
@@ -168,13 +168,14 @@ contract IndexPool is IIndexPool {
      *
      * @param paths Paths to be used respective to each token on DEX
      */
+    // TODO improve deposit dismemberment into more functions...
     function deposit(address[][] memory paths)
     external
     payable
     override
     {
         require(
-            msg.value <= _indexpoolFactory.maxDeposit(),
+            msg.value <= _indexpoolFactory.getMaxDeposit(),
             "EXCEEDED MAXIMUM ALLOWED DEPOSIT VALUE"
         );
 
@@ -191,7 +192,7 @@ contract IndexPool is IIndexPool {
         fee += depositFee;
 
         uint256 freeAmount = msg.value - depositFee;
-        (quotaPrice, amounts) = calculateQuotaPrice(allocation, paths, tokens);
+        (quotaPrice, amounts) = calculateQuotaPrice(paths);
         uint256 nQuotas = freeAmount / quotaPrice;
 
         buy(nQuotas, amounts, paths);
@@ -217,11 +218,11 @@ contract IndexPool is IIndexPool {
             if (address(0) == tokens[i]) {
                 amount = allocation[i];
             } else {
-                _indexpoolFactory.oracle.updateOracles(path);
-                amount = _indexpoolFactory.oracle.consult(path);
+                _oracle.updateOracles(path);
+                amount = _oracle.consult(path);
 
                 if (amount == 0) {
-                    amount = _indexpoolFactory.uniswapRouter.getAmountsOut(allocation[i], path)[
+                    amount = _uniswapRouter.getAmountsOut(allocation[i], path)[
                     path.length - 1
                     ];
                 }
@@ -229,7 +230,7 @@ contract IndexPool is IIndexPool {
             amounts[i] = amount;
             quotaPrice += amount;
         }
-        return quotaPrice;
+        return (quotaPrice, amounts);
     }
 
     function buy(uint256 nQuotas, uint256[] memory amounts, address[][] memory paths) internal {
@@ -323,7 +324,7 @@ contract IndexPool is IIndexPool {
         address[] memory path
     ) private returns (uint256[] memory) {
         return
-        _indexpoolFactory.uniswapRouter.swapExactETHForTokens{value : ethAmount}(
+        _uniswapRouter.swapExactETHForTokens{value : ethAmount}(
             1, // amountOutMin
             path, // path
             address(this), // to
@@ -345,12 +346,12 @@ contract IndexPool is IIndexPool {
         address[] memory path
     ) private returns (uint256[] memory) {
         require(
-            IERC20(fromToken).approve(address(_indexpoolFactory.uniswapRouter), sharesAmount),
+            IERC20(fromToken).approve(address(_uniswapRouter), sharesAmount),
             "approve failed."
         );
 
         return
-        _indexpoolFactory.uniswapRouter.swapExactTokensForETH(
+        _uniswapRouter.swapExactTokensForETH(
             sharesAmount,
             1, // amountOutMin
             path, // path
