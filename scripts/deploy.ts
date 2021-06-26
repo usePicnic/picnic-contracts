@@ -36,7 +36,7 @@ async function main() {
   console.log("Pool address:", pool.address);  
 
   // REGISTER ON SERVER
-  const contractFile = readFileSync('./artifacts/contracts/Pool.sol/Pool.json', 'utf8')
+  const contractFile = readFileSync('./artifacts/contracts/IndexPool.sol/Pool.json', 'utf8')
   const contractData = JSON.parse(contractFile)
 
   const response = await fetch(

@@ -3,7 +3,7 @@ pragma solidity 0.8.6;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Pool721 is ERC721, Ownable {
+contract PortfolioNFT is ERC721, Ownable {
     uint256 public tokenCounter;
     address creator;
     mapping(uint256 => address[]) public tokenIdToTokenAdresses;

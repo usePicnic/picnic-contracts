@@ -1,9 +1,9 @@
 pragma solidity >=0.8.6;
 
 import "hardhat/console.sol";
-import "./interfaces/IPool.sol";
+import "./interfaces/IIndexPool.sol";
 import "./libraries/DataStructures.sol";
-import "./Pool721.sol";
+import "./PortfolioNFT.sol";
 import "./interfaces/IOraclePath.sol";
 
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
@@ -28,7 +28,7 @@ contract Pool is IPool {
     Index[] private _indexes;
     IOraclePath private _oracle;
     IUniswapV2Router02 private _uniswapRouter;
-    Pool721 private _pool721;
+    PortfolioNFT private _pool721;
 
     uint256 private constant BASE_ASSET = 1000000000000000000;
     uint256 public maxDeposit = 100 * BASE_ASSET;

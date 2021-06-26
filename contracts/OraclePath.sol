@@ -1,6 +1,7 @@
 pragma solidity =0.6.6;
 
 import "hardhat/console.sol";
+// TODO import directly from Uniswap instead of creating a file for it
 import "./OraclePair.sol";
 
 contract OraclePath {
