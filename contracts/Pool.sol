@@ -25,6 +25,7 @@ import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
 contract Pool is IPool {
     address public creator;
 
+    Index[] private _indexes;
     IOraclePath private _oracle;
     IUniswapV2Router02 private _uniswapRouter;
     PortfolioNFT private _pool721;
@@ -32,18 +33,11 @@ contract Pool is IPool {
     uint256 private constant BASE_ASSET = 1000000000000000000;
     uint256 public maxDeposit = 100 * BASE_ASSET;
 
-    constructor(
-        address uniswapRouter,
-        address oracleAddress,
-        address[] tokens,
-        uint256[] allocation,
-        address[][] paths)
-    {
-        creator = msg.sender;
+    constructor(address uniswapRouter, address oracleAddress) {
         _uniswapRouter = IUniswapV2Router02(uniswapRouter);
+        creator = msg.sender;
+        _pool721 = new Pool721();
         _oracle = IOraclePath(oracleAddress);
-        _tokens = tokens;
-        _allocation = allocation;
     }
 
     modifier _indexpoolOnly_() {
@@ -221,7 +215,7 @@ contract Pool is IPool {
      *
      * @dev Create a new `Index` struct and append it to `indexes`.
 
-     * Token addresses and allocations are set at this moment and will be 
+     * Token addresses and allocations are set at this moment and will be
      * immutable for the rest of the contract's life.
      *
      * @param allocation Array of allocations (ordered by token addresses)
