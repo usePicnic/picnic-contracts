@@ -1,30 +1,38 @@
 pragma solidity >=0.8.6;
 
-import "./IndexPool.sol"; // TODO import interface
+import "./IndexPoolNFT.sol";
+import "./IndexPool.sol";
+import "./interfaces/IOraclePath.sol";
+import "./interfaces/IIndexPoolFactory.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 
-
-contract IndexPoolFactory {
+contract IndexpoolFactory is IIndexpoolFactory{
     address public creator;
     address[] private _indexes;
-    PortfolioNFT _NFTFactory = new NFTFactory();
-
-    PortfolioNFT private _pool721;
-    IOraclePath private _oracle;
-    IUniswapV2Router02 private _uniswapRouter;
+    IOraclePath public oracle;
+    IUniswapV2Router02 public uniswapRouter;
 
     uint256 private constant BASE_ASSET = 1000000000000000000;
     uint256 public maxDeposit = BASE_ASSET;
 
-    constructor(address uniswapRouter, address oracleAddress) {
-        _uniswapRouter = IUniswapV2Router02(uniswapRouter);
-        creator = msg.sender;
-        _pool721 = new Pool721();
-        _oracle = IOraclePath(oracleAddress);
-    }
+    IndexPoolNFT _NFTFactory = new IndexPoolNFT();
+
+    event LOG_CREATE_INDEX(
+        uint256 indexed indexId,
+        address indexed creatorAddress,
+        address[] tokens,
+        uint256[] allocation
+    );
 
     modifier _indexpoolOnly_() {
         require(msg.sender == creator, "ONLY INDEXPOOL CAN CALL THIS FUNCTION");
         _;
+    }
+
+    constructor(address uniswapRouter, address oracleAddress) {
+        uniswapRouter = IUniswapV2Router02(uniswapRouter);
+        creator = msg.sender;
+        oracle = IOraclePath(oracleAddress);
     }
 
     function createIndex(
@@ -50,12 +58,12 @@ contract IndexPoolFactory {
    * @dev Created to minimize damage in case any vulnerability is found on the
    * contract.
    *
-   * @param _max_deposit Max deposit value in wei
+   * @param newMaxDeposit Max deposit value in wei
    */
     function setMaxDeposit(uint256 newMaxDeposit)
     external
     override
-    _indexpool_only_
+    _indexpoolOnly_
     {
         maxDeposit = newMaxDeposit;
     }

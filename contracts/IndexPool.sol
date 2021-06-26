@@ -68,13 +68,13 @@ contract IndexPool is IIndexPool {
 
     constructor(
         address indexpoolFactoryAddress,
-        address[] tokens,
-        uint256[] allocation,
+        address[] _tokens,
+        uint256[] _allocation,
         address[][] paths)
     {
         creator = msg.sender;
-        tokens = tokens;
-        allocation = allocation;
+        tokens = _tokens;
+        allocation = _allocation;
 
         checkValidIndex(paths);
 
@@ -172,26 +172,28 @@ contract IndexPool is IIndexPool {
             "MINIMUM DEPOSIT OF 0.001 MATIC"
         );
 
-        uint256 amount;
-        uint256[] memory result;
+        uint256[] memory amounts = new uint256[](tokens.length);
+        uint256 quotaPrice;
 
         // Pay fees
         uint256 depositFee = msg.value / 500;
         fee += depositFee;
 
         uint256 freeAmount = msg.value - depositFee;
-        uint256 quotaPrice = calculateQuotaPrice(allocation, paths, tokens);
+        (quotaPrice, amounts) = calculateQuotaPrice(allocation, paths, tokens);
         uint256 nQuotas = freeAmount / quotaPrice;
 
-        buy(nQuotas);
+        buy(nQuotas, amounts, paths);
 
         emit LOG_DEPOSIT(msg.sender, msg.value);
     }
 
-    function calculateQuotaPrice(address[][] paths)
-    internal returns (uint256) {
+    function calculateQuotaPrice(address[][] memory paths)
+    internal returns (uint256, uint256[]) {
+        uint256 amount;
         uint256 quotaPrice = 0;
         address[] memory path;
+        uint256[] memory amounts = new uint256[](tokens.length);
 
         for (uint8 i = 0; i < allocation.length; i++) {
             path = paths[i];
@@ -219,12 +221,12 @@ contract IndexPool is IIndexPool {
         return quotaPrice;
     }
 
-    function buy(uint256 nQuotas) internal {
+    function buy(uint256 nQuotas, uint256[] memory amounts, address[][] memory paths) internal {
         uint256 bought;
-        uint256[] memory amounts = new uint256[](tokens.length);
         address tokenAddress;
         uint256 amount;
         address[] memory path;
+        uint256[] memory result;
 
         // Register operations
         for (uint8 i = 0; i < tokens.length; i++) {
@@ -242,7 +244,7 @@ contract IndexPool is IIndexPool {
                 bought = amount;
             }
 
-            index.shares[_token][msg.sender] += bought;
+            _shares[tokenAddress][msg.sender] += bought;
         }
     }
 
@@ -425,21 +427,21 @@ contract IndexPool is IIndexPool {
      *
      * @param sharesPct Percentage of shares to be minted as NFT (1000 = 100%)
      */
-    function mintPool721(
-        uint256 sharesPct
-    ) external override {
-        address token;
-        uint256[] memory allocationNFT = new uint256[](tokens.length);
-
-        for (uint256 i = 0; i < tokens.length; i++) {
-            token = tokens[i];
-            allocationNFT[i] = (_shares[token][msg.sender] * sharesPct) / 1000;
-            require(allocationNFT[i] > 0, "NOT ENOUGH FUNDS");
-            _shares[token][msg.sender] -= allocationNFT[i];
-        }
-
-        _pool721.generatePool721(msg.sender, allocationNFT);
-    }
+//    function mintPool721(
+//        uint256 sharesPct
+//    ) external override {
+//        address token;
+//        uint256[] memory allocationNFT = new uint256[](tokens.length);
+//
+//        for (uint256 i = 0; i < tokens.length; i++) {
+//            token = tokens[i];
+//            allocationNFT[i] = (_shares[token][msg.sender] * sharesPct) / 1000;
+//            require(allocationNFT[i] > 0, "NOT ENOUGH FUNDS");
+//            _shares[token][msg.sender] -= allocationNFT[i];
+//        }
+//
+//        _pool721.generatePool721(msg.sender, allocationNFT);
+//    }
 
     /**
      * @notice Burn a specific NFT token.
@@ -449,33 +451,33 @@ contract IndexPool is IIndexPool {
      *
      * @param tokenId Token Id (position in `tokens` array)
      */
-    function burnPool721(uint256 tokenId) external override {
-        // TODO make burnPool work on new architecture
-        uint256 indexId;
-
-        require(
-            _pool721.ownerOf(tokenId) == msg.sender,
-            "ONLY CALLABLE BY TOKEN OWNER"
-        );
-
-        (indexId, allocationNFT) = _pool721.burnPool721(tokenId);
-
-        address token;
-
-        for (uint256 i = 0; i < tokens.length; i++) {
-            token = tokens[i];
-            _shares[token][msg.sender] += allocationNFT[i];
-        }
-    }
+//    function burnPool721(uint256 tokenId) external override {
+//        // TODO make burnPool work on new architecture
+//        uint256 indexId;
+//
+//        require(
+//            _pool721.ownerOf(tokenId) == msg.sender,
+//            "ONLY CALLABLE BY TOKEN OWNER"
+//        );
+//
+//        (indexId, allocationNFT) = _pool721.burnPool721(tokenId);
+//
+//        address token;
+//
+//        for (uint256 i = 0; i < tokens.length; i++) {
+//            token = tokens[i];
+//            _shares[token][msg.sender] += allocationNFT[i];
+//        }
+//    }
 
     /**
      * @notice Get Pool721 (NFT contract) address.
      *
      * @dev Get the address of the NFT contract minted by this Pool.
-     */
-    function getPool721Address() external view override returns (address) {
-        return address(_pool721);
-    }
+//     */
+//    function getPool721Address() external view override returns (address) {
+//        return address(_pool721);
+//    }
 
     /**
      * @notice Pay creator fee.
