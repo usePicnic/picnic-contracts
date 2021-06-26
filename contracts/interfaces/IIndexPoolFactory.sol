@@ -1,6 +1,7 @@
 pragma solidity >=0.8.6;
 
 interface IIndexpoolFactory {
+
     function createIndex(
         address[] memory tokens,
         uint256[] memory allocation,
@@ -16,4 +17,6 @@ interface IIndexpoolFactory {
    * @param newMaxDeposit Max deposit value in wei
    */
     function setMaxDeposit(uint256 newMaxDeposit) external;
+
+    function getCreator() external returns (address);
 }

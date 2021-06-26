@@ -8,6 +8,9 @@ import "./IndexPoolNFT.sol";
 
 import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
 
+import "./interfaces/IOraclePath.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
+
 /**
  * @title Pool
  * @author IndexPool
@@ -33,6 +36,9 @@ contract IndexPool is IIndexPool {
 
     uint256 private constant BASE_ASSET = 1000000000000000000;
 
+    IOraclePath private _oracle;
+    IUniswapV2Router02 private _uniswapRouter;
+
     event LOG_DEPOSIT(
         address indexed userAddress,
         uint256 amount_in
@@ -57,31 +63,36 @@ contract IndexPool is IIndexPool {
 
     event Received(address sender, uint256 amount);
 
-    receive() external payable override {
+    receive() external payable { // TODO why no override?
         emit Received(msg.sender, msg.value);
     }
 
     modifier _indexpoolOnly_() {
-        require(msg.sender == _indexpoolFactory.creator, "ONLY INDEXPOOL CAN CALL THIS FUNCTION");
+        require(msg.sender == _indexpoolFactory.getCreator(), "ONLY INDEXPOOL CAN CALL THIS FUNCTION");
         _;
     }
 
     constructor(
         address indexpoolFactoryAddress,
-        address[] _tokens,
-        uint256[] _allocation,
-        address[][] paths)
+        address[] memory _tokens,
+        uint256[] memory _allocation,
+        address[][] memory paths,
+        address oracleAddress,
+        address uniswapRouterAddress)
     {
         creator = msg.sender;
         tokens = _tokens;
         allocation = _allocation;
+
+        _uniswapRouter = IUniswapV2Router02(uniswapRouter);
+        _oracle = IOraclePath(oracleAddress);
 
         checkValidIndex(paths);
 
         _indexpoolFactory = IIndexpoolFactory(indexpoolFactoryAddress);
     }
 
-    function checkValidIndex(address[][] paths) internal {
+    function checkValidIndex(address[][] memory paths) internal {
         require(allocation.length == tokens.length,
             "MISMATCH IN LENGTH BETWEEN TOKENS AND ALLOCATION");
 
@@ -189,7 +200,7 @@ contract IndexPool is IIndexPool {
     }
 
     function calculateQuotaPrice(address[][] memory paths)
-    internal returns (uint256, uint256[]) {
+    internal returns (uint256, uint256[] memory) {
         uint256 amount;
         uint256 quotaPrice = 0;
         address[] memory path;

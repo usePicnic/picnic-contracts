@@ -2,15 +2,16 @@ pragma solidity >=0.8.6;
 
 import "./IndexPoolNFT.sol";
 import "./IndexPool.sol";
-import "./interfaces/IOraclePath.sol";
 import "./interfaces/IIndexPoolFactory.sol";
+
+import "./interfaces/IOraclePath.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 
 contract IndexpoolFactory is IIndexpoolFactory{
     address public creator;
     address[] private _indexes;
-    IOraclePath public oracle;
-    IUniswapV2Router02 public uniswapRouter;
+    address public oracleAddress;
+    address public uniswapRouterAddress;
 
     uint256 private constant BASE_ASSET = 1000000000000000000;
     uint256 public maxDeposit = BASE_ASSET;
@@ -29,10 +30,11 @@ contract IndexpoolFactory is IIndexpoolFactory{
         _;
     }
 
-    constructor(address uniswapRouter, address oracleAddress) {
-        uniswapRouter = IUniswapV2Router02(uniswapRouter);
+    constructor(address _uniswapRouterAddress, address _oracleAddress) {
+        uniswapRouterAddress = _uniswapRouterAddress;
+        oracleAddress = _oracleAddress;
+
         creator = msg.sender;
-        oracle = IOraclePath(oracleAddress);
     }
 
     function createIndex(
@@ -40,7 +42,7 @@ contract IndexpoolFactory is IIndexpoolFactory{
         uint256[] memory allocation,
         address[][] memory paths
     ) external override {
-        IndexPool memory indexPool = new IndexPool(tokens, allocation, paths);
+        IndexPool indexPool = new IndexPool(tokens, allocation, paths);
 
         _indexes.push(address(indexPool));
 
@@ -66,5 +68,9 @@ contract IndexpoolFactory is IIndexpoolFactory{
     _indexpoolOnly_
     {
         maxDeposit = newMaxDeposit;
+    }
+
+    function getCreator() external override returns (address){
+        return creator;
     }
 }
