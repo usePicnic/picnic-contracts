@@ -25,7 +25,6 @@ import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
  */
 
 contract IndexPool is IIndexPool {
-    IIndexpoolFactory _indexpoolFactory;
     address public creator;
     uint256[] public allocation;
     address[] public tokens;
@@ -36,8 +35,10 @@ contract IndexPool is IIndexPool {
 
     uint256 private constant BASE_ASSET = 1000000000000000000;
 
+    IIndexpoolFactory _indexpoolFactory;
     IOraclePath private _oracle;
     IUniswapV2Router02 private _uniswapRouter;
+    IndexPoolNFT _indexPoolNFT = new IndexPoolNFT();
 
     event LOG_DEPOSIT(
         address indexed userAddress,
@@ -439,21 +440,21 @@ contract IndexPool is IIndexPool {
      *
      * @param sharesPct Percentage of shares to be minted as NFT (1000 = 100%)
      */
-//    function mintPool721(
-//        uint256 sharesPct
-//    ) external override {
-//        address token;
-//        uint256[] memory allocationNFT = new uint256[](tokens.length);
-//
-//        for (uint256 i = 0; i < tokens.length; i++) {
-//            token = tokens[i];
-//            allocationNFT[i] = (_shares[token][msg.sender] * sharesPct) / 1000;
-//            require(allocationNFT[i] > 0, "NOT ENOUGH FUNDS");
-//            _shares[token][msg.sender] -= allocationNFT[i];
-//        }
-//
-//        _pool721.generatePool721(msg.sender, allocationNFT);
-//    }
+    function mintPool721(
+        uint256 sharesPct
+    ) external override {
+        address token;
+        uint256[] memory allocationNFT = new uint256[](tokens.length);
+
+        for (uint256 i = 0; i < tokens.length; i++) {
+            token = tokens[i];
+            allocationNFT[i] = (_shares[token][msg.sender] * sharesPct) / 1000;
+            require(allocationNFT[i] > 0, "NOT ENOUGH FUNDS");
+            _shares[token][msg.sender] -= allocationNFT[i];
+        }
+
+        _indexPoolNFT.generatePool721(msg.sender, allocationNFT);
+    }
 
     /**
      * @notice Burn a specific NFT token.
@@ -463,33 +464,32 @@ contract IndexPool is IIndexPool {
      *
      * @param tokenId Token Id (position in `tokens` array)
      */
-//    function burnPool721(uint256 tokenId) external override {
-//        // TODO make burnPool work on new architecture
-//        uint256 indexId;
-//
-//        require(
-//            _pool721.ownerOf(tokenId) == msg.sender,
-//            "ONLY CALLABLE BY TOKEN OWNER"
-//        );
-//
-//        (indexId, allocationNFT) = _pool721.burnPool721(tokenId);
-//
-//        address token;
-//
-//        for (uint256 i = 0; i < tokens.length; i++) {
-//            token = tokens[i];
-//            _shares[token][msg.sender] += allocationNFT[i];
-//        }
-//    }
+    function burnPool721(uint256 tokenId) external override {
+        uint256[] memory allocationNFT;
+
+        require(
+            _indexPoolNFT.ownerOf(tokenId) == msg.sender,
+            "ONLY CALLABLE BY TOKEN OWNER"
+        );
+
+        allocationNFT = _indexPoolNFT.burnPool721(tokenId);
+
+        address token;
+
+        for (uint256 i = 0; i < tokens.length; i++) {
+            token = tokens[i];
+            _shares[token][msg.sender] += allocationNFT[i];
+        }
+    }
 
     /**
      * @notice Get Pool721 (NFT contract) address.
      *
      * @dev Get the address of the NFT contract minted by this Pool.
-//     */
-//    function getPool721Address() external view override returns (address) {
-//        return address(_pool721);
-//    }
+     */
+    function getPool721Address() external view override returns (address) {
+        return address(_indexPoolNFT);
+    }
 
     /**
      * @notice Pay creator fee.

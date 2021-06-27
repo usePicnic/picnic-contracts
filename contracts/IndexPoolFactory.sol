@@ -16,8 +16,6 @@ contract IndexpoolFactory is IIndexpoolFactory {
     uint256 private constant BASE_ASSET = 1000000000000000000;
     uint256 public maxDeposit = BASE_ASSET;
 
-    IndexPoolNFT _NFTFactory = new IndexPoolNFT();
-
     event LOG_CREATE_INDEX(
         uint256 indexed indexId,
         address indexed creatorAddress,
