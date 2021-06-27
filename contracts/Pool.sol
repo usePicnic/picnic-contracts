@@ -348,7 +348,7 @@ contract Pool is IPool {
         uint256 quotaPrice = calculateQuotaPrice(allocation, paths, tokens);
         uint256 nQuotas = freeAmount / quotaPrice;
 
-        buy(tokens, indexId, nQuotas);
+        buy(tokens, indexId, nQuotas, paths);
 
         emit LOG_DEPOSIT(msg.sender, indexId, msg.value);
     }
@@ -356,6 +356,8 @@ contract Pool is IPool {
     function calculateQuotaPrice(uint256[] memory allocation, address[][] paths, address[] tokens)
     internal returns (uint256) {
         uint256 quotaPrice = 0;
+        uint256[] memory amounts = new uint256[](tokens.length);
+        uint amount;
         address[] memory path;
 
         for (uint8 i = 0; i < allocation.length; i++) {
@@ -384,13 +386,14 @@ contract Pool is IPool {
         return quotaPrice;
     }
 
-    function buy(address[] tokens, uint256 indexId, uint256 nQuotas) internal {
+    function buy(address[] tokens, uint256 indexId, uint256 nQuotas, address[][] memory paths) internal {
         uint256 bought;
         Index memory index = _indexes[indexId];
         uint256[] memory amounts = new uint256[](tokens.length);
         address tokenAddress;
         uint256 amount;
         address[] memory path;
+        uint256[] memory result;
 
         // Register operations
         for (uint8 i = 0; i < tokens.length; i++) {
@@ -408,7 +411,7 @@ contract Pool is IPool {
                 bought = amount;
             }
 
-            index.shares[_token][msg.sender] += bought;
+            index.shares[tokenAddress][msg.sender] += bought;
         }
     }
 
@@ -473,8 +476,8 @@ contract Pool is IPool {
      *
      * @dev Sets path of the trade and send the order to Uniswap.
      *
-     * @param to_token Address of token to be traded
-     * @param eth_amount Amount in ETH
+     * @param ethAmount Amount in ETH
+     * @param path Uniswap V2 path (trading route)
      */
     function tradeFromETH(
         uint256 ethAmount,
@@ -518,19 +521,19 @@ contract Pool is IPool {
     }
 
     /**
-     * @notice Cashout ERC20 tokens directly to wallet.
+     * @notice Cash-out ERC20 tokens directly to wallet.
      *
-     * @dev This is mostly a safety feature and a way for users to cashout
+     * @dev This is mostly a safety feature and a way for users to cash-out
      * their ERC20 tokens in case one of the dependencies on this contract
      * goes amiss.
      *
-     * @param user Address of user to have ERC20 tokens withdrawn
-     * @param index_id Index Id (position in `indexes` array)
-     * @param shares_pct Percentage of shares to be cashed out (1000 = 100%)
+     * @param userAddress Address of user to have ERC20 tokens withdrawn
+     * @param indexId Index Id (position in `indexes` array)
+     * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
 
     function cashOutERC20Internal(
-        address user,
+        address userAddress,
         uint256 indexId,
         uint256 sharesPct
     ) internal {
@@ -542,29 +545,29 @@ contract Pool is IPool {
 
         for (uint256 i = 0; i < tokens.length; i++) {
             tokenAddress = tokens[i];
-            amount = ((_indexes[indexId].shares[tokenAddress][user] * sharesPct) / 1000);
+            amount = ((_indexes[indexId].shares[tokenAddress][userAddress] * sharesPct) / 1000);
 
             require(
-                _indexes[indexId].shares[tokenAddress][user] >= amount,
+                _indexes[indexId].shares[tokenAddress][userAddress] >= amount,
                 "INSUFFICIENT FUNDS"
             );
-            _indexes[indexId].shares[tokenAddress][user] -= amount;
+            _indexes[indexId].shares[tokenAddress][userAddress] -= amount;
 
             require(amount > 0, "AMOUNT TO CASH OUT IS TOO SMALL");
 
             if (address(0) != tokenAddress) {
                 require(
-                    IERC20(tokenAddress).approve(address(user), amount),
+                    IERC20(tokenAddress).approve(address(userAddress), amount),
                     "ERC20 APPROVE FAILED"
                 );
-                IERC20(tokenAddress).transfer(user, amount);
+                IERC20(tokenAddress).transfer(userAddress, amount);
                 amounts[i] = amount;
             } else {
-                payable(user).transfer(amount);
+                payable(userAddress).transfer(amount);
             }
         }
 
-        emit LOG_ERC20_WITHDRAW(user, indexId, sharesPct, amounts);
+        emit LOG_ERC20_WITHDRAW(userAddress, indexId, sharesPct, amounts);
     }
 
     /**
