@@ -42,9 +42,9 @@ describe("Withdraw", function () {
         // mined.
         hardhatPool = (await Pool.deploy(UNI_ROUTER, oracle.address)).connect(owner)
 
-        await hardhatPool.create_index(
-            tokens.map(() => 1000000000),  // uint256[] _allocation,
+        await hardhatPool.createIndex(
             tokens, // address[] _tokens
+            tokens.map(() => 1000000000),  // uint256[] _allocation,
             tokens.map(x => [x, WETH]), // paths
         );
 
@@ -67,7 +67,7 @@ describe("Withdraw", function () {
             tokens.map(x => [x, WETH]) // paths
         );
 
-        expect(await hardhatPool.get_token_balance(0, UNI_TOKEN, owner.getAddress())).to.equal(0);
+        expect(await hardhatPool.getTokenBalance(0, UNI_TOKEN, owner.getAddress())).to.equal(0);
         expect(await owner.getBalance()).to.be.above(prevBalance);
     })
 
@@ -82,7 +82,7 @@ describe("Withdraw", function () {
             tokens.map(x => [x, WETH]) // paths
         );
 
-        expect(await hardhatPool.get_token_balance(0, UNI_TOKEN, owner.getAddress())).to.be.above(0);
+        expect(await hardhatPool.getTokenBalance(0, UNI_TOKEN, owner.getAddress())).to.be.above(0);
         expect(await owner.getBalance()).to.be.above(prevBalance);
     })
 
@@ -114,9 +114,9 @@ describe("Withdraw", function () {
     })
 
     it("Rejects Withdrawals without shares bought", async function () {
-        await hardhatPool.create_index(
-            [1000000000],  // uint256[] _allocation,
+        await hardhatPool.createIndex(
             [UNI_TOKEN], // address[] _tokens
+            [1000000000],  // uint256[] _allocation,
             [[UNI_TOKEN, WETH]] // paths
         );
 
