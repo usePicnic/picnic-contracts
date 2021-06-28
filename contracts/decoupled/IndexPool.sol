@@ -1,16 +1,13 @@
 pragma solidity >=0.8.6;
 
-import "./interfaces/IIndexPool.sol";
-import "./interfaces/IIndexPoolFactory.sol";
-import "./interfaces/INFTFactory.sol";
-import "./interfaces/IOraclePath.sol";
+import "../interfaces/IIndexPool.sol";
+import "../interfaces/IIndexPoolFactory.sol";
+import "../interfaces/INFTFactory.sol";
+import "../interfaces/IOraclePath.sol";
+import "../interfaces/IIndexPoolNFT.sol";
 
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
-
-import "./interfaces/IIndexPoolNFT.sol";
-
-//import "hardhat/console.sol";
 
 /**
  * @title Pool
