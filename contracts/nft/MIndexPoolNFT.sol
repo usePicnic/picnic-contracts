@@ -12,9 +12,9 @@ contract MIndexPoolNFT is ERC721, Ownable {
     mapping(uint256 => uint256[]) public tokenIdToAllocation;
     mapping(uint256 => uint256) public tokenIdToIndexId;
 
-    constructor(address _creator) public ERC721("Dogie", "DOG") {
+    constructor() public ERC721("Dogie", "DOG") {
         tokenCounter = 0;
-        creator = _creator;
+        creator = msg.sender;
     }
 
     modifier _indexpoolOnly_() {

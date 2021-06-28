@@ -28,7 +28,7 @@
      Index[] private _indexes;
      IOraclePath private _oracle;
      IUniswapV2Router02 private _uniswapRouter;
-     MIndexPoolNFT private _pool721 = MIndexPoolNFT(address(this));
+     MIndexPoolNFT private _pool721 = new MIndexPoolNFT();
 
      uint256 private constant BASE_ASSET = 1000000000000000000;
      uint256 public maxDeposit = 100 * BASE_ASSET;
