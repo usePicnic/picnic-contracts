@@ -339,22 +339,25 @@
          uint256[] memory allocation = _indexes[indexId].allocation;
          uint256 amount;
          uint256[] memory result;
+         uint256[] memory amounts = new uint256[](tokens.length);
+         uint256 quotaPrice;
 
          // Pay fees
          uint256 fee = msg.value / 500;
          _indexes[indexId].fee += fee;
 
          uint256 freeAmount = msg.value - fee;
-         uint256 quotaPrice = calculateQuotaPrice(allocation, paths, tokens);
+         (quotaPrice, amounts) = calculateQuotaPrice(allocation, paths, tokens);
          uint256 nQuotas = freeAmount / quotaPrice;
 
-         buy(tokens, indexId, nQuotas, paths);
+
+         buy(indexId, nQuotas, tokens,  amounts, paths);
 
          emit LOG_DEPOSIT(msg.sender, indexId, msg.value);
      }
 
      function calculateQuotaPrice(uint256[] memory allocation, address[][] memory paths, address[] memory tokens)
-     internal returns (uint256) {
+     internal returns (uint256, uint256[] memory) {
          uint256 quotaPrice = 0;
          uint256[] memory amounts = new uint256[](tokens.length);
          uint amount;
@@ -383,13 +386,17 @@
              amounts[i] = amount;
              quotaPrice += amount;
          }
-         return quotaPrice;
+         return (quotaPrice, amounts);
      }
 
-     function buy(address[] memory tokens, uint256 indexId, uint256 nQuotas, address[][] memory paths) internal {
+     function buy(uint256 indexId,
+         uint256 nQuotas,
+         address[] memory tokens,
+         uint256[] memory amounts,
+         address[][] memory paths) internal {
+
          uint256 bought;
          Index storage index = _indexes[indexId]; // TODO how to make this more efficient? avoid storage...
-         uint256[] memory amounts = new uint256[](tokens.length);
          address tokenAddress;
          uint256 amount;
          address[] memory path;

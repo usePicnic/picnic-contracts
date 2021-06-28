@@ -42,25 +42,24 @@ describe("Cash-out ERC20 tokens", function () {
 
     hardhatPool = (await Pool.deploy(UNI_ROUTER, oracle.address)).connect(owner)
 
-    await hardhatPool.create_index(
-      tokens.map(() => 1000000000),  // uint256[] _allocation,
+    await hardhatPool.createIndex(
       tokens, // address[] _tokens
+      tokens.map(() => 1000000000),  // uint256[] _allocation,
       tokens.map(x => [x, WETH]), // paths
     );
 
     // DEPOSIT
-    let overrides = { value: ethers.utils.parseEther("10.") };
+    let overrides = { value: ethers.utils.parseEther("99.") };
     await hardhatPool.deposit(
       0, // _index_id
       tokens.map(x => [WETH, x]), // paths
       overrides
     );
-
   });
 
   it("Checks if there is positive balance for all tokens", async function () {
     const initialBalance = await owner.getBalance();
-    await hardhatPool.cash_out_erc20(
+    await hardhatPool.cashOutERC20(
       0, // index_id, 
       1000, // shares_pct
     );
@@ -80,14 +79,14 @@ describe("Cash-out ERC20 tokens", function () {
   });
 
   it("Rejects withdraw of 0.0%", async function () {
-    await expect(hardhatPool.cash_out_erc20(
+    await expect(hardhatPool.cashOutERC20(
       0,   // _index_id
       0, // _sell_pct
     )).to.be.revertedWith("AMOUNT TO CASH OUT IS TOO SMALL");
   });
 
   it("Rejects withdraw of 100.1%", async function () {
-    await expect(hardhatPool.cash_out_erc20(
+    await expect(hardhatPool.cashOutERC20(
       0,   // _index_id
       1001, // _sell_pct
     )).to.be.revertedWith('INSUFFICIENT FUNDS');
@@ -121,7 +120,7 @@ describe("Cash-out ERC20 tokens", function () {
       { value: ethers.utils.parseEther("10.") }
     );
 
-    await hardhatPool.cash_out_erc20_admin(
+    await hardhatPool.cashOutERC20Admin(
       addr1.getAddress(), // address user,
       0, // uint256 index_id,
       1000 // uint256 shares_pct

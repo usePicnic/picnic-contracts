@@ -29,14 +29,14 @@ describe("Deposit", function () {
     // mined.
     hardhatPool = (await Pool.deploy(UNI_ROUTER, oracle.address)).connect(owner)
 
-    await hardhatPool.create_index(
-      [1000000000],  // uint256[] _allocation,
+    await hardhatPool.createIndex(
       [UNI_TOKEN], // address[] _tokens
+      [1000000000],  // uint256[] _allocation,
       [[UNI_TOKEN, WETH]] // paths
     );
   });
 
-  it("Deposits to an index of single token", async function () {
+   it("Deposits and buys an index of single token", async function () {
     const initialBalance = await owner.getBalance();
 
     // DEPOSIT
@@ -47,21 +47,7 @@ describe("Deposit", function () {
       overrides
     );
 
-    expect(await owner.getBalance()).to.be.below(initialBalance);
-  })
-
-  it("Deposits and buys an index of single token", async function () {
-    const initialBalance = await owner.getBalance();
-
-    // DEPOSIT
-    let overrides = { value: ethers.utils.parseEther("1.1") };
-    const deposit_result = await hardhatPool.deposit(
-      0, // _index_id
-      [[WETH, UNI_TOKEN]], // paths
-      overrides
-    );
-
-    expect(await hardhatPool.get_token_balance(0, UNI_TOKEN, owner.getAddress())).to.above(0);
+    expect(await hardhatPool.getTokenBalance(0, UNI_TOKEN, owner.getAddress())).to.above(0);
     expect(await owner.getBalance()).to.be.below(initialBalance);
   })
 
@@ -94,7 +80,7 @@ describe("Deposit", function () {
 
   it("Increase deposit limit", async function () {   
     let overrides = { value: ethers.utils.parseEther("101") };
-    await hardhatPool.set_max_deposit(BigInt(200) * BASE_ASSET);
+    await hardhatPool.setMaxDeposit(BigInt(200) * BASE_ASSET);
 
     await hardhatPool.deposit(
       0, // _index_id
