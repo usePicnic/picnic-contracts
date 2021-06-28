@@ -10,6 +10,8 @@ import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
 
 import "./interfaces/IIndexPoolNFT.sol";
 
+//import "hardhat/console.sol";
+
 /**
  * @title Pool
  * @author IndexPool
@@ -79,6 +81,7 @@ contract IndexPool is IIndexPool {
         address uniswapRouterAddress,
         address nftFactoryAddress
     ) {
+        //console.log('xablau');
         creator = msg.sender;
         tokens = _tokens;
         allocation = _allocation;

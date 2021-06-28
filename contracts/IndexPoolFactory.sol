@@ -1,4 +1,5 @@
 pragma solidity >=0.8.6;
+import "hardhat/console.sol";
 
 import "./IndexPool.sol";
 import "./interfaces/IIndexPoolFactory.sol";
@@ -48,7 +49,7 @@ contract IndexpoolFactory is IIndexpoolFactory {
                 uniswapRouterAddress,
                 nftFactoryAddress
             ));
-        //        _indexes.push(indexPoolAddress);
+        _indexes.push(indexPoolAddress);
 
         emit LOG_CREATE_INDEX(
             _indexes.length - 1,
