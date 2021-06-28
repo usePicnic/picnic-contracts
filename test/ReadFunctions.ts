@@ -29,10 +29,10 @@ describe("Read", function () {
     // mined.
     hardhatPool = (await Pool.deploy(UNI_ROUTER, oracle.address)).connect(owner)
 
-    await hardhatPool.create_index(
-      [1000000000],  // uint256[] _allocation,
+    await hardhatPool.createIndex(
       [UNI_TOKEN], // address[] _tokens
-      [[UNI_TOKEN, WETH]] // paths
+        [1000000000],  // uint256[] _allocation,
+        [[UNI_TOKEN, WETH]] // paths
     );
 
     // DEPOSIT
@@ -45,13 +45,13 @@ describe("Read", function () {
   });
 
   it("Get Indexes Creators", async function () {
-    let creators = await hardhatPool.get_indexes_creators(
+    let creators = await hardhatPool.getIndexesCreators(
     );
     expect(creators[0]).to.be.equal(await owner.getAddress());
   })
 
   it("Read - Get Token Balance", async function () {
-    let token_balance = await hardhatPool.get_token_balance(
+    let token_balance = await hardhatPool.getTokenBalance(
       0, // Index ID
       UNI_TOKEN, // token address
       await owner.getAddress() // owner address
@@ -60,21 +60,21 @@ describe("Read", function () {
   })
 
   it("Get Index Allocation", async function () {
-    let allocation = await hardhatPool.get_index_allocation(
+    let allocation = await hardhatPool.getIndexAllocation(
       0 // index id
     );
     expect(allocation[0]).to.not.equal(0);
   })
 
   it("Get Index Allocation", async function () {
-    let allocation = await hardhatPool.get_index_tokens(
+    let allocation = await hardhatPool.getIndexTokens(
       0 // index id
     );
     expect(allocation[0]).to.be.equal(UNI_TOKEN);
   })
 
   it("Get Index", async function () {
-    let index = await hardhatPool.get_index(
+    let index = await hardhatPool.getIndex(
       0 // index id
     );
     expect(index['creator']).to.be.equal(await owner.getAddress());
