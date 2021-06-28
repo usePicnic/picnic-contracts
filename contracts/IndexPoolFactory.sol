@@ -8,6 +8,7 @@ contract IndexpoolFactory is IIndexpoolFactory {
     address[] private _indexes;
     address public oracleAddress;
     address public uniswapRouterAddress;
+    address public nftFactoryAddress;
 
     uint256 private constant BASE_ASSET = 1000000000000000000;
     uint256 public maxDeposit = BASE_ASSET;
@@ -24,9 +25,10 @@ contract IndexpoolFactory is IIndexpoolFactory {
         _;
     }
 
-    constructor(address _uniswapRouterAddress, address _oracleAddress) {
+    constructor(address _uniswapRouterAddress, address _oracleAddress, address _nftFactoryAddress) {
         uniswapRouterAddress = _uniswapRouterAddress;
         oracleAddress = _oracleAddress;
+        nftFactoryAddress = _nftFactoryAddress;
 
         creator = msg.sender;
     }
@@ -38,13 +40,13 @@ contract IndexpoolFactory is IIndexpoolFactory {
     ) external override {
         address indexPoolAddress = address(
             new IndexPool(
-                oracleAddress,
+                address(this),
                 tokens,
                 allocation,
                 paths,
                 oracleAddress,
                 uniswapRouterAddress,
-                uniswapRouterAddress // TODO fix with proper address
+                nftFactoryAddress
             ));
         //        _indexes.push(indexPoolAddress);
 
