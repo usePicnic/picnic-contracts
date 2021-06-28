@@ -81,7 +81,6 @@ contract IndexPool is IIndexPool {
         address uniswapRouterAddress,
         address nftFactoryAddress
     ) {
-        //console.log('xablau');
         creator = msg.sender;
         tokens = _tokens;
         allocation = _allocation;
