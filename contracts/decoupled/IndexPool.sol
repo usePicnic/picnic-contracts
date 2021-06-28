@@ -1,8 +1,8 @@
 pragma solidity >=0.8.6;
 
-import "../interfaces/IIndexPool.sol";
-import "../interfaces/IIndexPoolFactory.sol";
-import "../interfaces/INFTFactory.sol";
+import "./interfaces/IIndexPool.sol";
+import "./interfaces/IIndexPoolFactory.sol";
+import "./interfaces/INFTFactory.sol";
 import "../interfaces/IOraclePath.sol";
 import "../interfaces/IIndexPoolNFT.sol";
 

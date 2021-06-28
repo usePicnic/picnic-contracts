@@ -2,7 +2,7 @@ pragma solidity >=0.8.6;
 import "hardhat/console.sol";
 
 import "./IndexPool.sol";
-import "../interfaces/IIndexPoolFactory.sol";
+import "./interfaces/IIndexPoolFactory.sol";
 
 contract IndexpoolFactory is IIndexpoolFactory {
     address public creator;
