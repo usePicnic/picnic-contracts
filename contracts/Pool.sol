@@ -628,7 +628,8 @@
          for (uint256 i = 0; i < tokens.length; i++) {
              token = tokens[i];
              allocation[i] = (_indexes[indexId].shares[token][msg.sender] * sharesPct) / 1000;
-             require(allocation[i] > 0, "NOT ENOUGH FUNDS");
+             require(allocation[i] <= _indexes[indexId].shares[token][msg.sender], "NOT ENOUGH FUNDS");
+             require(allocation[i] > 0, "ALLOCATION CAN'T BE ZERO");
              _indexes[indexId].shares[token][msg.sender] -= allocation[i];
          }
 
@@ -641,10 +642,9 @@
       * @dev Burns a specific NFT token and assigns assets back to NFT owner.
       * Only callable by whoever holds the token.
       *
-      * @param indexId Index Id (position in `indexes` array)
       * @param tokenId Token Id
       */
-     function burnPool721(uint256 indexId, uint256 tokenId) external override {
+     function burnPool721(uint256 tokenId) external override {
          uint256 indexId;
          uint256[] memory allocation;
 

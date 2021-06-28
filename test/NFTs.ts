@@ -35,13 +35,13 @@ describe("NFTs", function () {
         hardhatPool = (await Pool.deploy(UNI_ROUTER, oracle.address)).connect(owner)
 
         pool721 = await ethers.getContractAt(
-            "Pool721",
-            await hardhatPool.get_pool721_address()
+            "MIndexPoolNFT",
+            await hardhatPool.getPool721Address()
         );
 
-        await hardhatPool.create_index(
-            tokens.map(() => 1000000000),  // uint256[] _allocation,
+        await hardhatPool.createIndex(
             tokens, // address[] _tokens
+            tokens.map(() => 1000000000),  // uint256[] _allocation,
             tokens.map(x => [x, WETH]), // paths
         );
 
@@ -53,9 +53,9 @@ describe("NFTs", function () {
             overrides
         );
 
-        await hardhatPool.create_index(
-            tokens.map(() => 1000000000),  // uint256[] _allocation,
+        await hardhatPool.createIndex(
             tokens, // address[] _tokens
+            tokens.map(() => 1000000000),  // uint256[] _allocation,
             tokens.map(x => [x, WETH]), // paths
         );
 
@@ -66,55 +66,55 @@ describe("NFTs", function () {
             overrides
         );
 
-        await hardhatPool.create_index(
-            tokens.map(() => 1000000000),  // uint256[] _allocation,
+        await hardhatPool.createIndex(
             tokens, // address[] _tokens
+            tokens.map(() => 1000000000),  // uint256[] _allocation,
             tokens.map(x => [x, WETH]), // paths
         );
     });
 
     it("Mint token is working :D", async () => {
         // All balances sshould live inside the contract
-        await expect(await hardhatPool.get_token_balance(0, UNI_TOKEN, owner.getAddress())).to.above(0);
-        await expect(await hardhatPool.get_token_balance(1, UNI_TOKEN, owner.getAddress())).to.above(0);
+        await expect(await hardhatPool.getTokenBalance(0, UNI_TOKEN, owner.getAddress())).to.above(0);
+        await expect(await hardhatPool.getTokenBalance(1, UNI_TOKEN, owner.getAddress())).to.above(0);
 
         // Balance should live outside the contract
-        await hardhatPool.mint_Pool721(0);
+        await hardhatPool.mintPool721(0, 1000);
 
         await expect(await pool721.balanceOf(owner.address)).to.be.equal(1);
-        await expect(await hardhatPool.get_token_balance(0, UNI_TOKEN, owner.getAddress())).to.equal(0);
+        await expect(await hardhatPool.getTokenBalance(0, UNI_TOKEN, owner.getAddress())).to.equal(0);
 
         // Two tokens should be created
-        await hardhatPool.mint_Pool721(1);
+        await hardhatPool.mintPool721(1, 1000);
         await expect(await pool721.balanceOf(owner.address)).to.be.equal(2);
     });
 
     it("Rejects mint if there is no deposit", async () => {    
         await expect(
-            hardhatPool.mint_Pool721(2)
-        ).to.be.revertedWith("NOT ENOUGH FUNDS");
+            hardhatPool.mintPool721(2, 1000)
+        ).to.be.revertedWith("ALLOCATION CAN'T BE ZERO");
     });
 
     it("Burn token", async () => {
-        await expect(await hardhatPool.get_token_balance(0, UNI_TOKEN, owner.getAddress())).to.above(0);
-        await hardhatPool.mint_Pool721(0);
+        await expect(await hardhatPool.getTokenBalance(0, UNI_TOKEN, owner.getAddress())).to.above(0);
+        await hardhatPool.mintPool721(0, 1000);
 
         await expect(await pool721.balanceOf(owner.address)).to.be.equal(1);
-        await expect(await hardhatPool.get_token_balance(0, UNI_TOKEN, owner.getAddress())).to.equal(0);
+        await expect(await hardhatPool.getTokenBalance(0, UNI_TOKEN, owner.getAddress())).to.equal(0);
 
-        await hardhatPool.burn_Pool721(0);
+        await hardhatPool.burnPool721(0);
 
         await expect(await pool721.balanceOf(owner.address)).to.be.equal(0);
-        await expect(await hardhatPool.get_token_balance(0, UNI_TOKEN, owner.getAddress())).to.above(0);
+        await expect(await hardhatPool.getTokenBalance(0, UNI_TOKEN, owner.getAddress())).to.above(0);
     });
 
     it("Rejects burn token when called by someone who is not the token owner", async () => {
         let contractAsSigner0 = hardhatPool.connect(addr1);
 
-        await hardhatPool.mint_Pool721(0);
+        await hardhatPool.mintPool721(0, 1000);
 
         await expect(
-            contractAsSigner0.burn_Pool721(0)
+            contractAsSigner0.burnPool721(0)
         ).to.be.revertedWith("ONLY CALLABLE BY TOKEN OWNER");
     });
 

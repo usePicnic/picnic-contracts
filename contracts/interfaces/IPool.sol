@@ -194,10 +194,9 @@ interface IPool {
      * @dev Burns a specific NFT token and assigns assets back to NFT owner.
      * Only callable by whoever holds the token.
      *
-     * @param indexId Index Id (position in `indexes` array)
      * @param tokenId Token Id
      */
-    function burnPool721(uint256 indexId, uint256 tokenId) external;
+    function burnPool721(uint256 tokenId) external;
 
     /**
      * @notice Get Pool721 (NFT contract) address.
