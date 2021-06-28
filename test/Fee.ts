@@ -30,9 +30,9 @@ describe("Fees", function () {
     // mined.
     hardhatPool = (await Pool.deploy(UNI_ROUTER, oracle.address)).connect(owner);
 
-    await hardhatPool.create_index(
-      [1000000000],  // uint256[] _allocation,
+    await hardhatPool.createIndex(
       [UNI_TOKEN], // address[] _tokens
+      [1000000000],  // uint256[] _allocation,
       [[UNI_TOKEN, WETH]] // PATHS
     );
 
@@ -45,15 +45,15 @@ describe("Fees", function () {
     );
 
     // Preparing to withdraw zero fee
-    await hardhatPool.create_index(
-      [1000000000],  // uint256[] _allocation,
-      [UNI_TOKEN], // address[] _tokens
+    await hardhatPool.createIndex(
+        [UNI_TOKEN], // address[] _tokens
+        [1000000000],  // uint256[] _allocation,
       [[UNI_TOKEN, WETH]] // PATHS
     );
   });
 
   it("Check fee - creator", async function () {
-    expect(await hardhatPool.get_available_creator_fee(
+    expect(await hardhatPool.getAvailableCreatorFee(
       0, // Index ID
     )).to.be.equal(ethers.utils.parseEther("0.001"));
   })
@@ -61,7 +61,7 @@ describe("Fees", function () {
   it("Pay fee - creator", async function () {
     const initialBalance = await owner.getBalance();
 
-    await hardhatPool.pay_creator_fee(
+    await hardhatPool.payCreatorFee(
       0, // Index ID
     );
 
@@ -71,19 +71,19 @@ describe("Fees", function () {
   it("Rejects creator fee withdraws from other address", async function () {
     let contractAsSigner0 = hardhatPool.connect(addr1);
 
-    await expect(contractAsSigner0.pay_creator_fee(
+    await expect(contractAsSigner0.payCreatorFee(
       0, // Index ID
     )).to.be.revertedWith('ONLY INDEX CREATOR CAN WITHDRAW FEES');
   })
 
   it("Rejects creator withdraw when there is no fee available", async function () {
-    await expect(hardhatPool.pay_creator_fee(
+    await expect(hardhatPool.payCreatorFee(
       1, // Index ID
     )).to.be.revertedWith('NO FEE TO WITHDRAW');
   })
 
   it("Check fee - protocol", async function () {
-    expect(await hardhatPool.get_available_protocol_fee(
+    expect(await hardhatPool.getAvailableProtocolFee(
       0, // Index ID
     )).to.be.equal(ethers.utils.parseEther("0.001"));
   })
@@ -91,7 +91,7 @@ describe("Fees", function () {
   it("Pay fee - protocol", async function () {
     const initialBalance = await owner.getBalance();
 
-    await hardhatPool.pay_protocol_fee(
+    await hardhatPool.payProtocolFee(
       0, // Index ID
     );
 
@@ -101,13 +101,13 @@ describe("Fees", function () {
   it("Rejects protocol fee withdraws from other address", async function () {
     let contractAsSigner0 = hardhatPool.connect(addr1);
 
-    await expect(contractAsSigner0.pay_protocol_fee(
+    await expect(contractAsSigner0.payProtocolFee(
       0, // Index ID
     )).to.be.revertedWith('ONLY INDEXPOOL CAN CALL THIS FUNCTION');
   })
 
   it("Rejects creator withdraw when there is no fee available", async function () {
-    await expect(hardhatPool.pay_protocol_fee(
+    await expect(hardhatPool.payProtocolFee(
       1, // Index ID
     )).to.be.revertedWith('NO FEE TO WITHDRAW');
   })
