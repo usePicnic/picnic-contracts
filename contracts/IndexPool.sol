@@ -1,15 +1,14 @@
 pragma solidity >=0.8.6;
 
-import "hardhat/console.sol";
 import "./interfaces/IIndexPool.sol";
 import "./interfaces/IIndexPoolFactory.sol";
-import "./libraries/DataStructures.sol";
-import "./IndexPoolNFT.sol";
+import "./interfaces/INFTFactory.sol";
+import "./interfaces/IOraclePath.sol";
 
+import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
 
-import "./interfaces/IOraclePath.sol";
-import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
+import "./interfaces/IIndexPoolNFT.sol";
 
 /**
  * @title Pool
@@ -38,12 +37,9 @@ contract IndexPool is IIndexPool {
     IIndexpoolFactory _indexpoolFactory;
     IOraclePath private _oracle;
     IUniswapV2Router02 private _uniswapRouter;
-    IndexPoolNFT _indexPoolNFT = new IndexPoolNFT();
+    IIndexPoolNFT _indexPoolNFT;
 
-    event LOG_DEPOSIT(
-        address indexed userAddress,
-        uint256 amount_in
-    );
+    event LOG_DEPOSIT(address indexed userAddress, uint256 amount_in);
 
     event LOG_WITHDRAW(
         address indexed userAddress,
@@ -57,19 +53,20 @@ contract IndexPool is IIndexPool {
         uint256[] amounts
     );
 
-    event LOG_FEE_WITHDRAW(
-        address indexed userAddress,
-        uint256 amountOut
-    );
+    event LOG_FEE_WITHDRAW(address indexed userAddress, uint256 amountOut);
 
     event Received(address sender, uint256 amount);
 
-    receive() external payable { // TODO why no override?
+    receive() external payable {
+        // TODO why no override?
         emit Received(msg.sender, msg.value);
     }
 
     modifier _indexpoolOnly_() {
-        require(msg.sender == _indexpoolFactory.getCreator(), "ONLY INDEXPOOL CAN CALL THIS FUNCTION");
+        require(
+            msg.sender == _indexpoolFactory.getCreator(),
+            "ONLY INDEXPOOL CAN CALL THIS FUNCTION"
+        );
         _;
     }
 
@@ -79,8 +76,9 @@ contract IndexPool is IIndexPool {
         uint256[] memory _allocation,
         address[][] memory paths,
         address oracleAddress,
-        address uniswapRouterAddress)
-    {
+        address uniswapRouterAddress,
+        address nftFactoryAddress
+    ) {
         creator = msg.sender;
         tokens = _tokens;
         allocation = _allocation;
@@ -91,14 +89,22 @@ contract IndexPool is IIndexPool {
         checkValidIndex(paths);
 
         _indexpoolFactory = IIndexpoolFactory(indexpoolFactoryAddress);
+
+        INFTFactory nftFactory = INFTFactory(nftFactoryAddress);
+        address indexPoolNFTAddress = nftFactory.newNFT();
+        _indexPoolNFT = IIndexPoolNFT(indexPoolNFTAddress);
     }
 
     function checkValidIndex(address[][] memory paths) internal {
-        require(allocation.length == tokens.length,
-            "MISMATCH IN LENGTH BETWEEN TOKENS AND ALLOCATION");
+        require(
+            allocation.length == tokens.length,
+            "MISMATCH IN LENGTH BETWEEN TOKENS AND ALLOCATION"
+        );
 
-        require(tokens.length <= 32,
-            "NO MORE THAN 32 TOKENS ALLOWED IN A SINGLE INDEX");
+        require(
+            tokens.length <= 32,
+            "NO MORE THAN 32 TOKENS ALLOWED IN A SINGLE INDEX"
+        );
 
         require(checkNotDuplicated(tokens), "DUPLICATED TOKENS");
 
@@ -144,9 +150,9 @@ contract IndexPool is IIndexPool {
      * @param tokens Array of token addresses
      */
     function checkNotDuplicated(address[] memory tokens)
-    internal
-    pure
-    returns (bool)
+        internal
+        pure
+        returns (bool)
     {
         for (uint256 i = 1; i < tokens.length; i++) {
             for (uint256 j = 0; j < i; j++) {
@@ -170,11 +176,7 @@ contract IndexPool is IIndexPool {
      * @param paths Paths to be used respective to each token on DEX
      */
     // TODO improve deposit dismemberment into more functions...
-    function deposit(address[][] memory paths)
-    external
-    payable
-    override
-    {
+    function deposit(address[][] memory paths) external payable override {
         require(
             msg.value <= _indexpoolFactory.getMaxDeposit(),
             "EXCEEDED MAXIMUM ALLOWED DEPOSIT VALUE"
@@ -202,7 +204,9 @@ contract IndexPool is IIndexPool {
     }
 
     function calculateQuotaPrice(address[][] memory paths)
-    internal returns (uint256, uint256[] memory) {
+        internal
+        returns (uint256, uint256[] memory)
+    {
         uint256 amount;
         uint256 quotaPrice = 0;
         address[] memory path;
@@ -224,7 +228,7 @@ contract IndexPool is IIndexPool {
 
                 if (amount == 0) {
                     amount = _uniswapRouter.getAmountsOut(allocation[i], path)[
-                    path.length - 1
+                        path.length - 1
                     ];
                 }
             }
@@ -234,7 +238,11 @@ contract IndexPool is IIndexPool {
         return (quotaPrice, amounts);
     }
 
-    function buy(uint256 nQuotas, uint256[] memory amounts, address[][] memory paths) internal {
+    function buy(
+        uint256 nQuotas,
+        uint256[] memory amounts,
+        address[][] memory paths
+    ) internal {
         uint256 bought;
         address tokenAddress;
         uint256 amount;
@@ -248,10 +256,7 @@ contract IndexPool is IIndexPool {
             path = paths[i];
 
             if (address(0) != tokens[i]) {
-                result = tradeFromETH({
-                ethAmount : amount,
-                path : path
-                });
+                result = tradeFromETH({ethAmount: amount, path: path});
                 bought = result[result.length - 1];
             } else {
                 bought = amount;
@@ -271,22 +276,26 @@ contract IndexPool is IIndexPool {
      * @param sellPct Percentage of shares to be cashed out (1000 = 100%)
      * @param paths Execution paths
      */
-    function withdraw(
-        uint256 sellPct,
-        address[][] memory paths
-    ) external override {
+    function withdraw(uint256 sellPct, address[][] memory paths)
+        external
+        override
+    {
         uint256 ethAmount = 0;
         address[] memory path;
         uint256[] memory result;
 
         require(sellPct > 0, "SELL PCT NEEDS TO BE GREATER THAN ZERO");
-        require(_shares[tokens[0]][msg.sender] > 0, "NEEDS TO HAVE SHARES OF THE INDEX");
+        require(
+            _shares[tokens[0]][msg.sender] > 0,
+            "NEEDS TO HAVE SHARES OF THE INDEX"
+        );
         require(sellPct <= 1000, "CAN'T SELL MORE THAN 100% OF FUNDS");
 
         // TODO Create sell function
         for (uint256 i = 0; i < tokens.length; i++) {
             address tokenAddress = tokens[i];
-            uint256 sharesAmount = (_shares[tokenAddress][msg.sender] * sellPct) / 1000;
+            uint256 sharesAmount = (_shares[tokenAddress][msg.sender] *
+                sellPct) / 1000;
 
             path = paths[i];
 
@@ -297,9 +306,9 @@ contract IndexPool is IIndexPool {
                 );
 
                 result = tradeFromTokens({
-                fromToken : tokenAddress,
-                sharesAmount : sharesAmount,
-                path : path
+                    fromToken: tokenAddress,
+                    sharesAmount: sharesAmount,
+                    path: path
                 });
                 _shares[tokenAddress][msg.sender] -= result[0];
                 ethAmount += result[result.length - 1];
@@ -320,17 +329,17 @@ contract IndexPool is IIndexPool {
      * @param ethAmount Amount in ETH
      * @param path Trade path to be executed in the DEX contract
      */
-    function tradeFromETH(
-        uint256 ethAmount,
-        address[] memory path
-    ) private returns (uint256[] memory) {
+    function tradeFromETH(uint256 ethAmount, address[] memory path)
+        private
+        returns (uint256[] memory)
+    {
         return
-        _uniswapRouter.swapExactETHForTokens{value : ethAmount}(
-            1, // amountOutMin
-            path, // path
-            address(this), // to
-            block.timestamp + 100000 // deadline
-        );
+            _uniswapRouter.swapExactETHForTokens{value: ethAmount}(
+                1, // amountOutMin
+                path, // path
+                address(this), // to
+                block.timestamp + 100000 // deadline
+            );
     }
 
     /**
@@ -352,13 +361,13 @@ contract IndexPool is IIndexPool {
         );
 
         return
-        _uniswapRouter.swapExactTokensForETH(
-            sharesAmount,
-            1, // amountOutMin
-            path, // path
-            address(this), // to
-            block.timestamp + 100000 // deadline
-        );
+            _uniswapRouter.swapExactTokensForETH(
+                sharesAmount,
+                1, // amountOutMin
+                path, // path
+                address(this), // to
+                block.timestamp + 100000 // deadline
+            );
     }
 
     /**
@@ -372,10 +381,9 @@ contract IndexPool is IIndexPool {
      * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
 
-    function cashOutERC20Internal(
-        address userAddress,
-        uint256 sharesPct
-    ) internal {
+    function cashOutERC20Internal(address userAddress, uint256 sharesPct)
+        internal
+    {
         address tokenAddress;
         uint256 amount;
         uint256[] memory amounts = new uint256[](tokens.length);
@@ -384,7 +392,10 @@ contract IndexPool is IIndexPool {
             tokenAddress = tokens[i];
             amount = (_shares[tokenAddress][userAddress] * sharesPct) / 1000;
 
-            require(_shares[tokenAddress][userAddress] >= amount, "INSUFFICIENT FUNDS");
+            require(
+                _shares[tokenAddress][userAddress] >= amount,
+                "INSUFFICIENT FUNDS"
+            );
             _shares[tokenAddress][userAddress] -= amount;
 
             require(amount > 0, "AMOUNT TO CASH OUT IS TOO SMALL");
@@ -411,10 +422,7 @@ contract IndexPool is IIndexPool {
      *
      * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
-    function cashOutERC20(uint256 sharesPct)
-    external
-    override
-    {
+    function cashOutERC20(uint256 sharesPct) external override {
         cashOutERC20Internal(msg.sender, sharesPct);
     }
 
@@ -426,10 +434,11 @@ contract IndexPool is IIndexPool {
      *
      * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
-    function cashOutERC20Admin(
-        address user,
-        uint256 sharesPct
-    ) external override _indexpoolOnly_ {
+    function cashOutERC20Admin(address user, uint256 sharesPct)
+        external
+        override
+        _indexpoolOnly_
+    {
         cashOutERC20Internal(user, sharesPct);
     }
 
@@ -440,9 +449,7 @@ contract IndexPool is IIndexPool {
      *
      * @param sharesPct Percentage of shares to be minted as NFT (1000 = 100%)
      */
-    function mintPool721(
-        uint256 sharesPct
-    ) external override {
+    function mintPool721(uint256 sharesPct) external override {
         address token;
         uint256[] memory allocationNFT = new uint256[](tokens.length);
 
@@ -516,12 +523,7 @@ contract IndexPool is IIndexPool {
      *
      * @dev Check how much is owed to the creator.
      */
-    function getAvailableCreatorFee()
-    external
-    view
-    override
-    returns (uint256)
-    {
+    function getAvailableCreatorFee() external view override returns (uint256) {
         uint256 creatorFee = fee / 2;
         uint256 creatorAvailableFee = creatorFee - creatorFeeCashOut;
 
@@ -534,11 +536,7 @@ contract IndexPool is IIndexPool {
      * @dev Only callable by the protocol creator. Cashes out ETH funds that are due to
      * a 0.1% in all deposits on the created index.
      */
-    function payProtocolFee()
-    external
-    override
-    _indexpoolOnly_
-    {
+    function payProtocolFee() external override _indexpoolOnly_ {
         uint256 protocolFee = fee / 2;
         uint256 withdrawAmount = protocolFee - protocolFeeCashOut;
 
@@ -556,10 +554,10 @@ contract IndexPool is IIndexPool {
      * @dev Check how much is owed to the protocol.
      */
     function getAvailableProtocolFee()
-    external
-    view
-    override
-    returns (uint256)
+        external
+        view
+        override
+        returns (uint256)
     {
         uint256 protocolFee = fee / 2;
         uint256 protocolAvailableFee = protocolFee - protocolFeeCashOut;

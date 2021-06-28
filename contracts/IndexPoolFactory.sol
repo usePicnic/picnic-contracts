@@ -3,9 +3,6 @@ pragma solidity >=0.8.6;
 import "./IndexPool.sol";
 import "./interfaces/IIndexPoolFactory.sol";
 
-import "./interfaces/IOraclePath.sol";
-import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
-
 contract IndexpoolFactory is IIndexpoolFactory {
     address public creator;
     address[] private _indexes;
@@ -39,8 +36,17 @@ contract IndexpoolFactory is IIndexpoolFactory {
         uint256[] memory allocation,
         address[][] memory paths
     ) external override {
-        address indexPoolAddress = address(new IndexPool(address(this), tokens, allocation, paths, oracleAddress, uniswapRouterAddress));
-        _indexes.push(indexPoolAddress);
+        address indexPoolAddress = address(
+            new IndexPool(
+                oracleAddress,
+                tokens,
+                allocation,
+                paths,
+                oracleAddress,
+                uniswapRouterAddress,
+                uniswapRouterAddress // TODO fix with proper address
+            ));
+        //        _indexes.push(indexPoolAddress);
 
         emit LOG_CREATE_INDEX(
             _indexes.length - 1,
