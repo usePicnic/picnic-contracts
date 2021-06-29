@@ -10,21 +10,17 @@ describe("Cash-out ERC20 tokens", function () {
 
   const UNI_FACTORY = "0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32";
   const UNI_ROUTER = "0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff";
-  const UNI_TOKEN = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984";
-  const ONEINCH_TOKEN = "0x111111111117dc0aa78b770fa6a738034120c302";
-  const LINK_TOKEN = "0x514910771af9ca656af840dff83e8264ecf986ca";
-  const CRYTPOCOM_TOKEN = "0xa0b73e1ff0b80914ab6fe0444e65848c4c34450b";
-  const SYNTHETIX_TOKEN = "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f";
-  const COMPOUND_TOKEN = "0xc00e94cb662c3520282e6f5717214004a7f26888";
-  const GRAPH_TOKEN = "0xc944e90c64b2c07662a292be6244bdf05cda44a7";
-  const DEV_TOKEN = "0x5cAf454Ba92e6F2c929DF14667Ee360eD9fD5b26";
-  const RLC_TOKEN = "0x607F4C5BB672230e8672085532f7e901544a7375";
-  const SUSHI_TOKEN = "0x6b3595068778dd592e39a122f4f5a5cf09c90fe2";
-  const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
-  const ETH = "0x0000000000000000000000000000000000000000";
+  const QUICK_TOKEN = "0x831753DD7087CaC61aB5644b308642cc1c33Dc13";
+  const WETH_TOKEN = "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619";
+   const USDC_TOKEN = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
+   const FISH_TOKEN = "0x3a3Df212b7AA91Aa0402B9035b098891d276572B";
+   const TEL_TOKEN = "0xdF7837DE1F2Fa4631D716CF2502f8b230F1dcc32";
+   const MOCEAN_TOKEN = "0xAcD7B3D9c10e97d0efA418903C0c7669E702E4C0";
+  const MATIC = "0x0000000000000000000000000000000000000000";
 
-  const tokens = [UNI_TOKEN, ONEINCH_TOKEN, LINK_TOKEN, CRYTPOCOM_TOKEN, SYNTHETIX_TOKEN,
-    COMPOUND_TOKEN, GRAPH_TOKEN, DEV_TOKEN, RLC_TOKEN, SUSHI_TOKEN, ETH]
+  const WMATIC = "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270";
+
+  const tokens = [QUICK_TOKEN, WETH_TOKEN, MATIC]
 
   beforeEach(async function () {
     [owner, addr1] = await ethers.getSigners();
@@ -33,11 +29,6 @@ describe("Cash-out ERC20 tokens", function () {
 
     oracle = (await Oracle.deploy(UNI_FACTORY)).connect(owner);
 
-    await oracle.updateOracles([WETH, UNI_TOKEN]);
-    await oracle.updateOracles([WETH, UNI_TOKEN]);
-
-    await oracle.consult([WETH, UNI_TOKEN]);
-
     Pool = await ethers.getContractFactory("Pool");
 
     hardhatPool = (await Pool.deploy(UNI_ROUTER, oracle.address)).connect(owner)
@@ -45,14 +36,14 @@ describe("Cash-out ERC20 tokens", function () {
     await hardhatPool.createIndex(
       tokens, // address[] _tokens
       tokens.map(() => 1000000000),  // uint256[] _allocation,
-      tokens.map(x => [x, WETH]), // paths
+      tokens.map(x => [x, WMATIC]), // paths
     );
 
     // DEPOSIT
     let overrides = { value: ethers.utils.parseEther("99.") };
     await hardhatPool.deposit(
       0, // _index_id
-      tokens.map(x => [WETH, x]), // paths
+      tokens.map(x => [WMATIC, x]), // paths
       overrides
     );
   });
@@ -65,7 +56,7 @@ describe("Cash-out ERC20 tokens", function () {
     );
     const finalBalance = await owner.getBalance();
 
-    for (var i = 0; i < tokens.length - 1; i++) { // Don't check WETH;
+    for (var i = 0; i < tokens.length - 1; i++) { // Don't check WMATIC;
       let erc20 = await ethers.getContractAt(
         "IERC20",
         tokens[i],
@@ -99,7 +90,7 @@ describe("Cash-out ERC20 tokens", function () {
     let erc20_balance;
     let erc20_balance_owner;
 
-    for (var i = 0; i < tokens.length - 1; i++) { // Don't check WETH;
+    for (var i = 0; i < tokens.length - 1; i++) { // Don't check WMATIC;
       let erc20 = await ethers.getContractAt(
         "IERC20",
         tokens[i],
@@ -116,7 +107,7 @@ describe("Cash-out ERC20 tokens", function () {
 
     await contractAsSigner0.deposit(
       0, // _index_id
-      tokens.map(x => [WETH, x]), // paths
+      tokens.map(x => [WMATIC, x]), // paths
       { value: ethers.utils.parseEther("10.") }
     );
 
@@ -126,7 +117,7 @@ describe("Cash-out ERC20 tokens", function () {
       1000 // uint256 shares_pct
     )
 
-    for (var i = 0; i < tokens.length - 1; i++) { // Don't check WETH;
+    for (var i = 0; i < tokens.length - 1; i++) { // Don't check WMATIC;
       let erc20 = await ethers.getContractAt("IERC20", tokens[i]);
 
       erc20_balance = await erc20.balanceOf(addr1.getAddress());

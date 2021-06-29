@@ -47,6 +47,7 @@ module.exports = {
       }
     },
   },
+  mocha: { timeout: '180000'},
   gasReporter: {
     currency: 'USD',
     gasPrice: 1,
