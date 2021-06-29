@@ -25,7 +25,7 @@ async function main() {
 
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  const UNI_ROUTER = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
+  const UNI_ROUTER = "0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff";
   const UNI_TOKEN = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984";
 
   const Pool = await ethers.getContractFactory("Pool");
