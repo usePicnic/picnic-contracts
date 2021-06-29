@@ -1,5 +1,5 @@
-import { expect } from "chai";
-import { ethers } from "hardhat";
+import {expect} from "chai";
+import {ethers} from "hardhat";
 import constants from "../constants";
 
 const hre = require('hardhat');
@@ -49,8 +49,6 @@ describe("Pool", function () {
                 ADDRESSES['TOKENS'].map(x => [x, ADDRESSES['WMAIN']]), // paths
             );
             expect(await hardhatPool.getIndexesLength()).to.equal(1);
-
-            console.log('aaa');
 
             await hardhatPool.createIndex(
                 ADDRESSES['TOKENS'], // address[] _tokens
