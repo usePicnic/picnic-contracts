@@ -43,7 +43,7 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: `https://rpc-mainnet.maticvigil.com/v1/${process.env.MATIC_KEY}`
+        url: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_KEY}`
       }
     },
   },
