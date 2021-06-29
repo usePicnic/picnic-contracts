@@ -31,8 +31,6 @@ describe("Cash-out ERC20 tokens", function () {
             tokens.map(x => [x, ADDRESSES['WMAIN']]), // paths
         );
 
-        console.log('2');
-
         // DEPOSIT
         let overrides = {value: ethers.utils.parseEther("99.")};
         await hardhatPool.deposit(
@@ -40,8 +38,6 @@ describe("Cash-out ERC20 tokens", function () {
             ADDRESSES['TOKENS'].map(x => [ADDRESSES['WMAIN'], x]), // paths
             overrides
         );
-
-        console.log('3');
     });
 
     it("Checks if there is positive balance for all tokens", async function () {
