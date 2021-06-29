@@ -43,8 +43,7 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`,
-        blockNumber: 12182008,
+        url: `https://rpc-mainnet.maticvigil.com/v1/${process.env.MATIC_KEY}`
       }
     },
   },
