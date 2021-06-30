@@ -38,7 +38,7 @@ async function main() {
   console.log("Pool address:", pool.address);  
 
   // REGISTER ON SERVER
-  const contractFile = readFileSync('./artifacts/contracts/IndexPool.sol/Pool.json', 'utf8')
+  const contractFile = readFileSync('./artifacts/contracts/Pool.sol/Pool.json', 'utf8')
   const contractData = JSON.parse(contractFile)
 
   const response = await fetch(
@@ -48,13 +48,14 @@ async function main() {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        network_name: "ethereum_indexpool_testnet",
+        network_name: "polygon_indexpool_testnet",
         address: pool.address,
         contract: contractData
       })
     })
   const responseText = await response.text()
   console.log(responseText)
+}
 
 main()
   .then(() => process.exit(0))
