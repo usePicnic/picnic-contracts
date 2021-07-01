@@ -3,7 +3,7 @@
  import "hardhat/console.sol";
  import "./interfaces/IPool.sol";
  import "./libraries/DataStructures.sol";
- import "./nft/MIndexPoolNFT.sol";
+ import "./nft/IndexPoolNFT.sol";
  import "./interfaces/IOraclePath.sol";
 
  import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
@@ -28,7 +28,7 @@
      Index[] private _indexes;
      IOraclePath private _oracle;
      IUniswapV2Router02 private _uniswapRouter;
-     MIndexPoolNFT private _pool721 = new MIndexPoolNFT();
+     IndexPoolNFT private _pool721 = new IndexPoolNFT();
 
      uint256 private constant BASE_ASSET = 1000000000000000000;
      uint256 public maxDeposit = 100 * BASE_ASSET;

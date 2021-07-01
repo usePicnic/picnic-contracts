@@ -31,7 +31,7 @@ describe("NFTs", function () {
         hardhatPool = (await Pool.deploy(ADDRESSES["ROUTER"], oracle.address)).connect(owner)
 
         pool721 = await ethers.getContractAt(
-            "MIndexPoolNFT",
+            "IndexPoolNFT",
             await hardhatPool.getPool721Address()
         );
 

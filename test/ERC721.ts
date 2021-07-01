@@ -10,7 +10,7 @@ describe("ERC721", function () {
   beforeEach(async function () {
     [owner] = await ethers.getSigners();
 
-    NFT = await ethers.getContractFactory("MIndexPoolNFT");
+    NFT = await ethers.getContractFactory("IndexPoolNFT");
 
     indexpoolNFT = (await NFT.deploy()).connect(owner);
 
