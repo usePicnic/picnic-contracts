@@ -347,10 +347,12 @@ contract Pool is IPool {
         (quotaPrice, amounts) = calculateQuotaPrice(allocation, paths, tokens);
         uint256 nQuotas = freeAmount / quotaPrice;
 
-        // TODO check amounts logic in details
+        for (uint8 i = 0; i < amounts.length; i++) {
+            amounts[i] = amounts[i] * nQuotas;
+        }
 
         // Go to uniswap
-        buy(tokens, amounts, nQuotas,  paths);
+        uint256[] memory outputAmounts = buy(tokens, amounts, paths);
 
         // Mint
         _pool721.generatePool721(msg.sender, indexId, amounts);
@@ -393,31 +395,28 @@ contract Pool is IPool {
 
     function buy(address[] memory tokens,
         uint256[] memory amounts,
-        uint256 nQuotas,
-        address[][] memory paths) internal {
+        address[][] memory paths) internal returns (uint256[] memory) {
 
         uint256 bought;
         address tokenAddress;
-        uint256 amount;
         address[] memory path;
         uint256[] memory result;
 
         // Register operations
         for (uint8 i = 0; i < tokens.length; i++) {
             tokenAddress = tokens[i];
-            amount = amounts[i] * nQuotas;
             path = paths[i];
 
             if (address(0) != tokens[i]) {
                 result = tradeFromETH({
-                ethAmount : amount,
+                ethAmount : amounts[i],
                 path : path
                 });
                 bought = result[result.length - 1];
-            } else {
-                bought = amount;
+                amounts[i] = bought;
             }
         }
+        return amounts;
     }
 
     /**

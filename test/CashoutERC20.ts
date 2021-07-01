@@ -44,7 +44,7 @@ describe("Cash-out ERC20 tokens", function () {
         const initialBalance = await owner.getBalance();
         await hardhatPool.cashOutERC20(
             0, // index_id,
-            1000, // shares_pct
+            100000, // shares_pct
         );
         const finalBalance = await owner.getBalance();
 
@@ -71,7 +71,7 @@ describe("Cash-out ERC20 tokens", function () {
     it("Rejects withdraw of 100.1%", async function () {
         await expect(hardhatPool.cashOutERC20(
             0,   // _index_id
-            1001, // _sell_pct
+            100001, // _sell_pct
         )).to.be.revertedWith('INSUFFICIENT FUNDS');
     });
 
