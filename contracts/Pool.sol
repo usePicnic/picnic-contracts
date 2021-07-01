@@ -545,15 +545,19 @@ contract Pool is IPool {
      * goes amiss.
      *
      * @param userAddress Address of user to have ERC20 tokens withdrawn
-     * @param indexId Index Id (position in `indexes` array)
+     * @param tokenId Token Id
      * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
     // TODO make this compatible with NFT Withdrawals
     function cashOutERC20Internal(
         address userAddress,
-        uint256 indexId,
+        uint256 tokenId,
         uint256 sharesPct
     ) internal {
+        uint256 indexId;
+        uint256[] memory allocation;
+        (indexId, allocation) = _pool721.burnPool721(tokenId);
+
         address tokenAddress;
         address[] memory tokens = _indexes[indexId].tokens;
 
@@ -562,14 +566,16 @@ contract Pool is IPool {
 
         for (uint256 i = 0; i < tokens.length; i++) {
             tokenAddress = tokens[i];
-            amount = 1;
+            amount = (allocation[i] * sharesPct) / 100000;
 
             require(
-                2 >= amount,
+                sharesPct <= 100000,
                 "INSUFFICIENT FUNDS"
             );
 
             require(amount > 0, "AMOUNT TO CASH OUT IS TOO SMALL");
+
+            allocation[i] -= amount;
 
             if (address(0) != tokenAddress) {
                 require(
@@ -584,6 +590,10 @@ contract Pool is IPool {
         }
 
         emit LOG_ERC20_WITHDRAW(userAddress, indexId, sharesPct, amounts);
+
+        if (sharesPct < 100000 && allocation[0] > 0) {
+            _pool721.generatePool721(msg.sender, indexId, amounts);
+        }
     }
 
     /**
