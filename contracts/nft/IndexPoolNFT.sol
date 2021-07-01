@@ -61,6 +61,8 @@ contract IndexPoolNFT is ERC721, Ownable {
 
         _burn(tokenId);
 
+        tokenIdToAllocation[tokenId] = new uint256[](allocation.length);
+
         emit LOG_BURN_NFT(tokenId, indexId, allocation);
 
         return (indexId, allocation);

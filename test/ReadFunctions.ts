@@ -50,9 +50,8 @@ describe("Read", function () {
 
     it("Read - Get Token Balance", async function () {
         let token_balance = await hardhatPool.getTokenBalance(
-            0, // Index ID
-            ADDRESSES['TOKENS'][0], // token address
-            await owner.getAddress() // owner address
+            0, // Token ID
+            ADDRESSES['TOKENS'][0] // token address
         );
         await expect(token_balance).to.not.equal(0);
     })

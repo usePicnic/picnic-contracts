@@ -49,13 +49,15 @@ describe("Withdraw", function () {
         // WITHDRAW
         await hardhatPool.withdraw(
             0,   // _index_id
-            1000, // _sell_pct
+            100000, // _sell_pct
             tokens.map(x => [x, ADDRESSES['WMAIN']]) // paths
         );
 
         expect(await hardhatPool.getTokenBalance(0, tokens[0], owner.getAddress())).to.equal(0);
         expect(await owner.getBalance()).to.be.above(prevBalance);
     })
+
+    // TODO reject 2 withdrawals
 
 
     it("Withdraws 50% from an index of single token", async function () {
@@ -64,11 +66,11 @@ describe("Withdraw", function () {
         // WITHDRAW
         const withdraw_result = await hardhatPool.withdraw(
             0,   // _index_id
-            500, // _sell_pct
+            50000, // _sell_pct
             tokens.map(x => [x, ADDRESSES['WMAIN']]) // paths
         );
 
-        expect(await hardhatPool.getTokenBalance(0, tokens[0], owner.getAddress())).to.be.above(0);
+        expect(await hardhatPool.getTokenBalance(1, tokens[0])).to.be.above(0);
         expect(await owner.getBalance()).to.be.above(prevBalance);
     })
 
@@ -85,7 +87,7 @@ describe("Withdraw", function () {
         // WITHDRAW
         await expect(hardhatPool.withdraw(
             0,   // _index_id
-            1001, // _sell_pct
+            100001, // _sell_pct
             tokens.map(x => [x, ADDRESSES['WMAIN']]) // paths
         )).to.be.revertedWith("CAN'T SELL MORE THAN 100% OF FUNDS");
     })
@@ -94,23 +96,9 @@ describe("Withdraw", function () {
         // WITHDRAW
         await expect(hardhatPool.withdraw(
             0,   // _index_id
-            1000, // _sell_pct
+            100000, // _sell_pct
             tokens.map(x => [ADDRESSES['WMAIN'], x]) // paths
         )).to.be.revertedWith("WRONG PATH: TOKEN NEEDS TO BE PART OF PATH");
     })
-
-    it("Rejects Withdrawals without shares bought", async function () {
-        await hardhatPool.createIndex(
-            [tokens[0]], // address[] _tokens
-            [1000000000],  // uint256[] _allocation,
-            [[tokens[0], ADDRESSES['WMAIN']]] // paths
-        );
-
-        // WITHDRAW
-        await expect(hardhatPool.withdraw(
-            1,   // _index_id
-            1000, // _sell_pct
-            [[tokens[0], ADDRESSES['WMAIN']]] // paths
-        )).to.be.revertedWith('NEEDS TO HAVE SHARES OF THE INDEX');
-    })
+    // TODO withdraw from a token that is not yours
 });
