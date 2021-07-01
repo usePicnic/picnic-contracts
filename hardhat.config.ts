@@ -43,11 +43,11 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`,
-        blockNumber: 12182008,
+        url: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_KEY}`
       }
     },
   },
+  mocha: { timeout: '180000'},
   gasReporter: {
     currency: 'USD',
     gasPrice: 1,

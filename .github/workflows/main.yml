@@ -23,17 +23,17 @@ jobs:
         run: yarn compile
         env:
           COINMARKETCAP_KEY: ${{ secrets.COINMARKETCAP_KEY }}
-          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }} 
+          INFURA_KEY: ${{ secrets.INFURA_KEY }} 
       - name: test
         run: yarn test --no-compile
         env:
           COINMARKETCAP_KEY: ${{ secrets.COINMARKETCAP_KEY }}
-          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }} 
+          INFURA_KEY: ${{ secrets.INFURA_KEY }} 
       - name: coverage
         run: yarn run coverage
         env:
           COINMARKETCAP_KEY: ${{ secrets.COINMARKETCAP_KEY }}
-          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }} 
+          INFURA_KEY: ${{ secrets.INFURA_KEY }} 
       - name: "Upload report to Coveralls"
         uses: "coverallsapp/github-action@master"
         with:

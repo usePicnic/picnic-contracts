@@ -1,113 +1,97 @@
-import { expect } from "chai";
-import { ethers } from "hardhat";
+import {expect} from "chai";
+import {ethers} from "hardhat";
+import constants from "../constants";
 
 describe("Deposit", function () {
-  let Pool;
-  let hardhatPool;
-  let owner;
-  let oracle;
+    let Pool;
+    let hardhatPool;
+    let owner;
+    let oracle;
 
-  const UNI_FACTORY = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
-  const UNI_ROUTER = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
-  const UNI_TOKEN = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984";
-  const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
-  const BASE_ASSET = BigInt(1000000000000000000);
+    const BASE_ASSET = BigInt(1000000000000000000);
+    const ADDRESSES = constants['POLYGON'];
 
 
-  beforeEach(async function () {
-    [owner] = await ethers.getSigners();
+    beforeEach(async function () {
+        [owner] = await ethers.getSigners();
 
-    let Oracle = await ethers.getContractFactory("OraclePath");
+        let Oracle = await ethers.getContractFactory("OraclePath");
 
-    oracle = (await Oracle.deploy(UNI_FACTORY)).connect(owner);
+        oracle = (await Oracle.deploy(ADDRESSES['FACTORY'])).connect(owner);
 
-    // Get the ContractFactory
-    Pool = await ethers.getContractFactory("Pool");
+        // Get the ContractFactory
+        Pool = await ethers.getContractFactory("Pool");
 
-    // To deploy our contract, we just have to call Pool.deploy() and await
-    // for it to be deployed(), which happens onces its transaction has been
-    // mined.
-    hardhatPool = (await Pool.deploy(UNI_ROUTER, oracle.address)).connect(owner)
+        // To deploy our contract, we just have to call Pool.deploy() and await
+        // for it to be deployed(), which happens onces its transaction has been
+        // mined.
+        hardhatPool = (await Pool.deploy(ADDRESSES['ROUTER'], oracle.address)).connect(owner)
 
-    await hardhatPool.create_index(
-      [1000000000],  // uint256[] _allocation,
-      [UNI_TOKEN], // address[] _tokens
-      [[UNI_TOKEN, WETH]] // paths
-    );
-  });
+        await hardhatPool.createIndex(
+            [ADDRESSES['TOKENS'][0]], // address[] _tokens
+            [1000000000],  // uint256[] _allocation,
+            [[ADDRESSES['TOKENS'][0], ADDRESSES['WMAIN']]] // paths
+        );
+    });
 
-  it("Deposits to an index of single token", async function () {
-    const initialBalance = await owner.getBalance();
+    it("Deposits and buys an index of single token", async function () {
+        const initialBalance = await owner.getBalance();
 
-    // DEPOSIT
-    let overrides = { value: ethers.utils.parseEther("1.1") };
-    const deposit_result = await hardhatPool.deposit(
-      0, // _index_id
-      [[WETH, UNI_TOKEN]], // paths
-      overrides
-    );
+        // DEPOSIT
+        let overrides = {value: ethers.utils.parseEther("1.1")};
+        const deposit_result = await hardhatPool.deposit(
+            0, // _index_id
+            [[ADDRESSES['WMAIN'], ADDRESSES['TOKENS'][0]]], // paths
+            overrides
+        );
 
-    expect(await owner.getBalance()).to.be.below(initialBalance);
-  })
+        expect(await hardhatPool.getTokenBalance(0, ADDRESSES['TOKENS'][0], owner.getAddress())).to.above(0);
+        expect(await owner.getBalance()).to.be.below(initialBalance);
+    })
 
-  it("Deposits and buys an index of single token", async function () {
-    const initialBalance = await owner.getBalance();
+    it("Rejects small deposits", async function () {
+        await expect(hardhatPool.deposit(
+            0, // _index_id
+            [[ADDRESSES['WMAIN'], ADDRESSES['TOKENS'][0]]]
+        )).to.be.revertedWith('MINIMUM DEPOSIT OF 0.001 MATIC');
+    })
 
-    // DEPOSIT
-    let overrides = { value: ethers.utils.parseEther("1.1") };
-    const deposit_result = await hardhatPool.deposit(
-      0, // _index_id
-      [[WETH, UNI_TOKEN]], // paths
-      overrides
-    );
+    it("Rejects big deposits", async function () {
+        // DEPOSIT
+        let overrides = {value: ethers.utils.parseEther("101")};
+        await expect(hardhatPool.deposit(
+            0, // _index_id
+            [[ADDRESSES['WMAIN'], ADDRESSES['TOKENS'][0]]], // paths
+            overrides
+        )).to.be.revertedWith('EXCEEDED MAXIMUM ALLOWED DEPOSIT VALUE');
+    })
 
-    expect(await hardhatPool.get_token_balance(0, UNI_TOKEN, owner.getAddress())).to.above(0);
-    expect(await owner.getBalance()).to.be.below(initialBalance);
-  })
+    it("Rejects wrong path", async function () {
+        // DEPOSIT
+        let overrides = {value: ethers.utils.parseEther("10")};
+        await expect(hardhatPool.deposit(
+            0, // _index_id
+            [[ADDRESSES['TOKENS'][0], ADDRESSES['WMAIN']]], // paths
+            overrides
+        )).to.be.revertedWith('WRONG PATH: TOKEN NEEDS TO BE PART OF PATH');
+    })
 
-  it("Rejects small deposits", async function () {
-    await expect(hardhatPool.deposit(
-      0, // _index_id
-      [[WETH, UNI_TOKEN]]
-    )).to.be.revertedWith('MINIMUM DEPOSIT OF 0.001 MATIC');
-  })
+    it("Increase deposit limit", async function () {
+        let overrides = {value: ethers.utils.parseEther("101")};
+        await hardhatPool.setMaxDeposit(BigInt(200) * BASE_ASSET);
 
-  it("Rejects big deposits", async function () {
-    // DEPOSIT
-    let overrides = { value: ethers.utils.parseEther("101") };
-    await expect(hardhatPool.deposit(
-      0, // _index_id
-      [[WETH, UNI_TOKEN]], // paths
-      overrides
-    )).to.be.revertedWith('EXCEEDED MAXIMUM ALLOWED DEPOSIT VALUE');  
-  })
+        await hardhatPool.deposit(
+            0, // _index_id
+            [[ADDRESSES['WMAIN'], ADDRESSES['TOKENS'][0]]], // paths
+            overrides
+        );
 
-  it("Rejects wrong path", async function () {
-    // DEPOSIT
-    let overrides = { value: ethers.utils.parseEther("10") };
-    await expect(hardhatPool.deposit(
-      0, // _index_id
-      [[UNI_TOKEN, WETH]], // paths
-      overrides
-    )).to.be.revertedWith('WRONG PATH: TOKEN NEEDS TO BE PART OF PATH');  
-  })
-
-  it("Increase deposit limit", async function () {   
-    let overrides = { value: ethers.utils.parseEther("101") };
-    await hardhatPool.set_max_deposit(BigInt(200) * BASE_ASSET);
-
-    await hardhatPool.deposit(
-      0, // _index_id
-      [[WETH, UNI_TOKEN]], // paths
-      overrides
-    );
-
-    overrides = { value: ethers.utils.parseEther("201") };
-    await expect(hardhatPool.deposit(
-      0, // _index_id
-      [[WETH, UNI_TOKEN]], // paths
-      overrides
-    )).to.be.revertedWith('EXCEEDED MAXIMUM ALLOWED DEPOSIT VALUE');     
-  })
+        overrides = {value: ethers.utils.parseEther("201")};
+        await expect(hardhatPool.deposit(
+            0, // _index_id
+            [[ADDRESSES['WMAIN'], ADDRESSES['TOKENS'][0]]], // paths
+            overrides
+        )).to.be.revertedWith('EXCEEDED MAXIMUM ALLOWED DEPOSIT VALUE');
+    })
 })
 

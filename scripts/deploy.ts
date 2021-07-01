@@ -7,7 +7,7 @@
 import { ethers } from "hardhat";
 import { readFileSync } from "fs";
 import fetch from "node-fetch";
-
+import constants from "../constants";
 
 
 function delay(ms) {
@@ -17,6 +17,7 @@ function delay(ms) {
 async function main() {
 
   const [deployer] = await ethers.getSigners();
+  const ADDRESSES = constants['POLYGON'];
 
   console.log(
     "Deploying contracts with the account:",
@@ -25,13 +26,14 @@ async function main() {
 
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  const UNI_ROUTER = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
-  const UNI_TOKEN = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984";
+  let Oracle = await ethers.getContractFactory("OraclePath");
+
+  let oracle = (await Oracle.deploy(ADDRESSES['FACTORY']));
 
   const Pool = await ethers.getContractFactory("Pool");
 
   // DEPLOY
-  const pool = await Pool.deploy(UNI_ROUTER);
+  const pool = await Pool.deploy(ADDRESSES['ROUTER'], oracle.address);
 
   console.log("Pool address:", pool.address);  
 
@@ -46,43 +48,13 @@ async function main() {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        network_name: "ethereum_indexpool_testnet",
+        network_name: "polygon_indexpool_testnet",
         address: pool.address,
         contract: contractData
       })
     })
   const responseText = await response.text()
   console.log(responseText)
-
-  // // CREATE INDEX
-  // const index_id = await pool.create_index(
-  //   [1],  // uint256[] _allocation,
-  //   [UNI_TOKEN] // address[] _tokens
-  // );
-
-  // console.log("Create index result:", index_id);
-
-  // await delay(16000);
-
-  // let overrides = { value: ethers.utils.parseEther("0.01") };
-
-  // // DEPOSIT
-  // const deposit_result = await pool.deposit(
-  //   0, // _index_id
-  //   overrides
-  // );
-
-  // console.log("Deposit result:", deposit_result);
-
-  // await delay(16000);
-
-  // // WITHDRAW
-  // const withdraw_result = await pool.withdraw(
-  //   100, // _sell_pct
-  //   0,   // _index_id
-  // );
-
-  // console.log("Withdraw result:", withdraw_result);
 }
 
 main()

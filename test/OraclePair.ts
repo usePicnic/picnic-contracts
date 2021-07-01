@@ -1,63 +1,61 @@
-import { expect } from "chai";
-import { ethers } from "hardhat";
+import {expect} from "chai";
+import {ethers} from "hardhat";
+
 const hre = require("hardhat");
+import constants from "../constants";
 
 describe("OraclePair", function () {
 
-  let owner;
-  let oracle;
+    let owner;
+    let oracle;
 
-  const UNI_FACTORY = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
-  const UNI_TOKEN = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984";
-  const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
-  const SUSHI_TOKEN = "0x6b3595068778dd592e39a122f4f5a5cf09c90fe2";
+    const ADDRESSES = constants['POLYGON'];
 
+    beforeEach(async function () {
+        [owner] = await ethers.getSigners();
+    });
 
-  beforeEach(async function () {
-    [owner] = await ethers.getSigners();
-  });
+    it("Deploys", async function () {
+        let Oracle = await ethers.getContractFactory("OraclePair");
 
-  it("Deploys", async function () {
-    let Oracle = await ethers.getContractFactory("OraclePair");
+        oracle = (await Oracle.deploy(ADDRESSES['FACTORY'], ADDRESSES['TOKENS'][0], ADDRESSES['WMAIN'])).connect(owner);
+    })
 
-    oracle = (await Oracle.deploy(UNI_FACTORY, UNI_TOKEN, WETH)).connect(owner);
-  })
- 
-  it("Rejects update as not enough time has passed", async function () {
-    let Oracle = await ethers.getContractFactory("OraclePair");
+    it("Rejects update as not enough time has passed", async function () {
+        let Oracle = await ethers.getContractFactory("OraclePair");
 
-    oracle = (await Oracle.deploy(UNI_FACTORY, UNI_TOKEN, WETH)).connect(owner);
+        oracle = (await Oracle.deploy(ADDRESSES['FACTORY'], ADDRESSES['TOKENS'][0], ADDRESSES['WMAIN'])).connect(owner);
 
-    await expect(oracle.update()).to.be.revertedWith('ExampleOracleSimple: PERIOD_NOT_ELAPSED');
+        await expect(oracle.update()).to.be.revertedWith('ExampleOracleSimple: PERIOD_NOT_ELAPSED');
 
-    expect(await oracle.consult(UNI_TOKEN, 1000000)).to.be.equal(0);    
-  })
+        expect(await oracle.consult(ADDRESSES['TOKENS'][0], 1000000)).to.be.equal(0);
+    })
 
-  it("Updates", async function () {   
-    let Oracle = await ethers.getContractFactory("OraclePair");
+    it("Updates", async function () {
+        let Oracle = await ethers.getContractFactory("OraclePair");
 
-    oracle = (await Oracle.deploy(UNI_FACTORY, UNI_TOKEN, WETH)).connect(owner);
+        oracle = (await Oracle.deploy(ADDRESSES['FACTORY'], ADDRESSES['TOKENS'][0], ADDRESSES['WMAIN'])).connect(owner);
 
-    // suppose the current block has a timestamp of 01:00 PM
-    await hre.network.provider.send("evm_increaseTime", [10800])
-    await hre.network.provider.send("evm_mine") // this one will have 02:00 PM as its timestamp 
-    
-    oracle.update();
+        // suppose the current block has a timestamp of 01:00 PM
+        await hre.network.provider.send("evm_increaseTime", [10800])
+        await hre.network.provider.send("evm_mine") // this one will have 02:00 PM as its timestamp
 
-    expect(await oracle.consult(UNI_TOKEN, 1000000)).to.be.above(0);    
-  }) 
+        oracle.update();
 
-  it("Rejects consult of token outside of pair", async function () {   
-    let Oracle = await ethers.getContractFactory("OraclePair");
+        expect(await oracle.consult(ADDRESSES['TOKENS'][0], 1000000)).to.be.above(0);
+    })
 
-    oracle = (await Oracle.deploy(UNI_FACTORY, UNI_TOKEN, WETH)).connect(owner);
+    it("Rejects consult of token outside of pair", async function () {
+        let Oracle = await ethers.getContractFactory("OraclePair");
 
-    // suppose the current block has a timestamp of 01:00 PM
-    await hre.network.provider.send("evm_increaseTime", [10800])
-    await hre.network.provider.send("evm_mine") // this one will have 02:00 PM as its timestamp 
-    
-    oracle.update();
-    await expect(oracle.consult(SUSHI_TOKEN, 1000000)).to.be.revertedWith('ExampleOracleSimple: INVALID_TOKEN');
-  }) 
+        oracle = (await Oracle.deploy(ADDRESSES['FACTORY'], ADDRESSES['TOKENS'][0], ADDRESSES['WMAIN'])).connect(owner);
+
+        // suppose the current block has a timestamp of 01:00 PM
+        await hre.network.provider.send("evm_increaseTime", [10800])
+        await hre.network.provider.send("evm_mine") // this one will have 02:00 PM as its timestamp
+
+        oracle.update();
+        await expect(oracle.consult(ADDRESSES['TOKENS'][1], 1000000)).to.be.revertedWith('ExampleOracleSimple: INVALID_TOKEN');
+    })
 })
 
