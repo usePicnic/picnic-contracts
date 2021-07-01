@@ -447,7 +447,7 @@ contract Pool is IPool {
         uint256 indexId;
 
         require(sellPct > 0, "SELL PCT NEEDS TO BE GREATER THAN ZERO");
-        require(sellPct <= 1000, "CAN'T SELL MORE THAN 100% OF FUNDS");
+        require(sellPct <= 100000, "CAN'T SELL MORE THAN 100% OF FUNDS");
 
         require(
             _pool721.ownerOf(tokenId) == msg.sender,
@@ -459,7 +459,7 @@ contract Pool is IPool {
 
         for (uint256 i = 0; i < tokens.length; i++) {
             address tokenAddress = tokens[i];
-            uint256 sharesAmount = (amounts[i] * sellPct) / 1000;
+            uint256 sharesAmount = (amounts[i] * sellPct) / 100000;
             amounts[i] -= sharesAmount;
 
             path = paths[i];
@@ -483,7 +483,8 @@ contract Pool is IPool {
         payable(msg.sender).transfer(ethAmount);
         emit LOG_WITHDRAW(msg.sender, indexId, sellPct, ethAmount);
 
-        if (sellPct < 1000 && amounts[0] > 0) {
+        // Mint new NFT
+        if (sellPct < 100000 && amounts[0] > 0) {
             _pool721.generatePool721(msg.sender, indexId, amounts);
         }
     }
