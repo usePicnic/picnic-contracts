@@ -311,6 +311,7 @@
       * @param indexId Index Id (position in `indexes` array)
       * @param paths Paths to be used respective to each token on DEX
       */
+     // TODO Refactor deposit -> quotaPrice -> buy
      function deposit(uint256 indexId, address[][] memory paths)
      external
      payable
@@ -430,7 +431,7 @@
       */
      // TODO figure out how to make partial withdrawals with NFTs (burn, sell, mint new one?)
      function withdraw(
-         uint256 indexId,
+         uint256 tokenId,
          uint256 sellPct,
          address[][] memory paths
      ) external override {
@@ -440,15 +441,22 @@
          uint256[] memory result;
 
          require(sellPct > 0, "SELL PCT NEEDS TO BE GREATER THAN ZERO");
-         require(
-             _indexes[indexId].shares[tokens[0]][msg.sender] > 0,
-             "NEEDS TO HAVE SHARES OF THE INDEX"
-         );
          require(sellPct <= 1000, "CAN'T SELL MORE THAN 100% OF FUNDS");
+
+         require(
+             _pool721.ownerOf(tokenId) == msg.sender,
+             "ONLY CALLABLE BY TOKEN OWNER"
+         );
+
+         (indexId, amounts) = _pool721.burnPool721(tokenId);
+
+         address[] memory tokens = _indexes[indexId].tokens;
+         address token;
 
          for (uint256 i = 0; i < tokens.length; i++) {
              address tokenAddress = tokens[i];
-             uint256 sharesAmount = (_indexes[indexId].shares[tokenAddress][msg.sender] * sellPct) / 1000;
+             uint256 sharesAmount = (allocation[i] * sellPct) / 1000;
+             allocation[i] -= sharesAmount;
 
              path = paths[i];
 
@@ -463,15 +471,17 @@
                  sharesAmount : sharesAmount,
                  path : path
                  });
-                 _indexes[indexId].shares[tokenAddress][msg.sender] -= result[0];
                  ethAmount += result[result.length - 1];
              } else {
-                 _indexes[indexId].shares[tokenAddress][msg.sender] -= sharesAmount;
                  ethAmount += sharesAmount;
              }
          }
          payable(msg.sender).transfer(ethAmount);
          emit LOG_WITHDRAW(msg.sender, indexId, sellPct, ethAmount);
+
+         if (sellPct < 1000 && allocation[0] > 0){
+             _pool721.generatePool721(msg.sender, indexId, amounts);
+         }
      }
 
      /**
@@ -606,39 +616,11 @@
      }
 
      /**
-      * @notice Burn a specific NFT token.
-      *
-      * @dev Burns a specific NFT token and assigns assets back to NFT owner.
-      * Only callable by whoever holds the token.
-      *
-      * @param tokenId Token Id
-      */
-     function burnPool721(uint256 tokenId) external override {
-         uint256 indexId;
-         uint256[] memory allocation;
-
-         require(
-             _pool721.ownerOf(tokenId) == msg.sender,
-             "ONLY CALLABLE BY TOKEN OWNER"
-         );
-
-         (indexId, allocation) = _pool721.burnPool721(tokenId);
-
-         address[] memory tokens = _indexes[indexId].tokens;
-         address token;
-
-         for (uint256 i = 0; i < tokens.length; i++) {
-             token = tokens[i];
-             _indexes[indexId].shares[token][msg.sender] += allocation[i];
-         }
-     }
-
-     /**
       * @notice Get Pool721 (NFT contract) address.
       *
       * @dev Get the address of the NFT contract minted by this Pool.
       */
-     function getPool721Address() external view override returns (address) {
+     function getPortfolioNFTAddress() external view override returns (address) {
          return address(_pool721);
      }
 
