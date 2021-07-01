@@ -350,7 +350,7 @@ contract Pool is IPool {
         // TODO check amounts logic in details
 
         // Go to uniswap
-        buy(indexId, nQuotas, tokens, amounts, paths);
+        buy(tokens, amounts, nQuotas,  paths);
 
         // Mint
         _pool721.generatePool721(msg.sender, indexId, amounts);
