@@ -179,18 +179,9 @@
      external
      view
      override
-     returns (OutputIndex memory)
+     returns (Index memory)
      {
-         OutputIndex memory output = OutputIndex({
-         creator : _indexes[indexId].creator,
-         allocation : _indexes[indexId].allocation,
-         tokens : _indexes[indexId].tokens,
-         fee : _indexes[indexId].fee,
-         creatorFeeCashOut : _indexes[indexId].creatorFeeCashOut,
-         protocolFeeCashOut : _indexes[indexId].protocolFeeCashOut
-         });
-
-         return output;
+         return _indexes[indexId];
      }
 
      /**
@@ -347,11 +338,18 @@
          _indexes[indexId].fee += fee;
 
          uint256 freeAmount = msg.value - fee;
+
+         // Decide how much to buy
          (quotaPrice, amounts) = calculateQuotaPrice(allocation, paths, tokens);
          uint256 nQuotas = freeAmount / quotaPrice;
 
+         // TODO check amounts logic in details
 
+         // Go to uniswap
          buy(indexId, nQuotas, tokens,  amounts, paths);
+
+         // Mint
+         _pool721.generatePool721(msg.sender, indexId, amounts);
 
          emit LOG_DEPOSIT(msg.sender, indexId, msg.value);
      }
@@ -396,7 +394,6 @@
          address[][] memory paths) internal {
 
          uint256 bought;
-         Index storage index = _indexes[indexId]; // TODO how to make this more efficient? avoid storage...
          address tokenAddress;
          uint256 amount;
          address[] memory path;
@@ -417,8 +414,6 @@
              } else {
                  bought = amount;
              }
-
-             index.shares[tokenAddress][msg.sender] += bought;
          }
      }
 
@@ -433,6 +428,7 @@
       * @param sellPct Percentage of shares to be cashed out (1000 = 100%)
       * @param paths Execution paths
       */
+     // TODO figure out how to make partial withdrawals with NFTs (burn, sell, mint new one?)
      function withdraw(
          uint256 indexId,
          uint256 sellPct,
@@ -607,33 +603,6 @@
          uint256 sharesPct
      ) external override _indexpoolOnly_ {
          cashOutERC20Internal(user, indexId, sharesPct);
-     }
-
-     /**
-      * @notice Mint a specific NFT token.
-      *
-      * @dev Mints a specific NFT token remove assigned contracts from contract and into token.
-      *
-      * @param indexId Index Id (position in `indexes` array)
-      * @param sharesPct Percentage of shares to be minted as NFT (1000 = 100%)
-      */
-     function mintPool721(
-         uint256 indexId,
-         uint256 sharesPct
-     ) external override {
-         address token;
-         address[] memory tokens = _indexes[indexId].tokens;
-         uint256[] memory allocation = new uint256[](tokens.length);
-
-         for (uint256 i = 0; i < tokens.length; i++) {
-             token = tokens[i];
-             allocation[i] = (_indexes[indexId].shares[token][msg.sender] * sharesPct) / 1000;
-             require(allocation[i] <= _indexes[indexId].shares[token][msg.sender], "NOT ENOUGH FUNDS");
-             require(allocation[i] > 0, "ALLOCATION CAN'T BE ZERO");
-             _indexes[indexId].shares[token][msg.sender] -= allocation[i];
-         }
-
-         _pool721.generatePool721(msg.sender, indexId, allocation);
      }
 
      /**
