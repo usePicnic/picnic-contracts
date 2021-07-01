@@ -8,7 +8,6 @@ import "../interfaces/IIndexPoolNFT.sol";
 contract IndexPoolNFT is ERC721, Ownable {
     uint256 public tokenCounter;
     address creator;
-    mapping(uint256 => address[]) public tokenIdToTokenAddresses;
     mapping(uint256 => uint256[]) public tokenIdToAllocation;
     mapping(uint256 => uint256) public tokenIdToIndexId;
 
