@@ -43,7 +43,7 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`
+        url: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_KEY}`
       }
     },
   },
