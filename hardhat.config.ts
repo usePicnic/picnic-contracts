@@ -19,8 +19,6 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
 
 const gwei = 1000000000;
 
-console.log(`https://polygon-mainnet.infura.io/v3/${process.env.INFURA_KEY}`);
-
 module.exports = {
   solidity: {
     compilers: [
@@ -45,7 +43,7 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_KEY}`
+        url: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`
       }
     },
   },
