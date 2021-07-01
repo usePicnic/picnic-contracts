@@ -334,8 +334,6 @@ contract Pool is IPool {
 
         address[] memory tokens = _indexes[indexId].tokens;
         uint256[] memory allocation = _indexes[indexId].allocation;
-        uint256 amount;
-        uint256[] memory result;
         uint256[] memory amounts = new uint256[](tokens.length);
         uint256 quotaPrice;
 
@@ -393,10 +391,9 @@ contract Pool is IPool {
         return (quotaPrice, amounts);
     }
 
-    function buy(uint256 indexId,
-        uint256 nQuotas,
-        address[] memory tokens,
+    function buy(address[] memory tokens,
         uint256[] memory amounts,
+        uint256 nQuotas,
         address[][] memory paths) internal {
 
         uint256 bought;
