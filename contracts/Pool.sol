@@ -423,10 +423,10 @@ contract Pool is IPool {
         uint256[] memory tokenIds,
         uint256[] memory sellPct,
         address[][] memory paths
-    )
+    ) external override
     {
         for (uint256 i = 0; i < tokenIds.length; i++) {
-            withdrawSingleToken(tokenIds[i], sharesPct[i], paths);
+            withdrawSingleToken(tokenIds[i], sellPct[i], paths);
         }
     }
 
@@ -446,7 +446,7 @@ contract Pool is IPool {
         uint256 tokenId,
         uint256 sellPct,
         address[][] memory paths
-    ) external override {
+    ) internal {
         uint256 ethAmount = 0;
         address[] memory path;
         uint256[] memory result;
@@ -612,12 +612,13 @@ contract Pool is IPool {
      * @param tokenIds Token Ids
      * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
-    function cashOutERC20(uint256[] memory tokenIds, uint256[] memory sharesPct)
-    external
-    override
-    {
+    function cashOutERC20(
+        uint256[] memory tokenIds,
+        uint256[] memory sharesPct
+    ) external override {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             cashOutERC20Internal(msg.sender, tokenIds[i], sharesPct[i]);
+        }
     }
 
     /**
@@ -632,8 +633,8 @@ contract Pool is IPool {
      */
     function cashOutERC20Admin(
         address userAddress,
-        uint256[] tokenIds,
-        uint256[] sharesPct
+        uint256[] memory tokenIds,
+        uint256[] memory sharesPct
     ) external override _indexpoolOnly_ {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             cashOutERC20Internal(userAddress, tokenIds[i], sharesPct[i]);
