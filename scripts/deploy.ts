@@ -48,7 +48,7 @@ async function main() {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        network_name: "polygon-testnet",
+        networkName: "polygon-testnet",
         address: pool.address,
         abi: contractData['abi']
       })
