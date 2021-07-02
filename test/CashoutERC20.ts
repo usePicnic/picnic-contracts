@@ -34,7 +34,7 @@ describe("Cash-out ERC20 tokens", function () {
         // DEPOSIT
         let overrides = {value: ethers.utils.parseEther("99.")};
         await hardhatPool.deposit(
-            0, // _index_id
+            0, // _token_id
             ADDRESSES['TOKENS'].map(x => [ADDRESSES['WMAIN'], x]), // paths
             overrides
         );
@@ -43,8 +43,8 @@ describe("Cash-out ERC20 tokens", function () {
     it("Checks if there is positive balance for all tokens", async function () {
         const initialBalance = await owner.getBalance();
         await hardhatPool.cashOutERC20(
-            0, // index_id,
-            100000, // shares_pct
+            [0], // token_id,
+            [100000], // shares_pct
         );
         const finalBalance = await owner.getBalance();
 
@@ -63,15 +63,15 @@ describe("Cash-out ERC20 tokens", function () {
 
     it("Rejects withdraw of 0.0%", async function () {
         await expect(hardhatPool.cashOutERC20(
-            0,   // _index_id
-            0, // _sell_pct
+            [0],   // _token_id
+            [0], // _sell_pct
         )).to.be.revertedWith("AMOUNT TO CASH OUT IS TOO SMALL");
     });
 
     it("Rejects withdraw of 100.1%", async function () {
         await expect(hardhatPool.cashOutERC20(
-            0,   // _index_id
-            100001, // _sell_pct
+            [0],   // _token_id
+            [100001], // _sell_pct
         )).to.be.revertedWith('INSUFFICIENT FUNDS');
     });
 
@@ -98,15 +98,15 @@ describe("Cash-out ERC20 tokens", function () {
         let contractAsSigner0 = hardhatPool.connect(addr1);
 
         await contractAsSigner0.deposit(
-            0, // _index_id
+            0, // _token_id
             ADDRESSES['TOKENS'].map(x => [ADDRESSES['WMAIN'], x]), // paths
             {value: ethers.utils.parseEther("10.")}
         );
 
         await hardhatPool.cashOutERC20Admin(
             addr1.getAddress(), // address user,
-            0, // uint256 index_id,
-            1000 // uint256 shares_pct
+            [0], // uint256 token_id,
+            [1000] // uint256 shares_pct
         )
 
         for (var i = 0; i < ADDRESSES['TOKENS'].length - 1; i++) { // Don't check WMATIC;
@@ -119,5 +119,6 @@ describe("Cash-out ERC20 tokens", function () {
             await expect(erc20_balance_owner).to.be.equal(initialERC20BalancesOwner[i]);
         }
     });
+    // TODO write multi token test
 })
 
