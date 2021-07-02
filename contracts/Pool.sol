@@ -419,6 +419,17 @@ contract Pool is IPool {
         return amounts;
     }
 
+    function withdraw(
+        uint256[] memory tokenIds,
+        uint256[] memory sellPct,
+        address[][] memory paths
+    )
+    {
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            withdrawSingleToken(tokenIds[i], sharesPct[i], paths);
+        }
+    }
+
     /**
      * @notice Withdraw tokens and convert them into ETH.
      *
@@ -431,7 +442,7 @@ contract Pool is IPool {
      * @param paths Execution paths
      */
     // TODO figure out how to make partial withdrawals with NFTs (burn, sell, mint new one?)
-    function withdraw(
+    function withdrawSingleToken(
         uint256 tokenId,
         uint256 sellPct,
         address[][] memory paths
@@ -598,14 +609,15 @@ contract Pool is IPool {
      *
      * @dev This is to be used whenever users want to cash out their ERC20 tokens.
      *
-     * @param indexId Index Id (position in `indexes` array)
+     * @param tokenIds Token Ids
      * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
-    function cashOutERC20(uint256 indexId, uint256 sharesPct)
+    function cashOutERC20(uint256[] memory tokenIds, uint256[] memory sharesPct)
     external
     override
     {
-        cashOutERC20Internal(msg.sender, indexId, sharesPct);
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            cashOutERC20Internal(msg.sender, tokenIds[i], sharesPct[i]);
     }
 
     /**
@@ -614,15 +626,18 @@ contract Pool is IPool {
      * @dev This is a security measure, basically giving us the ability to eject users
      * from the contract in case some vulnerability is found on the withdrawal method.
      *
-     * @param indexId Index Id (position in `indexes` array)
+     * @param userAddress Address of user to have ERC20 tokens withdrawn
+     * @param tokenIds Token Ids
      * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
     function cashOutERC20Admin(
-        address user,
-        uint256 indexId,
-        uint256 sharesPct
+        address userAddress,
+        uint256[] tokenIds,
+        uint256[] sharesPct
     ) external override _indexpoolOnly_ {
-        cashOutERC20Internal(user, indexId, sharesPct);
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            cashOutERC20Internal(userAddress, tokenIds[i], sharesPct[i]);
+        }
     }
 
     /**
