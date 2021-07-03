@@ -12,12 +12,14 @@ contract IndexPoolNFT is ERC721, Ownable {
     mapping(uint256 => uint256) public tokenIdToIndexId;
 
     event LOG_MINT_NFT(
+        address indexed userAddress,
         uint256 indexed tokenId,
         uint256 indexed indexId,
         uint256[] allocation
     );
 
     event LOG_BURN_NFT(
+        address indexed userAddress,
         uint256 indexed tokenId,
         uint256 indexed indexId,
         uint256[] allocation
@@ -48,7 +50,7 @@ contract IndexPoolNFT is ERC721, Ownable {
 
         tokenCounter = tokenCounter + 1;
 
-        emit LOG_MINT_NFT(newItemId, indexId, allocation);
+        emit LOG_MINT_NFT(user, newItemId, indexId, allocation);
 
         return newItemId;
     }
@@ -63,7 +65,7 @@ contract IndexPoolNFT is ERC721, Ownable {
 
         tokenIdToAllocation[tokenId] = new uint256[](allocation.length);
 
-        emit LOG_BURN_NFT(tokenId, indexId, allocation);
+        emit LOG_BURN_NFT(user, tokenId, indexId, allocation);
 
         return (indexId, allocation);
     }

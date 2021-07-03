@@ -275,7 +275,7 @@ contract Pool is IPool {
 
         emit LOG_CREATE_INDEX(
             _indexes.length - 1,
-            creator,
+            msg.sender,
             tokens,
             allocation
         );
