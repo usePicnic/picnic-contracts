@@ -19,7 +19,6 @@ contract IndexPoolNFT is ERC721, Ownable {
     );
 
     event LOG_BURN_NFT(
-        address indexed userAddress,
         uint256 indexed tokenId,
         uint256 indexed indexId,
         uint256[] allocation
@@ -65,7 +64,7 @@ contract IndexPoolNFT is ERC721, Ownable {
 
         tokenIdToAllocation[tokenId] = new uint256[](allocation.length);
 
-        emit LOG_BURN_NFT(user, tokenId, indexId, allocation);
+        emit LOG_BURN_NFT(tokenId, indexId, allocation);
 
         return (indexId, allocation);
     }
