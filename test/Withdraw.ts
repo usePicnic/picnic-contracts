@@ -1,5 +1,6 @@
-import { expect } from "chai";
-import { ethers } from "hardhat";
+import {expect} from "chai";
+import {ethers} from "hardhat";
+import constants from "../constants";
 
 const hre = require('hardhat');
 
@@ -7,12 +8,17 @@ describe("Withdraw", function () {
     let Pool;
     let hardhatPool;
     let owner;
+    let oracle;
 
-    const UNI_ROUTER = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
-    const UNI_TOKEN = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984";
+    const ADDRESSES = constants['POLYGON'];
+    const tokens = ADDRESSES['TOKENS'];
 
     beforeEach(async function () {
-        [owner] = await ethers.getSigners()
+        [owner] = await ethers.getSigners();
+
+        let Oracle = await ethers.getContractFactory("OraclePath");
+
+        oracle = (await Oracle.deploy(ADDRESSES['FACTORY'])).connect(owner);
 
         // Get the ContractFactory
         Pool = await ethers.getContractFactory("Pool");
@@ -20,102 +26,79 @@ describe("Withdraw", function () {
         // To deploy our contract, we just have to call Pool.deploy() and await
         // for it to be deployed(), which happens onces its transaction has been
         // mined.
-        hardhatPool = (await Pool.deploy(UNI_ROUTER)).connect(owner)
+        hardhatPool = (await Pool.deploy(ADDRESSES['ROUTER'], oracle.address)).connect(owner)
 
-        await hardhatPool.create_index(
-            [1000000000],  // uint256[] _allocation,
-            [UNI_TOKEN] // address[] _tokens
+        await hardhatPool.createIndex(
+            tokens, // address[] _tokens
+            tokens.map(() => 1000000000),  // uint256[] _allocation,
+            tokens.map(x => [x, ADDRESSES['WMAIN']]), // paths
         );
 
         // DEPOSIT
-        let overrides = { value: ethers.utils.parseEther("1") };
+        let overrides = {value: ethers.utils.parseEther("10.")};
         await hardhatPool.deposit(
-            0, // _index_id
+            0, // _token_id
+            tokens.map(x => [ADDRESSES['WMAIN'], x]), // paths
             overrides
-        );
-
-        hardhatPool.buy(
-            0 // _index_id
         );
     });
 
-    it("Withdraws and sell from an index of single token", async function () {
+    it("Withdraws from an index of single token", async function () {
         const prevBalance = await owner.getBalance();
 
         // WITHDRAW
         await hardhatPool.withdraw(
-            0,   // _index_id
-            1000, // _sell_pct
+            [0],   // _token_id
+            [100000], // _sell_pct
+            tokens.map(x => [x, ADDRESSES['WMAIN']]) // paths
         );
 
-        await hardhatPool.sell(
-            0,   // _index_id
-        );
-
-        expect(await hardhatPool.get_token_balance(0, UNI_TOKEN, owner.getAddress())).to.equal(0);
+        expect(await hardhatPool.getTokenBalance(0, tokens[0], owner.getAddress())).to.equal(0);
         expect(await owner.getBalance()).to.be.above(prevBalance);
     })
 
-    it("Withdraws and sell a single token", async function () {
-        const prevBalance = await owner.getBalance();
+    // TODO reject 2 withdrawals
 
-        // WITHDRAW
-        await hardhatPool.withdraw(
-            0,   // _index_id
-            1000, // _sell_pct
-        );
 
-        await hardhatPool.sell_token(
-            UNI_TOKEN,   // _index_id
-        );
-
-        expect(await hardhatPool.get_token_balance(0, UNI_TOKEN, owner.getAddress())).to.equal(0);
-        expect(await owner.getBalance()).to.be.above(prevBalance);
-    })
-
-    it("Withdraws and sell 50% from an index of single token", async function () {
+    it("Withdraws 50% from an index of single token", async function () {
         const prevBalance = await owner.getBalance();
 
         // WITHDRAW
         const withdraw_result = await hardhatPool.withdraw(
-            0,   // _index_id
-            500, // _sell_pct
+            [0],   // _token_id
+            [50000], // _sell_pct
+            tokens.map(x => [x, ADDRESSES['WMAIN']]) // paths
         );
 
-        await hardhatPool.sell(
-            0,   // _index_id
-        );
-
-        expect(await hardhatPool.get_token_balance(0, UNI_TOKEN, owner.getAddress())).to.be.above(0);
+        expect(await hardhatPool.getTokenBalance(1, tokens[0])).to.be.above(0);
         expect(await owner.getBalance()).to.be.above(prevBalance);
     })
 
     it("Rejects 0% Withdrawals", async function () {
         // WITHDRAW
         await expect(hardhatPool.withdraw(
-            0,   // _index_id
-            0, // _sell_pct
+            [0],   // _token_id
+            [0], // _sell_pct
+            tokens.map(x => [x, ADDRESSES['WMAIN']]) // paths
         )).to.be.revertedWith('SELL PCT NEEDS TO BE GREATER THAN ZERO');
     })
 
     it("Rejects greater than 100% Withdrawals", async function () {
         // WITHDRAW
         await expect(hardhatPool.withdraw(
-            0,   // _index_id
-            1001, // _sell_pct
-        )).to.be.revertedWith("CAN'T SELL MORE THAN 100% OF FUNDS");        
+            [0],   // _token_id
+            [100001], // _sell_pct
+            tokens.map(x => [x, ADDRESSES['WMAIN']]) // paths
+        )).to.be.revertedWith("CAN'T SELL MORE THAN 100% OF FUNDS");
     })
 
-    it("Rejects Withdrawals without shares bought", async function () {
-        await hardhatPool.create_index(
-            [1000000000],  // uint256[] _allocation,
-            [UNI_TOKEN] // address[] _tokens
-        );
-
+    it("Rejects wrong path", async function () {
         // WITHDRAW
         await expect(hardhatPool.withdraw(
-            1,   // _index_id
-            1000, // _sell_pct
-        )).to.be.revertedWith('NEEDS TO HAVE SHARES OF THE INDEX');
+            [0],   // _token_id
+            [100000], // _sell_pct
+            tokens.map(x => [ADDRESSES['WMAIN'], x]) // paths
+        )).to.be.revertedWith("WRONG PATH: TOKEN NEEDS TO BE PART OF PATH");
     })
+    // TODO withdraw from a token that is not yours
 });

@@ -1,120 +1,113 @@
-import { expect } from "chai";
-import { ethers } from "hardhat";
+import {expect} from "chai";
+import {ethers} from "hardhat";
+import constants from "../constants";
 
 const hre = require('hardhat');
 
 describe("Fees", function () {
-  let Pool;
-  let hardhatPool;
-  let owner;
-  let addr1;
+    let Pool;
+    let hardhatPool;
+    let owner;
+    let addr1;
+    let oracle;
 
-  const UNI_ROUTER = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
-  const UNI_TOKEN = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984";
+    const ADDRESSES = constants['POLYGON'];
 
-  beforeEach(async function () {
-    [owner, addr1] = await ethers.getSigners();
+    beforeEach(async function () {
+        [owner, addr1] = await ethers.getSigners();
 
-    // Get the ContractFactory
-    Pool = await ethers.getContractFactory("Pool");
+        let Oracle = await ethers.getContractFactory("OraclePath");
 
-    // To deploy our contract, we just have to call Pool.deploy() and await
-    // for it to be deployed(), which happens onces its transaction has been
-    // mined.
-    hardhatPool = (await Pool.deploy(UNI_ROUTER))
+        oracle = (await Oracle.deploy(ADDRESSES['FACTORY'])).connect(owner);
 
-    await hardhatPool.create_index(
-      [1000000000],  // uint256[] _allocation,
-      [UNI_TOKEN] // address[] _tokens
-    );
+        // Get the ContractFactory
+        Pool = await ethers.getContractFactory("Pool");
 
-    // DEPOSIT
-    let overrides = { value: ethers.utils.parseEther("1.") };
-    await hardhatPool.deposit(
-      0, // _index_id
-      overrides
-    );
-  });
+        // To deploy our contract, we just have to call Pool.deploy() and await
+        // for it to be deployed(), which happens onces its transaction has been
+        // mined.
+        hardhatPool = (await Pool.deploy(ADDRESSES['ROUTER'], oracle.address)).connect(owner);
 
-  it("Check fee - creator", async function () {
-    expect(await hardhatPool.get_available_creator_fee(
-      0, // Index ID
-    )).to.be.equal(ethers.utils.parseEther("0.001"));
-  })
+        await hardhatPool.createIndex(
+            [ADDRESSES['TOKENS'][0]], // address[] _tokens
+            [1000000000],  // uint256[] _allocation,
+            [[ADDRESSES['TOKENS'][0], ADDRESSES['WMAIN']]] // PATHS
+        );
 
-  it("Pay fee - creator", async function () {    
-    const initialBalance = await owner.getBalance();
+        // DEPOSIT
+        let overrides = {value: ethers.utils.parseEther("1.")};
+        await hardhatPool.deposit(
+            0, // _index_id
+            [[ADDRESSES['WMAIN'], ADDRESSES['TOKENS'][0]]], // Paths
+            overrides
+        );
 
-    await hardhatPool.pay_creator_fee(
-      0, // Index ID
-      1000 // Withdraw Percentage
-    );
+        // Preparing to withdraw zero fee
+        await hardhatPool.createIndex(
+            [ADDRESSES['TOKENS'][0]], // address[] _tokens
+            [1000000000],  // uint256[] _allocation,
+            [[ADDRESSES['TOKENS'][0], ADDRESSES['WMAIN']]] // PATHS
+        );
+    });
 
-    expect(await owner.getBalance()).to.be.above(initialBalance);
-  })
+    it("Check fee - creator", async function () {
+        expect(await hardhatPool.getAvailableCreatorFee(
+            0, // Index ID
+        )).to.be.equal(ethers.utils.parseEther("0.001"));
+    })
 
-  it("Rejects creator fee withdraws of 0%", async function () {
-    await expect(hardhatPool.pay_creator_fee(
-      0, // Index ID
-      0 // Withdraw Percentage
-    )).to.be.revertedWith('WITHDRAW PERCANTAGE NEEDS TO BE GREATER THAN 0');
-  })
+    it("Pay fee - creator", async function () {
+        const initialBalance = await owner.getBalance();
 
-  it("Rejects creator fee withdraws of more than 100%", async function () {
-    await expect(hardhatPool.pay_creator_fee(
-      0, // Index ID
-      1001 // Withdraw Percentage
-    )).to.be.revertedWith('FEE WITHDRAW LIMIT EXCEEDED');
-  })
+        await hardhatPool.payCreatorFee(
+            0, // Index ID
+        );
 
-  it("Rejects creator fee withdraws from other address", async function () {
-    let contractAsSigner0 = hardhatPool.connect(addr1);
+        expect(await owner.getBalance()).to.be.above(initialBalance);
+    })
 
-    await expect(contractAsSigner0.pay_creator_fee(
-      0, // Index ID
-      1001 // Withdraw Percentage
-    )).to.be.revertedWith('ONLY INDEX CREATOR CAN WITHDRAW FEES');
-  })
+    it("Rejects creator fee withdraws from other address", async function () {
+        let contractAsSigner0 = hardhatPool.connect(addr1);
 
-  it("Check fee - protocol", async function () {
-    expect(await hardhatPool.get_available_protocol_fee(
-      0, // Index ID
-    )).to.be.equal(ethers.utils.parseEther("0.001"));
-  })
+        await expect(contractAsSigner0.payCreatorFee(
+            0, // Index ID
+        )).to.be.revertedWith('ONLY INDEX CREATOR CAN WITHDRAW FEES');
+    })
 
-  it("Pay fee - protocol", async function () {    
-    const initialBalance = await owner.getBalance();
+    it("Rejects creator withdraw when there is no fee available", async function () {
+        await expect(hardhatPool.payCreatorFee(
+            1, // Index ID
+        )).to.be.revertedWith('NO FEE TO WITHDRAW');
+    })
 
-    await hardhatPool.pay_protocol_fee(
-      0, // Index ID
-      1000 // Withdraw Percentage
-    );
-    
-    expect(await owner.getBalance()).to.be.above(initialBalance);
-  })
+    it("Check fee - protocol", async function () {
+        expect(await hardhatPool.getAvailableProtocolFee(
+            0, // Index ID
+        )).to.be.equal(ethers.utils.parseEther("0.001"));
+    })
 
-  it("Rejects protocol fee withdraws of 0%", async function () {
-    await expect(hardhatPool.pay_protocol_fee(
-      0, // Index ID
-      0 // Withdraw Percentage
-    )).to.be.revertedWith('WITHDRAW PERCANTAGE NEEDS TO BE GREATER THAN 0');
-  })
+    it("Pay fee - protocol", async function () {
+        const initialBalance = await owner.getBalance();
 
-  it("Rejects protocol fee withdraws of more than 100%", async function () {
-    await expect(hardhatPool.pay_protocol_fee(
-      0, // Index ID
-      1001 // Withdraw Percentage
-    )).to.be.revertedWith('FEE WITHDRAW LIMIT EXCEEDED');
-  })
+        await hardhatPool.payProtocolFee(
+            0, // Index ID
+        );
 
-  it("Rejects protocol fee withdraws from other address", async function () {
-    let contractAsSigner0 = hardhatPool.connect(addr1);
+        expect(await owner.getBalance()).to.be.above(initialBalance);
+    })
 
-    await expect(contractAsSigner0.pay_protocol_fee(
-      0, // Index ID
-      1001 // Withdraw Percentage
-    )).to.be.revertedWith('ONLY INDEXPOOL CAN WITHDRAW FEES');
-  })
- 
+    it("Rejects protocol fee withdraws from other address", async function () {
+        let contractAsSigner0 = hardhatPool.connect(addr1);
+
+        await expect(contractAsSigner0.payProtocolFee(
+            0, // Index ID
+        )).to.be.revertedWith('ONLY INDEXPOOL CAN CALL THIS FUNCTION');
+    })
+
+    it("Rejects creator withdraw when there is no fee available", async function () {
+        await expect(hardhatPool.payProtocolFee(
+            1, // Index ID
+        )).to.be.revertedWith('NO FEE TO WITHDRAW');
+    })
 })
 

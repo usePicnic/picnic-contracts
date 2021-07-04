@@ -29,7 +29,10 @@ module.exports = {
         version: "0.4.24"
       },
       {
-        version: "0.8.4",
+        version: "0.6.6"
+      },
+      {
+        version: "0.8.6",
       }
     ],
     settings: {
@@ -39,12 +42,13 @@ module.exports = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
+      chainId: 7671,
       forking: {
-        url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`,
-        blockNumber: 12182008,
+        url: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_KEY}`, 
       }
     },
   },
+  mocha: { timeout: '180000'},
   gasReporter: {
     currency: 'USD',
     gasPrice: 1,
