@@ -8,9 +8,22 @@ import "../interfaces/IIndexPoolNFT.sol";
 contract IndexPoolNFT is ERC721, Ownable {
     uint256 public tokenCounter;
     address creator;
-    mapping(uint256 => address[]) public tokenIdToTokenAddresses;
     mapping(uint256 => uint256[]) public tokenIdToAllocation;
     mapping(uint256 => uint256) public tokenIdToIndexId;
+
+    event LOG_MINT_NFT(
+        address indexed userAddress,
+        uint256 indexed tokenId,
+        uint256 indexed indexId,
+        uint256[] allocation
+    );
+
+    event LOG_BURN_NFT(
+        uint256 indexed tokenId,
+        uint256 indexed indexId,
+        uint256[] allocation
+    );
+
 
     constructor() public ERC721("INDEXPOOL", "IPNFT") {
         tokenCounter = 0;
@@ -36,6 +49,8 @@ contract IndexPoolNFT is ERC721, Ownable {
 
         tokenCounter = tokenCounter + 1;
 
+        emit LOG_MINT_NFT(user, newItemId, indexId, allocation);
+
         return newItemId;
     }
 
@@ -46,6 +61,10 @@ contract IndexPoolNFT is ERC721, Ownable {
         uint256[] memory allocation = tokenIdToAllocation[tokenId];
 
         _burn(tokenId);
+
+        tokenIdToAllocation[tokenId] = new uint256[](allocation.length);
+
+        emit LOG_BURN_NFT(tokenId, indexId, allocation);
 
         return (indexId, allocation);
     }

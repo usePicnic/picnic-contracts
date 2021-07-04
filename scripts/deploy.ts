@@ -48,9 +48,9 @@ async function main() {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        network_name: "polygon_indexpool_testnet",
+        networkName: "polygon-testnet",
         address: pool.address,
-        contract: contractData
+        abi: contractData['abi']
       })
     })
   const responseText = await response.text()

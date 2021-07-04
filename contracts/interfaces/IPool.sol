@@ -40,14 +40,12 @@ interface IPool {
      *
      * @dev Access the mapping that control holdings for index -> token -> user.
      *
-     * @param indexId Index Id (position in `indexes` array)
+     * @param tokenId Token Id
      * @param tokenAddress Token address
-     * @param userAddress User address
      */
     function getTokenBalance(
-        uint256 indexId,
-        address tokenAddress,
-        address userAddress
+        uint256 tokenId,
+        address tokenAddress
     ) external view returns (uint256);
 
     /**
@@ -86,7 +84,7 @@ interface IPool {
     function getIndex(uint256 indexId)
     external
     view
-    returns (OutputIndex memory);
+    returns (Index memory);
 
     /**
      * @notice Set max deposit (guarded launch).
@@ -140,13 +138,13 @@ interface IPool {
      * according to the amounts that the user holds and the percentage he wants to
      * withdraw.
      *
-     * @param indexId Index Id (position in `indexes` array)
-     * @param sellPct Percentage of shares to be cashed out (1000 = 100%)
+     * @param tokenIds Token Ids
+     * @param sellPct Percentage of shares to be cashed out (100000 = 100%)
      * @param paths Execution paths
      */
     function withdraw(
-        uint256 indexId,
-        uint256 sellPct,
+        uint256[] memory tokenIds,
+        uint256[] memory sellPct,
         address[][] memory paths
     ) external;
 
@@ -155,10 +153,13 @@ interface IPool {
     *
     * @dev This is to be used whenever users want to cash out their ERC20 tokens.
     *
-    * @param indexId Index Id (position in `indexes` array)
+    * @param tokenIds Token Ids
     * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
     */
-    function cashOutERC20(uint256 indexId, uint256 sharesPct) external;
+    function cashOutERC20(
+        uint256[] memory tokenIds,
+        uint256[] memory sharesPct
+    ) external;
 
     /**
      * @notice Admin-force cash-out ERC20 tokens directly to wallet.
@@ -166,44 +167,21 @@ interface IPool {
      * @dev This is a security measure, basically giving us the ability to eject users
      * from the contract in case some vulnerability is found on the withdrawal method.
      *
-     * @param indexId Index Id (position in `indexes` array)
+     * @param tokenIds Token Ids
      * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
     function cashOutERC20Admin(
         address user,
-        uint256 indexId,
-        uint256 sharesPct
+        uint256[] memory tokenIds,
+        uint256[] memory sharesPct
     ) external;
-
-    /**
-     * @notice Mint a specific NFT token.
-     *
-     * @dev Mints a specific NFT token remove assigned contracts from contract and into token.
-     *
-     * @param indexId Index Id (position in `indexes` array)
-     * @param sharesPct Percentage of shares to be minted as NFT (1000 = 100%)
-     */
-    function mintPool721(
-        uint256 indexId,
-        uint256 sharesPct
-    ) external;
-
-    /**
-     * @notice Burn a specific NFT token.
-     *
-     * @dev Burns a specific NFT token and assigns assets back to NFT owner.
-     * Only callable by whoever holds the token.
-     *
-     * @param tokenId Token Id
-     */
-    function burnPool721(uint256 tokenId) external;
 
     /**
      * @notice Get Pool721 (NFT contract) address.
      *
      * @dev Get the address of the NFT contract minted by this Pool.
      */
-    function getPool721Address() external view returns (address);
+    function getPortfolioNFTAddress() external view returns (address);
 
     /**
      * @notice Pay creator fee.
