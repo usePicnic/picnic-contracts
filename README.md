@@ -1,3 +1,26 @@
+<p align="center">IndexPool is a portfolio sharing platform with a simple design. Check our prototype at <a href="https://indexpool.org">indexpool.org</a>.</p>
+
+<p align="center">
+  <a href="https://hardhat.org">
+    <img src="https://img.shields.io/badge/built with-Hardhat-f9c937" alt="Build with Hardhat">
+  </a>
+
+  <a href="https://github.com/indexpool/contracts/actions/workflows/main.yml">
+    <img src="https://github.com/indexpool/contracts/workflows/lint+compile+test/badge.svg" alt="test"/>
+  </a>
+  
+  <a href='https://coveralls.io/github/indexpool/contracts?branch=main'>
+    <img src='https://coveralls.io/repos/github/indexpool/contracts/badge.svg?branch=main' alt='Coverage Status' />
+  </a>
+
+  <a href="https://github.com/indexpool/contracts/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/license-GPL--3-blue" alt="License GPL-3">
+  </a>
+</p>
+
+
+---
+
 ## Compile
 
 ```bash
@@ -14,20 +37,6 @@ yarn test
 
 ```
 yarn coverage
-```
-
-## Running Locally
-
-You will first need to run a local node in your machine. You can do that with Hardhat using:
-
-```
-npx hardhat node
-```
-
-After that, you can run our script responsible for deploying all our contracts with a default configuration. It will be created some initial options and pools with liquidity there.
-
-```
-npx hardhat setupLocal --network local
 ```
 
 ## Contributing
