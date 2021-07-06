@@ -35,9 +35,11 @@ async function main() {
   // DEPLOY
   const pool = await Pool.deploy(ADDRESSES['ROUTER'], oracle.address);
 
-  const nftAddress = await Pool.getPortfolioNFTAddress();
+  console.log("Pool address:", pool.address);
 
-  console.log("Pool address:", pool.address);  
+  const nftAddress = await pool.getPortfolioNFTAddress();
+
+  console.log("NFT Address", nftAddress)
 
   // REGISTER ON SERVER
   const poolFile = readFileSync('./artifacts/contracts/Pool.sol/Pool.json', 'utf8')
