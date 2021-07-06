@@ -35,11 +35,16 @@ async function main() {
   // DEPLOY
   const pool = await Pool.deploy(ADDRESSES['ROUTER'], oracle.address);
 
+  const nftAddress = await Pool.getPortfolioNFTAddress();
+
   console.log("Pool address:", pool.address);  
 
   // REGISTER ON SERVER
-  const contractFile = readFileSync('./artifacts/contracts/Pool.sol/Pool.json', 'utf8')
-  const contractData = JSON.parse(contractFile)
+  const poolFile = readFileSync('./artifacts/contracts/Pool.sol/Pool.json', 'utf8')
+  const poolContract = JSON.parse(poolFile)
+
+  const nftFile = readFileSync('./artifacts/contracts/nft/IndexPoolNFT.sol/IndexPoolNFT.json', 'utf8')
+  const nftContract = JSON.parse(nftFile)
 
   const response = await fetch(
     'https://indexpool-appservice.azurewebsites.net/api/setcontract?code=yKjNRKdRLV4xl5fdmZU6bPveAg6lxpmxmRB3ocSXYTkrCUyXIa3QgA%3D%3D', {
@@ -50,7 +55,9 @@ async function main() {
       body: JSON.stringify({
         networkName: "polygon-testnet",
         address: pool.address,
-        abi: contractData['abi']
+        abi: poolContract['abi'],
+        nftAddress: nftAddress,
+        nftAbi: nftContract['abi']
       })
     })
   const responseText = await response.text()
