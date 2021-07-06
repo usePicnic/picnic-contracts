@@ -8,20 +8,18 @@ import "../interfaces/IIndexPoolNFT.sol";
 contract IndexPoolNFT is ERC721, Ownable {
     uint256 public tokenCounter;
     address creator;
-    mapping(uint256 => uint256[]) public tokenIdToAllocation;
-    mapping(uint256 => uint256) public tokenIdToIndexId;
+    mapping(uint256 => uint256[]) public nftIdToAllocation;
+    mapping(uint256 => uint256) public nftIdToIndexId;
 
     event LOG_MINT_NFT(
         address indexed userAddress,
-        uint256 indexed tokenId,
+        uint256 indexed nftId,
         uint256 indexed indexId,
         uint256[] allocation
     );
 
     event LOG_BURN_NFT(
-        uint256 indexed tokenId,
-        uint256 indexed indexId,
-        uint256[] allocation
+        uint256 indexed nftId
     );
 
 
@@ -44,8 +42,8 @@ contract IndexPoolNFT is ERC721, Ownable {
 
         _safeMint(user, newItemId);
 
-        tokenIdToIndexId[newItemId] = indexId;
-        tokenIdToAllocation[newItemId] = allocation;
+        nftIdToIndexId[newItemId] = indexId;
+        nftIdToAllocation[newItemId] = allocation;
 
         tokenCounter = tokenCounter + 1;
 
@@ -55,25 +53,25 @@ contract IndexPoolNFT is ERC721, Ownable {
     }
 
     function burnPool721(
-        uint256 tokenId
+        uint256 nftId
     ) external _indexpoolOnly_ returns (uint256, uint256[] memory) {
-        uint256 indexId = tokenIdToIndexId[tokenId];
-        uint256[] memory allocation = tokenIdToAllocation[tokenId];
+        uint256 indexId = nftIdToIndexId[nftId];
+        uint256[] memory allocation = nftIdToAllocation[nftId];
 
-        _burn(tokenId);
+        _burn(nftId);
 
-        tokenIdToAllocation[tokenId] = new uint256[](allocation.length);
+        nftIdToAllocation[nftId] = new uint256[](allocation.length);
 
-        emit LOG_BURN_NFT(tokenId, indexId, allocation);
+        emit LOG_BURN_NFT(nftId);
 
         return (indexId, allocation);
     }
 
     function viewPool721(
-        uint256 tokenId
+        uint256 nftId
     ) external view returns (uint256, uint256[] memory)  {
-        uint256 indexId = tokenIdToIndexId[tokenId];
-        uint256[] memory allocation = tokenIdToAllocation[tokenId];
+        uint256 indexId = nftIdToIndexId[nftId];
+        uint256[] memory allocation = nftIdToAllocation[nftId];
 
         return (indexId, allocation);
     }

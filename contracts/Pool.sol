@@ -53,22 +53,21 @@ contract Pool is IPool {
 
     event LOG_DEPOSIT(
         address indexed userAddress,
-        uint256 indexed indexId,
-        uint256 amount_in
+        uint256 indexed nftId,
+        uint256 amountIn
     );
 
     event LOG_WITHDRAW(
         address indexed userAddress,
-        uint256 indexed indexId,
-        uint256 percentage,
-        uint256 amount_out
+        uint256 indexed burnedNftId,
+        uint256 indexed mintedNftId,
+        uint256 amountOut
     );
 
     event LOG_ERC20_WITHDRAW(
         address indexed userAddress,
-        uint256 indexed indexId,
-        uint256 percentage,
-        uint256[] amounts
+        uint256 indexed burnedNftId,
+        uint256 indexed mintedNftId
     );
 
     event LOG_FEE_WITHDRAW(
@@ -124,17 +123,17 @@ contract Pool is IPool {
      *
      * @dev Access the mapping that control holdings for index -> token -> user.
      *
-     * @param tokenId Token Id
+     * @param nftId NFT Id
      * @param tokenAddress Token address
      */
     function getTokenBalance(
-        uint256 tokenId,
+        uint256 nftId,
         address tokenAddress // TODO use token position??
     ) external view override returns (uint256) {
         // TODO Remove uint8 accross contract
         uint256 indexId;
         uint256[] memory allocation;
-        (indexId, allocation) = _pool721.viewPool721(tokenId);
+        (indexId, allocation) = _pool721.viewPool721(nftId);
 
         address[] memory tokens = _indexes[indexId].tokens;
 
@@ -420,13 +419,13 @@ contract Pool is IPool {
     }
 
     function withdraw(
-        uint256[] memory tokenIds,
+        uint256[] memory nftIds,
         uint256[] memory sellPct,
         address[][] memory paths
     ) external override
     {
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            withdrawSingleToken(tokenIds[i], sellPct[i], paths);
+        for (uint256 i = 0; i < nftIds.length; i++) {
+            withdrawSingleToken(nftIds[i], sellPct[i], paths);
         }
     }
 
@@ -437,13 +436,13 @@ contract Pool is IPool {
      * according to the amounts that the user holds and the percentage he wants to
      * withdraw.
      *
-     * @param tokenId Token Id
+     * @param nftId NFT Id
      * @param sellPct Percentage of shares to be cashed out (1000 = 100%)
      * @param paths Execution paths
      */
     // TODO figure out how to make partial withdrawals with NFTs (burn, sell, mint new one?)
     function withdrawSingleToken(
-        uint256 tokenId,
+        uint256 nftId,
         uint256 sellPct,
         address[][] memory paths
     ) internal {
@@ -457,11 +456,11 @@ contract Pool is IPool {
         require(sellPct <= 100000, "CAN'T SELL MORE THAN 100% OF FUNDS");
 
         require(
-            _pool721.ownerOf(tokenId) == msg.sender,
+            _pool721.ownerOf(nftId) == msg.sender,
             "ONLY CALLABLE BY TOKEN OWNER"
         );
 
-        (indexId, amounts) = _pool721.burnPool721(tokenId);
+        (indexId, amounts) = _pool721.burnPool721(nftId);
         address[] memory tokens = _indexes[indexId].tokens;
 
         for (uint256 i = 0; i < tokens.length; i++) {
@@ -553,18 +552,18 @@ contract Pool is IPool {
      * goes amiss.
      *
      * @param userAddress Address of user to have ERC20 tokens withdrawn
-     * @param tokenId Token Id
+     * @param nftId NFT Id
      * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
     // TODO make this compatible with NFT Withdrawals
     function cashOutERC20Internal(
         address userAddress,
-        uint256 tokenId,
+        uint256 nftId,
         uint256 sharesPct
     ) internal {
         uint256 indexId;
         uint256[] memory allocation;
-        (indexId, allocation) = _pool721.burnPool721(tokenId);
+        (indexId, allocation) = _pool721.burnPool721(nftId);
 
         address tokenAddress;
         address[] memory tokens = _indexes[indexId].tokens;
@@ -609,15 +608,15 @@ contract Pool is IPool {
      *
      * @dev This is to be used whenever users want to cash out their ERC20 tokens.
      *
-     * @param tokenIds Token Ids
+     * @param nftIds Token Ids
      * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
     function cashOutERC20(
-        uint256[] memory tokenIds,
+        uint256[] memory nftIds,
         uint256[] memory sharesPct
     ) external override {
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            cashOutERC20Internal(msg.sender, tokenIds[i], sharesPct[i]);
+        for (uint256 i = 0; i < nftIds.length; i++) {
+            cashOutERC20Internal(msg.sender, nftIds[i], sharesPct[i]);
         }
     }
 
@@ -628,16 +627,16 @@ contract Pool is IPool {
      * from the contract in case some vulnerability is found on the withdrawal method.
      *
      * @param userAddress Address of user to have ERC20 tokens withdrawn
-     * @param tokenIds Token Ids
+     * @param nftIds NFT Ids
      * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
     function cashOutERC20Admin(
         address userAddress,
-        uint256[] memory tokenIds,
+        uint256[] memory nftIds,
         uint256[] memory sharesPct
     ) external override _indexpoolOnly_ {
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            cashOutERC20Internal(userAddress, tokenIds[i], sharesPct[i]);
+        for (uint256 i = 0; i < nftIds.length; i++) {
+            cashOutERC20Internal(userAddress, nftIds[i], sharesPct[i]);
         }
     }
 
