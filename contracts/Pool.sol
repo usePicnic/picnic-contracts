@@ -354,9 +354,9 @@ contract Pool is IPool {
         uint256[] memory outputAmounts = buy(tokens, amounts, paths);
 
         // Mint
-        _pool721.generatePool721(msg.sender, indexId, amounts);
+        uint256 nftId = _pool721.generatePool721(msg.sender, indexId, outputAmounts);
 
-        emit LOG_DEPOSIT(msg.sender, indexId, msg.value);
+        emit LOG_DEPOSIT(msg.sender, nftId, msg.value);
     }
 
     function calculateQuotaPrice(uint256[] memory allocation, address[][] memory paths, address[] memory tokens)
