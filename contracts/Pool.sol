@@ -436,13 +436,13 @@ contract Pool is IPool {
      * according to the amounts that the user holds and the percentage he wants to
      * withdraw.
      *
-     * @param nftId NFT Id
+     * @param burnedNftId NFT Id to be burned
      * @param sellPct Percentage of shares to be cashed out (1000 = 100%)
      * @param paths Execution paths
      */
     // TODO figure out how to make partial withdrawals with NFTs (burn, sell, mint new one?)
     function withdrawSingleToken(
-        uint256 nftId,
+        uint256 burnedNftId,
         uint256 sellPct,
         address[][] memory paths
     ) internal {
@@ -456,11 +456,11 @@ contract Pool is IPool {
         require(sellPct <= 100000, "CAN'T SELL MORE THAN 100% OF FUNDS");
 
         require(
-            _pool721.ownerOf(nftId) == msg.sender,
+            _pool721.ownerOf(burnedNftId) == msg.sender,
             "ONLY CALLABLE BY TOKEN OWNER"
         );
 
-        (indexId, amounts) = _pool721.burnPool721(nftId);
+        (indexId, amounts) = _pool721.burnPool721(burnedNftId);
         address[] memory tokens = _indexes[indexId].tokens;
 
         for (uint256 i = 0; i < tokens.length; i++) {
@@ -487,12 +487,17 @@ contract Pool is IPool {
             }
         }
         payable(msg.sender).transfer(ethAmount);
-        emit LOG_WITHDRAW(msg.sender, indexId, sellPct, ethAmount);
 
         // Mint new NFT
+        uint256 mintedNftId;
         if (sellPct < 100000 && amounts[0] > 0) {
-            _pool721.generatePool721(msg.sender, indexId, amounts);
+            mintedNftId = _pool721.generatePool721(msg.sender, indexId, amounts);
         }
+        else {
+            mintedNftId = burnedNftId;
+        }
+
+        emit LOG_WITHDRAW(msg.sender, burnedNftId, mintedNftId, ethAmount);
     }
 
     /**
@@ -552,18 +557,18 @@ contract Pool is IPool {
      * goes amiss.
      *
      * @param userAddress Address of user to have ERC20 tokens withdrawn
-     * @param nftId NFT Id
+     * @param burnedNftId NFT Id to be burned
      * @param sharesPct Percentage of shares to be cashed out (1000 = 100%)
      */
     // TODO make this compatible with NFT Withdrawals
     function cashOutERC20Internal(
         address userAddress,
-        uint256 nftId,
+        uint256 burnedNftId,
         uint256 sharesPct
     ) internal {
         uint256 indexId;
         uint256[] memory allocation;
-        (indexId, allocation) = _pool721.burnPool721(nftId);
+        (indexId, allocation) = _pool721.burnPool721(burnedNftId);
 
         address tokenAddress;
         address[] memory tokens = _indexes[indexId].tokens;
@@ -596,11 +601,16 @@ contract Pool is IPool {
             }
         }
 
-        emit LOG_ERC20_WITHDRAW(userAddress, indexId, sharesPct, amounts);
-
+        // Mint new NFT
+        uint256 mintedNftId;
         if (sharesPct < 100000 && allocation[0] > 0) {
-            _pool721.generatePool721(msg.sender, indexId, amounts);
+            mintedNftId = _pool721.generatePool721(msg.sender, indexId, amounts);
         }
+        else {
+            mintedNftId = burnedNftId;
+        }
+
+        emit LOG_ERC20_WITHDRAW(userAddress, burnedNftId, mintedNftId);
     }
 
     /**
