@@ -93,5 +93,39 @@ describe("Deposit", function () {
             overrides
         )).to.be.revertedWith('EXCEEDED MAXIMUM ALLOWED DEPOSIT VALUE');
     })
+
+    it("Figuring out buggy case", async function () {
+        let tokens = ['0xD6DF932A45C0f255f85145f286eA0b292B21C90B',
+            '0xF84BD51eab957c2e7B7D646A3427C5A50848281D',
+            '0x6aB6d61428fde76768D7b45D8BFeec19c6eF91A8']
+        let paths = [['0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+            '0xD6DF932A45C0f255f85145f286eA0b292B21C90B'],
+            ['0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+                '0x831753DD7087CaC61aB5644b308642cc1c33Dc13',
+                '0xF84BD51eab957c2e7B7D646A3427C5A50848281D'],
+            ['0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+                '0x6aB6d61428fde76768D7b45D8BFeec19c6eF91A8']]
+
+        await hardhatPool.createIndex(
+            tokens, // address[] _tokens
+            [32131631195684, 7781, BigInt(669904507422815072459)],  // uint256[] _allocation,
+            paths.map((l) => {
+                return l.slice().reverse();
+            }) // paths
+        );
+
+        const initialBalance = await owner.getBalance();
+
+        // DEPOSIT
+        let overrides = {value: ethers.utils.parseEther("1")};
+        const deposit_result = await hardhatPool.deposit(
+            1, // _index_id
+            paths, // paths
+            overrides
+        );
+
+        expect(await hardhatPool.getTokenBalance(0, tokens[0], owner.getAddress())).to.above(0);
+        expect(await owner.getBalance()).to.be.below(initialBalance);
+    })
 })
 
