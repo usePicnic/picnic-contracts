@@ -94,7 +94,7 @@ describe("Deposit", function () {
         )).to.be.revertedWith('EXCEEDED MAXIMUM ALLOWED DEPOSIT VALUE');
     })
 
-    it("Figuring out buggy case", async function () {
+    it("Figuring out buggy case # 1", async function () {
         let tokens = ['0xD6DF932A45C0f255f85145f286eA0b292B21C90B',
             '0xF84BD51eab957c2e7B7D646A3427C5A50848281D',
             '0x6aB6d61428fde76768D7b45D8BFeec19c6eF91A8']
@@ -117,12 +117,16 @@ describe("Deposit", function () {
         const initialBalance = await owner.getBalance();
 
         // DEPOSIT
-        let overrides = {value: ethers.utils.parseEther("1")};
-        const deposit_result = await hardhatPool.deposit(
-            1, // _index_id
-            paths, // paths
-            overrides
-        );
+        let overrides = {value: ethers.utils.parseEther("10")};
+
+        for (var i = 0; i < 100; i++) {
+            console.log(i);
+            await hardhatPool.deposit(
+                1, // _index_id
+                paths, // paths
+                overrides
+            );
+        }
 
         expect(await hardhatPool.getTokenBalance(0, tokens[0], owner.getAddress())).to.above(0);
         expect(await owner.getBalance()).to.be.below(initialBalance);
