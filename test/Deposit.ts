@@ -108,7 +108,7 @@ describe("Deposit", function () {
 
         await hardhatPool.createIndex(
             tokens, // address[] _tokens
-            [32131631195684, 7781, BigInt(669904507422815072459)],  // uint256[] _allocation,
+            [32131631195684, 3500, BigInt(669904507422815072459)],  // uint256[] _allocation,
             paths.map((l) => {
                 return l.slice().reverse();
             }) // paths
@@ -119,14 +119,11 @@ describe("Deposit", function () {
         // DEPOSIT
         let overrides = {value: ethers.utils.parseEther("10")};
 
-        for (var i = 0; i < 100; i++) {
-            console.log(i);
-            await hardhatPool.deposit(
-                1, // _index_id
-                paths, // paths
-                overrides
-            );
-        }
+        await hardhatPool.deposit(
+            1, // _index_id
+            paths, // paths
+            overrides
+        );
 
         expect(await hardhatPool.getTokenBalance(0, tokens[0], owner.getAddress())).to.above(0);
         expect(await owner.getBalance()).to.be.below(initialBalance);
