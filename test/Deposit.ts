@@ -108,7 +108,7 @@ describe("Deposit", function () {
 
         await hardhatPool.createIndex(
             tokens, // address[] _tokens
-            [32131631195684, 3500, BigInt(669904507422815072459)],  // uint256[] _allocation,
+            [32131631195684, 3510, BigInt(669904507422815072459)],  // uint256[] _allocation,
             paths.map((l) => {
                 return l.slice().reverse();
             }) // paths
