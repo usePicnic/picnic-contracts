@@ -249,7 +249,7 @@ contract Pool is IPool {
                 );
 
                 // Checks if amount is too small
-                amount = _uniswapRouter.getAmountsOut(allocation[i], path)[1];
+                amount = _uniswapRouter.getAmountsOut(allocation[i], path)[path.length - 1];
                 require(
                     amount > 100000,
                     "ALLOCATION AMOUNT IS TOO SMALL, NEEDS TO BE AT LEAST EQUIVALENT TO 100,000 WEI"
