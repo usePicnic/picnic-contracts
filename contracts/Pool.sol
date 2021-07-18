@@ -240,7 +240,6 @@ contract Pool is IPool {
         for (uint8 i = 0; i < allocation.length; i++) {
             // Set temp variables
             path = paths[i];
-            address[] memory invPath = new address[](path.length);
             tokenAddress = tokens[i];
 
             if (address(0) != tokenAddress) {
@@ -250,13 +249,14 @@ contract Pool is IPool {
                 );
 
                 // Checks if amount is too small
-                amount = _uniswapRouter.getAmountsOut(allocation[i], path)[1];
+                amount = _uniswapRouter.getAmountsOut(allocation[i], path)[path.length - 1];
                 require(
                     amount > 100000,
                     "ALLOCATION AMOUNT IS TOO SMALL, NEEDS TO BE AT LEAST EQUIVALENT TO 100,000 WEI"
                 );
 
                 // Calculate inverse path and instantiate Oracles
+                address[] memory invPath = new address[](path.length);
                 for (uint8 j = 0; j < path.length; j++) {
                     invPath[path.length - 1 - j] = path[j];
                 }
@@ -374,14 +374,19 @@ contract Pool is IPool {
                 "WRONG PATH: TOKEN NEEDS TO BE PART OF PATH"
             );
 
+            address[] memory invPath = new address[](path.length);
+            for (uint8 j = 0; j < path.length; j++) {
+                invPath[path.length - 1 - j] = path[j];
+            }
+
             if (address(0) == tokens[i]) {
                 amount = allocation[i];
             } else {
-                _oracle.updateOracles(path);
-                amount = _oracle.consult(path);
+                _oracle.updateOracles(invPath);
+                amount = _oracle.consult(invPath);
 
                 if (amount == 0) {
-                    amount = _uniswapRouter.getAmountsOut(allocation[i], path)[
+                    amount = _uniswapRouter.getAmountsOut(allocation[i], invPath)[
                     path.length - 1
                     ];
                 }
