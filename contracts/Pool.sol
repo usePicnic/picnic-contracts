@@ -1,13 +1,14 @@
 pragma solidity >=0.8.6;
 
 import "hardhat/console.sol";
-import "./interfaces/IPool.sol";
 import "./libraries/DataStructures.sol";
 import "./nft/IndexPoolNFT.sol";
 import "./interfaces/IOraclePath.sol";
+import "./interfaces/IPool.sol";
 
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
+import "./interfaces/IWallet.sol";
 
 /**
  * @title Pool
@@ -321,42 +322,52 @@ contract Pool is IPool {
     payable
     override
     {
-        require(
-            msg.value <= maxDeposit,
-            "EXCEEDED MAXIMUM ALLOWED DEPOSIT VALUE"
-        );
-
-        require(
-            msg.value > BASE_ASSET / 1000,
-            "MINIMUM DEPOSIT OF 0.001 MATIC"
-        );
-
-        address[] memory tokens = _indexes[indexId].tokens;
-        uint256[] memory allocation = _indexes[indexId].allocation;
-        uint256[] memory amounts = new uint256[](tokens.length);
-        uint256 quotaPrice;
-
-        // Pay fees
-        uint256 fee = msg.value / 500;
-        _indexes[indexId].fee += fee;
-
-        uint256 freeAmount = msg.value - fee;
-
-        // Decide how much to buy
-        (quotaPrice, amounts) = calculateQuotaPrice(allocation, paths, tokens);
-        uint256 nQuotas = freeAmount / quotaPrice;
-
-        for (uint8 i = 0; i < amounts.length; i++) {
-            amounts[i] = amounts[i] * nQuotas;
-        }
-
-        // Go to uniswap
-        uint256[] memory outputAmounts = buy(tokens, amounts, paths);
-
         // Mint
         uint256 nftId = _pool721.generatePool721(msg.sender, indexId, outputAmounts);
 
-        emit LOG_DEPOSIT(msg.sender, nftId, msg.value);
+        IWallet wallet = new Wallet(nftId);
+        uint256 ethValue = msg.value / tokens.length; // TODO
+
+        for (uint8 i = 0; i < amounts.length; i++) {
+            wallet.deposit{value : ethValue}(bridgeAddresses[i], token[i], paths[i]);
+        }
+
+        //        require(
+        //            msg.value <= maxDeposit,
+        //            "EXCEEDED MAXIMUM ALLOWED DEPOSIT VALUE"
+        //        );
+        //
+        //        require(
+        //            msg.value > BASE_ASSET / 1000,
+        //            "MINIMUM DEPOSIT OF 0.001 MATIC"
+        //        );
+        //
+        //        address[] memory tokens = _indexes[indexId].tokens;
+        //        uint256[] memory allocation = _indexes[indexId].allocation;
+        //        uint256[] memory amounts = new uint256[](tokens.length);
+        //        uint256 quotaPrice;
+        //
+        //        // Pay fees
+        //        uint256 fee = msg.value / 500;
+        //        _indexes[indexId].fee += fee;
+        //
+        //        uint256 freeAmount = msg.value - fee;
+        //
+        //        // Decide how much to buy
+        //        (quotaPrice, amounts) = calculateQuotaPrice(allocation, paths, tokens);
+        //        uint256 nQuotas = freeAmount / quotaPrice;
+        //
+        //        for (uint8 i = 0; i < amounts.length; i++) {
+        //            amounts[i] = amounts[i] * nQuotas;
+        //        }
+        //
+        //        // Go to uniswap
+        //        uint256[] memory outputAmounts = buy(tokens, amounts, paths);
+        //
+        //        // Mint
+        //        uint256 nftId = _pool721.generatePool721(msg.sender, indexId, outputAmounts);
+        //
+        //        emit LOG_DEPOSIT(msg.sender, nftId, msg.value);
     }
 
     function calculateQuotaPrice(uint256[] memory allocation, address[][] memory paths, address[] memory tokens)
