@@ -40,13 +40,11 @@ contract IndexPoolNFT is ERC721, Ownable {
     ) external _indexpoolOnly_ returns (uint256) {
         uint256 newItemId = tokenCounter;
 
-        _safeMint(user, newItemId);
-
         nftIdToIndexId[newItemId] = indexId;
         nftIdToAllocation[newItemId] = allocation;
-
         tokenCounter = tokenCounter + 1;
 
+        _safeMint(user, newItemId);
         emit LOG_MINT_NFT(user, newItemId, indexId, allocation);
 
         return newItemId;
