@@ -1,9 +1,12 @@
-pragma solidity >=0.8.6;
+pragma solidity 0.6.12;
+
+pragma experimental ABIEncoderV2;
 
 interface IWallet {
-    function deposit(address bridgeAddress, address token, address[] path);
 
-    function withdraw(address bridgeAddress, address token, address[] path);
+    function deposit(address[] calldata _bridgeAddresses, bytes[] calldata _bridgeEncodedCalls) external payable;
 
-    function viewEthHoldings(address bridgeAddress, address token, address[] path);
+    function withdraw(address[] calldata _bridgeAddresses, bytes[] calldata _bridgeEncodedCalls) external;
+
+    function viewEthHoldings (address[] calldata _bridgeAddresses, bytes[] calldata _bridgeEncodedCalls) external;
 }
