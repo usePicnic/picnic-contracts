@@ -344,10 +344,9 @@ contract Pool is IPool {
 
         // Decide how much to buy
         (quotaPrice, amounts) = calculateQuotaPrice(allocation, paths, tokens);
-        uint256 nQuotas = freeAmount / quotaPrice;
 
         for (uint8 i = 0; i < amounts.length; i++) {
-            amounts[i] = amounts[i] * nQuotas;
+            amounts[i] = (amounts[i] * freeAmount) / quotaPrice;
         }
 
         // Go to uniswap
