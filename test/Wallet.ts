@@ -17,59 +17,23 @@ describe("Withdraw", function () {
 
     beforeEach(async function () {
       let UniswapV2SwapBridge = await ethers.getContractFactory("UniswapV2SwapBridge");
-      console.log(UniswapV2SwapBridge);
-      console.log("aaaa");
-      console.log(ADDRESSES['ROUTER']);
-      uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy(ADDRESSES['ROUTER']);
+      uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
       await uniswapV2SwapBridge.deployed();
 
       let Wallet = await ethers.getContractFactory("Wallet");
       wallet = await Wallet.deploy();
       await wallet.deployed();
-      
-      
+
       // await expect(wallet.deposit(_bridgeAddresses, _bridgeEncodedCalls))
       //   .to.emit(greeterCaller, 'GREETING')
-      //   .withArgs('Hello, Sir Paul McCartney');
-  
-
-
-
-
-        // [owner] = await ethers.getSigners();
-
-        // let Oracle = await ethers.getContractFactory("OraclePath");
-
-        // oracle = (await Oracle.deploy(ADDRESSES['FACTORY'])).connect(owner);
-
-        // // Get the ContractFactory
-        // Pool = await ethers.getContractFactory("Pool");
-
-        // // To deploy our contract, we just have to call Pool.deploy() and await
-        // // for it to be deployed(), which happens onces its transaction has been
-        // // mined.
-        // hardhatPool = (await Pool.deploy(ADDRESSES['ROUTER'], oracle.address)).connect(owner)
-
-        // await hardhatPool.createIndex(
-        //     tokens, // address[] _tokens
-        //     tokens.map(() => 1000000000),  // uint256[] _allocation,
-        //     tokens.map(x => [x, ADDRESSES['WMAIN']]), // paths
-        // );
-
-        // // DEPOSIT
-        // let overrides = {value: ethers.utils.parseEther("10.")};
-        // await hardhatPool.deposit(
-        //     0, // _token_id
-        //     tokens.map(x => [ADDRESSES['WMAIN'], x]), // paths
-        //     overrides
-        // );
+      //   .withArgs('Hello, Sir Paul McCartney')
     });
 
     it("Single Uniswap buy", async function () {
       var _bridgeAddresses = [uniswapV2SwapBridge.address];
       var _bridgeEncodedCalls = [
         uniswapV2SwapBridge.interface.encodeFunctionData("buy",
-        [
+        [ ADDRESSES['ROUTER'],
           1,
           [ADDRESSES['WMAIN'], ADDRESSES['TOKENS'][0]]
         ])
@@ -84,20 +48,5 @@ describe("Withdraw", function () {
         overrides
       );
       console.log(ret);
-
-
-
-        // const prevBalance = await owner.getBalance();
-
-        // // WITHDRAW
-        // await hardhatPool.withdraw(
-        //     [0],   // _token_id
-        //     [100000], // _sell_pct
-        //     tokens.map(x => [x, ADDRESSES['WMAIN']]) // paths
-        // );
-
-        // expect(await hardhatPool.getTokenBalance(0, tokens[0], owner.getAddress())).to.equal(0);
-        // expect(await owner.getBalance()).to.be.above(prevBalance);
     })
-
 });
