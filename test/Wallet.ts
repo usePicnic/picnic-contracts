@@ -41,7 +41,7 @@ describe("Withdraw", function () {
       ];
       var _bridgeEncodedCalls = [
         uniswapV2SwapBridge.interface.encodeFunctionData(
-          "buy",
+          "tradeFromETHtoTokens",
           [
             ADDRESSES['UNISWAP_V2_ROUTER'],
             1,
@@ -66,5 +66,50 @@ describe("Withdraw", function () {
         _bridgeEncodedCalls,
         overrides
       );
+    })
+
+    it("Buy DAI on Uniswap -> Sell DAI on Uniswap", async function () {
+        var _bridgeAddresses = [
+            uniswapV2SwapBridge.address
+        ];
+        var _bridgeEncodedCalls = [
+            uniswapV2SwapBridge.interface.encodeFunctionData(
+                "tradeFromETHtoTokens",
+                [
+                    ADDRESSES['UNISWAP_V2_ROUTER'],
+                    1,
+                    [
+                        ADDRESSES['WMAIN'],
+                        ADDRESSES['DAI'],
+                    ]
+                ],
+            )
+        ];
+
+        let overrides = {value: ethers.utils.parseEther("1.1")};
+        const ret = await wallet.deposit(
+            _bridgeAddresses,
+            _bridgeEncodedCalls,
+            overrides
+        );
+
+        var _bridgeEncodedCalls = [
+            uniswapV2SwapBridge.interface.encodeFunctionData(
+                "tradeFromTokensToETH",
+                [
+                    ADDRESSES['UNISWAP_V2_ROUTER'],
+                    1,
+                    [
+                        ADDRESSES['DAI'],
+                        ADDRESSES['WMAIN'],
+                    ]
+                ],
+            )
+        ];
+
+        await wallet.deposit(
+            _bridgeAddresses,
+            _bridgeEncodedCalls
+        );
     })
 });
