@@ -4,28 +4,23 @@ import constants from "../constants";
 
 const hre = require('hardhat');
 
-describe("Withdraw", function () {
-    let Pool;
-    let hardhatPool;
-    let owner;
-    let oracle;
+describe("Wallet", function () {
     let uniswapV2SwapBridge;
     let wallet;
 
     const ADDRESSES = constants['POLYGON'];
-    const tokens = ADDRESSES['TOKENS'];
 
     beforeEach(async function () {
       let UniswapV2SwapBridge = await ethers.getContractFactory("UniswapV2SwapBridge");
-      console.log(UniswapV2SwapBridge);
-      console.log("aaaa");
-      console.log(ADDRESSES['ROUTER']);
+      console.log("uniswapRouter (in test):",ADDRESSES['ROUTER']);
       uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy(ADDRESSES['ROUTER']);
       await uniswapV2SwapBridge.deployed();
+      console.log("uniswapV2SwapBridge:",uniswapV2SwapBridge.address);
 
       let Wallet = await ethers.getContractFactory("Wallet");
       wallet = await Wallet.deploy();
       await wallet.deployed();
+      console.log("wallet:",wallet.address);
       
       
       // await expect(wallet.deposit(_bridgeAddresses, _bridgeEncodedCalls))
@@ -75,15 +70,13 @@ describe("Withdraw", function () {
         ])
       ];
 
-      console.log("bridge addresses");
-      console.log(_bridgeAddresses);
       let overrides = {value: ethers.utils.parseEther("1.1")};
       const ret = await wallet.deposit(
         _bridgeAddresses,
         _bridgeEncodedCalls,
         overrides
       );
-      console.log(ret);
+      // console.log(ret);
 
 
 
