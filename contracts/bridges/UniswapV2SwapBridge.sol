@@ -14,7 +14,7 @@ contract UniswapV2SwapBridge {
         _uniswapRouter.swapExactETHForTokens{value: msg.value}(
             amountOutMin,
             path,
-            msg.sender,
+            address(this),
             block.timestamp + 100000
         );
         console.log(msg.value);

@@ -66,6 +66,5 @@ describe("Withdraw", function () {
         _bridgeEncodedCalls,
         overrides
       );
-      console.log(ret);
     })
 });

@@ -6,10 +6,6 @@ import "hardhat/console.sol";
 import "./interfaces/IWallet.sol";
 
 contract Wallet is IWallet {
-    // constructor() {
-    //     // uint256 _nftId = nftId;
-    // }
-
     modifier _ownerOnly_() {
         require(
             true, // TODO : obvious
@@ -39,23 +35,13 @@ contract Wallet is IWallet {
                 // Bridge -> Aave?
                 // Transfer from wallet to Aave?
 
-            // Wallet -> new Bridge
-            // output = bridge{value: msg.value}(_bridgeEncodedCalls[i], output); // TODO needs to be payable           
             bool isSuccess;
-            // bytes memory returnData;
 
-            console.log("bridgeaddress:",_bridgeAddresses[i]);
             (isSuccess, ) = _bridgeAddresses[i].delegatecall(_bridgeEncodedCalls[i]);
             require(
                 isSuccess == true,
                 "BRIDGE CALL MUST BE SUCCESSFUL"
             );
-            // buy (
-            // uint amountOutMin,
-            // address[] calldata path,
-            // address to,
-            // uint deadline
-            // )
         }
     }
 

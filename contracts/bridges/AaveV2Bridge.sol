@@ -2,6 +2,7 @@ pragma solidity 0.6.12;
 
 import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
 import {ILendingPool} from "@aave/protocol-v2/contracts/interfaces/ILendingPool.sol";
+import {ILendingPoolAddressesProvider} from "@aave/protocol-v2/contracts/interfaces/ILendingPoolAddressesProvider.sol";
 import "hardhat/console.sol";
 
 contract AaveV2Bridge {
@@ -11,18 +12,11 @@ contract AaveV2Bridge {
     )
         public
         payable
-    {        
+    {
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
-        uint256 balance;
-        balance = IERC20(asset).balanceOf(msg.sender);
-        console.log("balance before",balance);
+        uint256 balance = IERC20(asset).balanceOf(address(this));
         IERC20(asset).approve(address(_aaveLendingPool), balance);
-        console.log("approved!");
-        console.log("asset",asset);
-        _aaveLendingPool.deposit(asset, balance, msg.sender, 0);
-        console.log("deposited!");
-        balance = IERC20(asset).balanceOf(msg.sender);
-        console.log("balance after",balance);
+        _aaveLendingPool.deposit(asset, balance, address(this), 0);
     }
 
     // function withdraw(
