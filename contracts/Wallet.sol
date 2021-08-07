@@ -30,8 +30,9 @@ contract Wallet is IWallet {
     ) external payable override _ownerOnly_ {
         // IBridge bridge;
         // uint256[] output;
-        console.log("wallet address:");
-        console.log(address(this));
+        // console.log("wallet address:");
+        // console.log(address(this));
+        console.log("wallet:",address(this));
         for (uint8 i = 0; i < _bridgeAddresses.length; i++) {
             // bridge = IBridge(_bridgeAddresses[i]);
             // Bridge 1 -> Swap
@@ -48,7 +49,8 @@ contract Wallet is IWallet {
             bool isSuccess;
             // bytes memory returnData;
 
-            (isSuccess, ) = _bridgeAddresses[i].delegatecall(_bridgeEncodedCalls[i]);
+            console.log("bridgeaddress:",_bridgeAddresses[i]);
+            (isSuccess, ) = _bridgeAddresses[i].call(_bridgeEncodedCalls[i]);
             require(
                 isSuccess == true,
                 "BRIDGE CALL MUST BE SUCCESSFUL"
