@@ -112,4 +112,46 @@ describe("Withdraw", function () {
             _bridgeEncodedCalls
         );
     })
+
+    it("Buy DAI on Uniswap and deposit on Aave and withdraw on Aave", async function () {
+        var _bridgeAddresses = [
+            uniswapV2SwapBridge.address,
+            aaveV2Bridge.address,
+            aaveV2Bridge.address,
+        ];
+        var _bridgeEncodedCalls = [
+            uniswapV2SwapBridge.interface.encodeFunctionData(
+                "tradeFromETHtoTokens",
+                [
+                    ADDRESSES['UNISWAP_V2_ROUTER'],
+                    1,
+                    [
+                        ADDRESSES['WMAIN'],
+                        ADDRESSES['DAI'],
+                    ]
+                ],
+            ),
+            aaveV2Bridge.interface.encodeFunctionData(
+                "deposit",
+                [
+                    ADDRESSES['AAVE_V2_LENDING_POOL'],
+                    ADDRESSES['DAI'],
+                ]
+            ),
+            aaveV2Bridge.interface.encodeFunctionData(
+                "withdraw",
+                [
+                    ADDRESSES['AAVE_V2_LENDING_POOL'],
+                    ADDRESSES['DAI'],
+                ]
+            )
+        ];
+
+        let overrides = {value: ethers.utils.parseEther("1.1")};
+        const ret = await wallet.deposit(
+            _bridgeAddresses,
+            _bridgeEncodedCalls,
+            overrides
+        );
+    })
 });
