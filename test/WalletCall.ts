@@ -35,11 +35,11 @@ describe("Withdraw", function () {
 
         let overrides = {value: ethers.utils.parseEther("1.1")};
 
-        await uniswapV2SwapBridge.tradeFromETHtoTokens(
+        await uniswapV2SwapBridge.tradeFromETHToTokens(
             ADDRESSES['UNISWAP_V2_ROUTER'],
             1,
             [
-                ADDRESSES['WMAIN'],
+                TOKENS['WMAIN'],
                 ADDRESSES['DAI']
             ],
             overrides

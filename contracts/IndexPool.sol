@@ -1,9 +1,23 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.8.6;
 
 import "./Wallet.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 
-contract IndexPool {
+contract IndexPool is ERC721, Ownable {
+    event LOG_MINT_NFT();
+    event LOG_EDIT_NFT();
+
+
+    modifier _indexpoolOnly_() {
+        require(
+            creator == msg.sender,
+            "ONLY WALLET OWNER CAN CALL THIS FUNCTION"
+        );
+        _;
+    }
 
     // TODO is Index necessary?
     struct Index {
@@ -13,12 +27,14 @@ contract IndexPool {
     uint256 private constant BASE_ASSET = 1000000000000000000;
     uint256 public maxDeposit = 100 * BASE_ASSET;
 
-    address indexpoolWallet;
-
     Index[] private _indexes;
-    constructor(address _indexpoolWallet) {
+    uint256 public tokenCounter = 0;
+
+    address creator;
+
+    mapping(uint256 => address) public nftIdToWallet;
+    constructor() public ERC721("INDEXPOOL", "IPNFT") {
         creator = msg.sender;
-        indexpoolWallet = _indexpoolWallet; // TODO is creator different than _indexpoolWallet ???
     }
 
     event Received(address sender, uint256 amount);
@@ -43,43 +59,48 @@ contract IndexPool {
         }
     }
 
-    function transferTokens(
+    function _transferTokens(
         address[] calldata inputTokens,
         uint256[] calldata inputAmounts,
         address toWallet
-    ){
+    ) private {
         // TODO fee for Portfolio Creators / Finder?
         for (uint16 i = 0; i < inputTokens.length; i++) {
-            indexpoolFee = inputAmounts[i] / 1000;
-            if (inputTokens[i] == address(0))
-            {
-                payable(indexpoolWallet).transfer(indexpoolFee);
-                payable(toWallet).transfer(inputAmounts[i] - indexpoolFee);
-            }
-            else {
-                IERC20(inputTokens[i]).transfer(indexpoolWallet, indexpoolFee);
-                IERC20(inputTokens[i]).transfer(toWallet, inputAmounts[i] - indexpoolFee);
-            }
+            uint256 indexpoolFee = inputAmounts[i] / 1000;
+            // if (inputTokens[i] == address(0))
+            // {
+            //     payable(creator).transfer(indexpoolFee);
+            //     payable(toWallet).transfer(inputAmounts[i] - indexpoolFee);
+            // }
+            // else {
+            IERC20(inputTokens[i]).transfer(creator, indexpoolFee);
+            IERC20(inputTokens[i]).transfer(toWallet, inputAmounts[i] - indexpoolFee);
+            // }
         }
     }
 
     function mintPortfolio(
-        uint256 portfolioId,
         address[] calldata inputTokens,
         uint256[] calldata inputAmounts,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) external {
-        transferTokens(inputTokens, inputAmounts, address(wallet)); // TODO understand if there is a better
-
+    ) external payable {
         Wallet wallet = new Wallet();
-        wallet.write(_bridgeAddresses, _bridgeEncodedCalls);
+
+        _transferTokens(inputTokens, inputAmounts, address(wallet)); // TODO understand if there is a better
+
+        uint256 indexpoolFee = msg.value / 1000;
+        payable(creator).transfer(indexpoolFee);
+        // payable(wallet).transfer(msg.value - indexpoolFee);
+
+        wallet.write{value:msg.value - indexpoolFee}(_bridgeAddresses, _bridgeEncodedCalls);
 
         uint256 newItemId = tokenCounter;
-        nftIdToIndexId[newItemId] = indexId;
+        // nftIdToIndexId[newItemId] = indexId;
         nftIdToWallet[newItemId] = address(wallet);
         tokenCounter = tokenCounter + 1;
-        _safeMint(user, newItemId);
+        _safeMint(msg.sender, newItemId);
+
         emit LOG_MINT_NFT();
     }
 
@@ -89,10 +110,15 @@ contract IndexPool {
         uint256[] calldata inputAmounts,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) external {
-        transferTokens(inputTokens, inputAmounts, address(wallet)); // TODO understand if there is a better
+    ) external payable {
+        Wallet wallet = Wallet(payable(nftIdToWallet[nftId]));
 
-        Wallet wallet = Wallet(nftIdToWallet[nftId]);
+        _transferTokens(inputTokens, inputAmounts, address(wallet)); // TODO understand if there is a better
+
+        uint256 indexpoolFee = msg.value / 1000;
+        payable(creator).transfer(indexpoolFee);
+        payable(wallet).transfer(msg.value - indexpoolFee);
+
         wallet.write(_bridgeAddresses, _bridgeEncodedCalls);
 
         emit LOG_EDIT_NFT();

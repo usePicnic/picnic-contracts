@@ -41,12 +41,12 @@ describe("Withdraw", function () {
       ];
       var _bridgeEncodedCalls = [
         uniswapV2SwapBridge.interface.encodeFunctionData(
-          "tradeFromETHtoTokens",
+          "tradeFromETHToTokens",
           [
             ADDRESSES['UNISWAP_V2_ROUTER'],
             1,
             [
-              ADDRESSES['WMAIN'],
+              TOKENS['WMAIN'],
               TOKENS['DAI'],
             ]
           ],
@@ -61,7 +61,7 @@ describe("Withdraw", function () {
       ];
 
       let overrides = {value: ethers.utils.parseEther("1.1")};
-      const ret = await wallet.deposit(
+      const ret = await wallet.write(
         _bridgeAddresses,
         _bridgeEncodedCalls,
         overrides
@@ -74,12 +74,12 @@ describe("Withdraw", function () {
         ];
         var _bridgeEncodedCalls = [
             uniswapV2SwapBridge.interface.encodeFunctionData(
-                "tradeFromETHtoTokens",
+                "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
                     1,
                     [
-                        ADDRESSES['WMAIN'],
+                        TOKENS['WMAIN'],
                         TOKENS['DAI'],
                     ]
                 ],
@@ -87,7 +87,7 @@ describe("Withdraw", function () {
         ];
 
         let overrides = {value: ethers.utils.parseEther("1.1")};
-        const ret = await wallet.deposit(
+        const ret = await wallet.write(
             _bridgeAddresses,
             _bridgeEncodedCalls,
             overrides
@@ -101,13 +101,13 @@ describe("Withdraw", function () {
                     1,
                     [
                         TOKENS['DAI'],
-                        ADDRESSES['WMAIN'],
+                        TOKENS['WMAIN'],
                     ]
                 ],
             )
         ];
 
-        await wallet.deposit(
+        await wallet.write(
             _bridgeAddresses,
             _bridgeEncodedCalls
         );
@@ -121,12 +121,12 @@ describe("Withdraw", function () {
         ];
         var _bridgeEncodedCalls = [
             uniswapV2SwapBridge.interface.encodeFunctionData(
-                "tradeFromETHtoTokens",
+                "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
                     1,
                     [
-                        ADDRESSES['WMAIN'],
+                        TOKENS['WMAIN'],
                         TOKENS['DAI'],
                     ]
                 ],
@@ -150,7 +150,7 @@ describe("Withdraw", function () {
         ];
 
         let overrides = {value: ethers.utils.parseEther("1.1")};
-        const ret = await wallet.deposit(
+        const ret = await wallet.write(
             _bridgeAddresses,
             _bridgeEncodedCalls,
             overrides

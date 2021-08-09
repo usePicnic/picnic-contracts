@@ -1,4 +1,4 @@
-pragma solidity 0.6.12;
+pragma solidity ^0.8.6;
 
 pragma experimental ABIEncoderV2;
 import "hardhat/console.sol";
@@ -23,7 +23,7 @@ contract Wallet is IWallet {
     function write(
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) external override _ownerOnly_ {
+    ) external override payable _ownerOnly_ {
         for (uint16 i = 0; i < _bridgeAddresses.length; i++) {
             bool isSuccess;
 

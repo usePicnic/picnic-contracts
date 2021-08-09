@@ -23,7 +23,7 @@ async function main() {
     await pool.createIndex(
         tokens, // address[] _tokens
         tokens.map(() => 1000000000),  // uint256[] _allocation,
-        tokens.map(x => [x, ADDRESSES['WMAIN']]), // paths
+        tokens.map(x => [x, TOKENS['WMAIN']]), // paths
     );
 
     console.log("Index created successfully.")
