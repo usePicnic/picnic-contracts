@@ -143,6 +143,8 @@ describe("Withdraw", function () {
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
                     ADDRESSES['DAI'],
+                    ["0x27F8D03b3a2196956ED754baDc28D73be8830A6e"],
+                    "0x357D51124f59836DeD84c8a1730D72B749d8BC23"
                 ]
             )
         ];
