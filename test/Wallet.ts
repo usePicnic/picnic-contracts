@@ -14,7 +14,7 @@ describe("Withdraw", function () {
     let wallet;
 
     const ADDRESSES = constants['POLYGON'];
-    const tokens = ADDRESSES['TOKENS'];
+    const TOKENS = constants['POLYGON']['TOKENS'];
 
     beforeEach(async function () {
       let UniswapV2SwapBridge = await ethers.getContractFactory("UniswapV2SwapBridge");
@@ -47,7 +47,7 @@ describe("Withdraw", function () {
             1,
             [
               ADDRESSES['WMAIN'],
-              ADDRESSES['DAI'],
+              TOKENS['DAI'],
             ]
           ],
         ),
@@ -55,7 +55,7 @@ describe("Withdraw", function () {
           "deposit",
           [
             ADDRESSES['AAVE_V2_LENDING_POOL'],
-            ADDRESSES['DAI'],
+            TOKENS['DAI'],
           ]
         )
       ];
@@ -80,7 +80,7 @@ describe("Withdraw", function () {
                     1,
                     [
                         ADDRESSES['WMAIN'],
-                        ADDRESSES['DAI'],
+                        TOKENS['DAI'],
                     ]
                 ],
             )
@@ -100,7 +100,7 @@ describe("Withdraw", function () {
                     ADDRESSES['UNISWAP_V2_ROUTER'],
                     1,
                     [
-                        ADDRESSES['DAI'],
+                        TOKENS['DAI'],
                         ADDRESSES['WMAIN'],
                     ]
                 ],
@@ -127,7 +127,7 @@ describe("Withdraw", function () {
                     1,
                     [
                         ADDRESSES['WMAIN'],
-                        ADDRESSES['DAI'],
+                        TOKENS['DAI'],
                     ]
                 ],
             ),
@@ -135,14 +135,14 @@ describe("Withdraw", function () {
                 "deposit",
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
-                    ADDRESSES['DAI'],
+                    TOKENS['DAI'],
                 ]
             ),
             aaveV2Bridge.interface.encodeFunctionData(
                 "withdraw",
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
-                    ADDRESSES['DAI'],
+                    TOKENS['DAI'],
                     ["0x27F8D03b3a2196956ED754baDc28D73be8830A6e"],
                     "0x357D51124f59836DeD84c8a1730D72B749d8BC23"
                 ]

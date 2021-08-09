@@ -8,10 +8,7 @@ import {IAaveIncentivesController} from "../interfaces/IAaveIncentivesController
 import "hardhat/console.sol";
 
 contract AaveV2Bridge {
-    function deposit(
-        address aaveLendingPoolAddress,
-        address asset
-    )
+    function deposit(address aaveLendingPoolAddress, address asset)
         public
         payable
     {
@@ -28,8 +25,13 @@ contract AaveV2Bridge {
         address incentivesController
     ) public payable {
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
-        IAaveIncentivesController distributor = IAaveIncentivesController(incentivesController);
-        uint256 amountToClaim = distributor.getRewardsBalance(assets, address(this));
+        IAaveIncentivesController distributor = IAaveIncentivesController(
+            incentivesController
+        );
+        uint256 amountToClaim = distributor.getRewardsBalance(
+            assets,
+            address(this)
+        );
         distributor.claimRewards(assets, amountToClaim, address(this));
         uint256 balance = IERC20(assets[0]).balanceOf(address(this));
         _aaveLendingPool.withdraw(asset, balance, address(this));

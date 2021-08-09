@@ -2,15 +2,13 @@ import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
 
 import "hardhat/console.sol";
+
 contract UniswapV2SwapBridge {
-    function tradeFromETHtoTokens (
+    function tradeFromETHtoTokens(
         address uniswapRouter,
-        uint amountOutMin,
+        uint256 amountOutMin,
         address[] calldata path
-    )
-        public
-        payable
-    {
+    ) public payable {
         IUniswapV2Router02 _uniswapRouter = IUniswapV2Router02(uniswapRouter);
 
         _uniswapRouter.swapExactETHForTokens{value: msg.value}(
@@ -22,14 +20,11 @@ contract UniswapV2SwapBridge {
         console.log(msg.value);
     }
 
-    function tradeFromTokensToETH (
+    function tradeFromTokensToETH(
         address uniswapRouter,
-        uint amountOutMin,
+        uint256 amountOutMin,
         address[] calldata path
-    )
-    public
-    payable
-    {
+    ) public payable {
         IUniswapV2Router02 _uniswapRouter = IUniswapV2Router02(uniswapRouter);
         uint256 balance = IERC20(path[0]).balanceOf(address(this));
 
