@@ -5,10 +5,8 @@ import constants from "../constants";
 const hre = require('hardhat');
 
 describe("Withdraw", function () {
-    let Pool;
-    let hardhatPool;
     let owner;
-    let oracle;
+    let other;
     let aaveV2Bridge;
     let uniswapV2SwapBridge;
     let wallet;
@@ -17,16 +15,18 @@ describe("Withdraw", function () {
     const TOKENS = constants['POLYGON']['TOKENS'];
 
     beforeEach(async function () {
+      [owner, other] = await ethers.getSigners();
+
       let UniswapV2SwapBridge = await ethers.getContractFactory("UniswapV2SwapBridge");
-      uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
+      uniswapV2SwapBridge = (await UniswapV2SwapBridge.deploy()).connect(owner);
       await uniswapV2SwapBridge.deployed();
 
       let AaveV2Bridge = await ethers.getContractFactory("AaveV2Bridge");
-      aaveV2Bridge = await AaveV2Bridge.deploy();
+      aaveV2Bridge = (await AaveV2Bridge.deploy()).connect(owner);
       await aaveV2Bridge.deployed();
 
       let Wallet = await ethers.getContractFactory("Wallet");
-      wallet = await Wallet.deploy();
+      wallet = (await Wallet.deploy()).connect(owner);
       await wallet.deployed();
 
       // await expect(wallet.deposit(_bridgeAddresses, _bridgeEncodedCalls))
@@ -34,7 +34,7 @@ describe("Withdraw", function () {
       //   .withArgs('Hello, Sir Paul McCartney')
     });
 
-    it("Buy DAI on Uniswap and deposit on Aave", async function () {
+    it("Buys DAI on Uniswap and deposit on Aave", async function () {
       var _bridgeAddresses = [
         uniswapV2SwapBridge.address, 
         aaveV2Bridge.address,
@@ -68,7 +68,7 @@ describe("Withdraw", function () {
       );
     })
 
-    it("Buy DAI on Uniswap -> Sell DAI on Uniswap", async function () {
+    it("Buys DAI on Uniswap -> Sell DAI on Uniswap", async function () {
         var _bridgeAddresses = [
             uniswapV2SwapBridge.address
         ];
@@ -113,7 +113,7 @@ describe("Withdraw", function () {
         );
     })
 
-    it("Buy DAI on Uniswap and deposit on Aave and withdraw on Aave", async function () {
+    it("Buys DAI on Uniswap and deposit on Aave and withdraw on Aave", async function () {
         var _bridgeAddresses = [
             uniswapV2SwapBridge.address,
             aaveV2Bridge.address,
@@ -155,5 +155,50 @@ describe("Withdraw", function () {
             _bridgeEncodedCalls,
             overrides
         );
+    })
+
+    it("Rejects write from other user", async function () {
+        var _bridgeAddresses = [
+            uniswapV2SwapBridge.address,
+            aaveV2Bridge.address,
+            aaveV2Bridge.address,
+        ];
+        var _bridgeEncodedCalls = [
+            uniswapV2SwapBridge.interface.encodeFunctionData(
+                "tradeFromETHToTokens",
+                [
+                    ADDRESSES['UNISWAP_V2_ROUTER'],
+                    1,
+                    [
+                        TOKENS['WMAIN'],
+                        TOKENS['DAI'],
+                    ]
+                ],
+            ),
+            aaveV2Bridge.interface.encodeFunctionData(
+                "deposit",
+                [
+                    ADDRESSES['AAVE_V2_LENDING_POOL'],
+                    TOKENS['DAI'],
+                ]
+            ),
+            aaveV2Bridge.interface.encodeFunctionData(
+                "withdraw",
+                [
+                    ADDRESSES['AAVE_V2_LENDING_POOL'],
+                    TOKENS['DAI'],
+                    ["0x27F8D03b3a2196956ED754baDc28D73be8830A6e"],
+                    "0x357D51124f59836DeD84c8a1730D72B749d8BC23"
+                ]
+            )
+        ];
+
+        let overrides = {value: ethers.utils.parseEther("1.1")};
+
+        await expect(wallet.connect(other).write(
+            _bridgeAddresses,
+            _bridgeEncodedCalls,
+            overrides
+        )).to.be.revertedWith("WALLET: ONLY WALLET OWNER CAN CALL THIS FUNCTION");
     })
 });

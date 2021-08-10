@@ -6,10 +6,11 @@ import "hardhat/console.sol";
 import "./interfaces/IWallet.sol";
 
 contract Wallet is IWallet {
+    address creator;
     modifier _ownerOnly_() {
         require(
-            true, // TODO : NFT owner needs to check
-            "ONLY WALLET OWNER CAN CALL THIS FUNCTION"
+            creator==msg.sender,
+            "WALLET: ONLY WALLET OWNER CAN CALL THIS FUNCTION"
         );
         _;
     }
@@ -18,6 +19,10 @@ contract Wallet is IWallet {
 
     receive() external payable {
         emit Received(msg.sender, msg.value);
+    }
+
+    constructor() {
+        creator = msg.sender;
     }
 
     function write(
