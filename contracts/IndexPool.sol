@@ -7,7 +7,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 
 contract IndexPool is ERC721, Ownable {
-    event LOG_PORTFOLIO_REGISTERED();
+    event LOG_PORTFOLIO_REGISTERED(
+        address creator,
+        bytes32 jsonString
+    );
     event LOG_MINT_NFT(
         uint256 nftId,
         address owner,
@@ -66,13 +69,8 @@ contract IndexPool is ERC721, Ownable {
         maxDeposit = newMaxDeposit;
     }
 
-    function registerPortfolio(
-        address[][] calldata _bridgeAddresses,
-        bytes[][] calldata _bridgeEncodedCalls
-    ) external {
-        for (uint16 i = 0; i < _bridgeAddresses.length; i++) {
-            // TODO log events with index creation -- bridges / data / creator
-        }
+    function registerPortfolio(bytes32 jsonString) external {
+        LOG_PORTFOLIO_REGISTERED(msg.sender, jsonString);
     }
 
     function mintPortfolio(
@@ -87,13 +85,13 @@ contract IndexPool is ERC721, Ownable {
         _delegateToWallet(msg.sender, inputTokens, inputAmounts, address(wallet));
         uint256 nftId = _mintNFT({walletAddress : address(wallet), owner : msg.sender});
         emit LOG_MINT_NFT(
-             nftId,
-             msg.sender,
-             finder,
-             creator,
-             inputTokens,
-             inputAmounts,
-             msg.value);
+            nftId,
+            msg.sender,
+            finder,
+            creator,
+            inputTokens,
+            inputAmounts,
+            msg.value);
     }
 
     function editPortfolio(
@@ -147,7 +145,7 @@ contract IndexPool is ERC721, Ownable {
         wallet.write{value : msg.value - indexpoolFee}(_bridgeAddresses, _bridgeEncodedCalls);
     }
 
-    function _mintNFT(address walletAddress, address owner) internal returns(uint256) {
+    function _mintNFT(address walletAddress, address owner) internal returns (uint256) {
         uint256 newItemId = tokenCounter;
         nftIdToWallet[newItemId] = walletAddress;
         tokenCounter = tokenCounter + 1;
