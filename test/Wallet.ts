@@ -201,4 +201,49 @@ describe("Withdraw", function () {
             overrides
         )).to.be.revertedWith("WALLET: ONLY WALLET OWNER CAN CALL THIS FUNCTION");
     })
+
+    it("Rejects failed bridge call", async function () {
+        var _bridgeAddresses = [
+            uniswapV2SwapBridge.address,
+            aaveV2Bridge.address,
+            aaveV2Bridge.address,
+        ];
+        var _bridgeEncodedCalls = [
+            uniswapV2SwapBridge.interface.encodeFunctionData(
+                "tradeFromETHToTokens",
+                [
+                    ADDRESSES['UNISWAP_V2_ROUTER'],
+                    1,
+                    [
+                        TOKENS['WMAIN'],
+                        TOKENS['DAI'],
+                    ]
+                ],
+            ),
+            aaveV2Bridge.interface.encodeFunctionData(
+                "deposit",
+                [
+                    ADDRESSES['AAVE_V2_LENDING_POOL'],
+                    TOKENS['QUICK'],
+                ]
+            ),
+            aaveV2Bridge.interface.encodeFunctionData(
+                "withdraw",
+                [
+                    ADDRESSES['AAVE_V2_LENDING_POOL'],
+                    TOKENS['QUICK'],
+                    [TOKENS['QUICK']],
+                    "0x357D51124f59836DeD84c8a1730D72B749d8BC23"
+                ]
+            )
+        ];
+
+        let overrides = {value: ethers.utils.parseEther("1.1")};
+
+        await expect(wallet.write(
+            _bridgeAddresses,
+            _bridgeEncodedCalls,
+            overrides
+        )).to.be.revertedWith("WALLET: BRIDGE CALL MUST BE SUCCESSFUL");
+    })
 });

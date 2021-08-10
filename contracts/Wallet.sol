@@ -35,7 +35,7 @@ contract Wallet is IWallet {
             (isSuccess, ) = _bridgeAddresses[i].delegatecall(_bridgeEncodedCalls[i]);
             require(
                 isSuccess == true,
-                "BRIDGE CALL MUST BE SUCCESSFUL"
+                "WALLET: BRIDGE CALL MUST BE SUCCESSFUL"
             );
         }
     }
