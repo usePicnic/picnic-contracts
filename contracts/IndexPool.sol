@@ -85,8 +85,15 @@ contract IndexPool is ERC721, Ownable {
     ) external payable _maxDeposit_ {
         Wallet wallet = new Wallet();
         _delegateToWallet(msg.sender, inputTokens, inputAmounts, address(wallet));
-        _mintNFT({walletAddress : address(wallet), owner : msg.sender});
-        // emit LOG_MINT_NFT();
+        uint256 nftId = _mintNFT({walletAddress : address(wallet), owner : msg.sender});
+        emit LOG_MINT_NFT(
+             nftId,
+             msg.sender,
+             finder,
+             creator,
+             inputTokens,
+             inputAmounts,
+             msg.value);
     }
 
     function editPortfolio(
@@ -99,7 +106,14 @@ contract IndexPool is ERC721, Ownable {
         require(_owners[nftId] == msg.sender, "Only NFT owner can edit it");
         Wallet wallet = Wallet(payable(nftIdToWallet[nftId]));
         _delegateToWallet(msg.sender, inputTokens, inputAmounts, wallet);
-        // emit LOG_EDIT_NFT();
+        emit LOG_EDIT_NFT(
+            nftId,
+            msg.sender,
+            finder,
+            creator,
+            inputTokens,
+            inputAmounts,
+            msg.value);
     }
 
     function _transferTokens(
@@ -133,13 +147,12 @@ contract IndexPool is ERC721, Ownable {
         wallet.write{value : msg.value - indexpoolFee}(_bridgeAddresses, _bridgeEncodedCalls);
     }
 
-    function _mintNFT(address walletAddress, address owner) internal {
+    function _mintNFT(address walletAddress, address owner) internal returns(uint256) {
         uint256 newItemId = tokenCounter;
         nftIdToWallet[newItemId] = walletAddress;
         tokenCounter = tokenCounter + 1;
         _safeMint(owner, newItemId);
+        return newItemId;
     }
-
-
 }
 
