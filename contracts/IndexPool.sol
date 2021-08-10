@@ -81,9 +81,15 @@ contract IndexPool is ERC721, Ownable {
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) external payable _maxDeposit_ {
+        // Create new wallet
         Wallet wallet = new Wallet();
+
+        // Run all bridges and calls to build the portfolio on Wallet
         _delegateToWallet(msg.sender, inputTokens, inputAmounts, address(wallet));
+
+        // Mint NFT
         uint256 nftId = _mintNFT({walletAddress : address(wallet), owner : msg.sender});
+
         emit LOG_MINT_NFT(
             nftId,
             msg.sender,
@@ -96,14 +102,20 @@ contract IndexPool is ERC721, Ownable {
 
     function editPortfolio(
         uint256 nftId,
+        address finder,
+        address creator,
         address[] calldata inputTokens,
         uint256[] calldata inputAmounts,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) external payable _maxDeposit_ {
+        // Instantiate existing wallet
         require(_owners[nftId] == msg.sender, "Only NFT owner can edit it");
         Wallet wallet = Wallet(payable(nftIdToWallet[nftId]));
+
+        // Run all bridges and calls to build the portfolio on Wallet
         _delegateToWallet(msg.sender, inputTokens, inputAmounts, wallet);
+
         emit LOG_EDIT_NFT(
             nftId,
             msg.sender,
@@ -120,10 +132,12 @@ contract IndexPool is ERC721, Ownable {
         uint256[] calldata inputAmounts,
         address toWallet
     ) private {
-        // TODO fee for Portfolio Creators / Finder?
         for (uint16 i = 0; i < inputTokens.length; i++) {
+            // IndexPool Fee
             uint256 indexpoolFee = inputAmounts[i] / 1000;
             IERC20(inputTokens[i]).transferFrom(from, indexpoolAddress, indexpoolFee);
+
+            // Transfer ERC20 to Wallet
             IERC20(inputTokens[i]).transferFrom(from, toWallet, inputAmounts[i] - indexpoolFee);
         }
     }
@@ -146,9 +160,12 @@ contract IndexPool is ERC721, Ownable {
     }
 
     function _mintNFT(address walletAddress, address owner) internal returns (uint256) {
+        // Saving NFT data
         uint256 newItemId = tokenCounter;
         nftIdToWallet[newItemId] = walletAddress;
         tokenCounter = tokenCounter + 1;
+
+        // Minting NFT
         _safeMint(owner, newItemId);
         return newItemId;
     }
