@@ -8,6 +8,19 @@ import {IAaveIncentivesController} from "../interfaces/IAaveIncentivesController
 import "hardhat/console.sol";
 
 contract AaveV2Bridge {
+    event Deposit (
+        address wallet,
+        address asset,
+        uint256 amount
+    );
+    event Withdraw (
+        address wallet,
+        address asset,
+        address[] assets,
+        uint256 amount,
+        uint256 claimedReward
+    );
+
     function deposit(address aaveLendingPoolAddress, address asset)
         public
         payable
@@ -16,6 +29,12 @@ contract AaveV2Bridge {
         uint256 balance = IERC20(asset).balanceOf(address(this));
         IERC20(asset).approve(aaveLendingPoolAddress, balance);
         _aaveLendingPool.deposit(asset, balance, address(this), 0);
+
+        emit Deposit(
+            address(this),
+            asset,
+            balance
+        );
     }
 
     function withdraw(
@@ -32,9 +51,17 @@ contract AaveV2Bridge {
             assets,
             address(this)
         );
-        distributor.claimRewards(assets, amountToClaim, address(this));
+        uint256 claimedReward = distributor.claimRewards(assets, amountToClaim, address(this));
         uint256 balance = IERC20(assets[0]).balanceOf(address(this));
         _aaveLendingPool.withdraw(asset, balance, address(this));
+
+        emit Withdraw(
+            address(this),
+            asset,
+            assets,
+            balance,
+            claimedReward
+        );
     }
 
     // function viewHoldings() external view returns (uint256[] memory) {

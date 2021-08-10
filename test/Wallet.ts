@@ -10,6 +10,7 @@ import constants from "../constants";
 describe("Withdraw", function () {
     let owner;
     let other;
+    let AaveV2Bridge;
     let aaveV2Bridge;
     let UniswapV2SwapBridge;
     let uniswapV2SwapBridge;
@@ -25,7 +26,7 @@ describe("Withdraw", function () {
         uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
         await uniswapV2SwapBridge.deployed();
 
-        let AaveV2Bridge = await ethers.getContractFactory("AaveV2Bridge");
+        AaveV2Bridge = await ethers.getContractFactory("AaveV2Bridge");
         aaveV2Bridge = (await AaveV2Bridge.deploy()).connect(owner);
         await aaveV2Bridge.deployed();
 
@@ -180,11 +181,32 @@ describe("Withdraw", function () {
         ];
 
         let overrides = { value: ethers.utils.parseEther("1.1") };
-        const receipt = await wallet.write(
+        await wallet.write(
             _bridgeAddresses,
             _bridgeEncodedCalls,
             overrides
         );
+
+        var event = await getFirstEvent({ address: wallet.address }, UniswapV2SwapBridge, 'TradedFromETHToTokens');
+        
+        expect(event.args.wallet).to.equal(wallet.address);
+        expect(event.args.value).to.equal(ethers.utils.parseEther("1.1"));
+        expect(event.args.path).to.eql([ TOKENS['WMAIN'], TOKENS['DAI'] ]);
+        expect(event.args.amounts).to.be.an('array');
+
+        event = await getFirstEvent({ address: wallet.address }, AaveV2Bridge, 'Deposit');
+
+        // TODO: Check amount
+        expect(event.args.wallet).to.equal(wallet.address);
+        expect(event.args.asset).to.equal(TOKENS['DAI']);
+        // expect(event.args.amount).to.equal(ethers.utils.parseEther("1.1"));
+
+        // TODO: Check amount
+        // TODO: Check claimed reward
+        event = await getFirstEvent({ address: wallet.address }, AaveV2Bridge, 'Withdraw');
+        expect(event.args.wallet).to.equal(wallet.address);
+        expect(event.args.asset).to.equal(TOKENS['DAI']);
+        expect(event.args.assets).to.eql(["0x27F8D03b3a2196956ED754baDc28D73be8830A6e"]);
     })
 
     it("Rejects write from other user", async function () {
