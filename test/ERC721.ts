@@ -116,13 +116,13 @@ describe("ERC721", function () {
     ];
     var _bridgeEncodedCalls = [
       uniswapV2SwapBridge.interface.encodeFunctionData(
-        "tradeFromETHToTokens",
+        "tradeFromTokensToTokens",
         [
           ADDRESSES['UNISWAP_V2_ROUTER'],
           1,
           [
-            TOKENS['WMAIN'],
             TOKENS['DAI'],
+            TOKENS['WMAIN'],
           ]
         ],
       ),
@@ -130,16 +130,15 @@ describe("ERC721", function () {
         "deposit",
         [
           ADDRESSES['AAVE_V2_LENDING_POOL'],
-          TOKENS['DAI'],
+          TOKENS['WMAIN'],
         ]
       )
     ];
 
-    let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"]);
+    let dai = (await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])).connect(owner);
     let daiBalance = await dai.balanceOf(owner.address);
-    console.log(daiBalance);
-    await dai.approve(owner.address, daiBalance);
-    
+    await dai.approve(indexPool.address, daiBalance);
+
     await indexPool.mintPortfolio(
       [TOKENS["DAI"]],
       [daiBalance],
