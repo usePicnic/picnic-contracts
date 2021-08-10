@@ -70,7 +70,7 @@ contract IndexPool is ERC721, Ownable {
     }
 
     function registerPortfolio(bytes32 jsonString) external {
-        LOG_PORTFOLIO_REGISTERED(msg.sender, jsonString);
+        emit LOG_PORTFOLIO_REGISTERED(msg.sender, jsonString);
     }
 
     function mintPortfolio(
@@ -85,7 +85,7 @@ contract IndexPool is ERC721, Ownable {
         Wallet wallet = new Wallet();
 
         // Run all bridges and calls to build the portfolio on Wallet
-        _delegateToWallet(msg.sender, inputTokens, inputAmounts, address(wallet));
+        _delegateToWallet(msg.value, msg.sender, inputTokens, inputAmounts, wallet, _bridgeAddresses, _bridgeEncodedCalls);
 
         // Mint NFT
         uint256 nftId = _mintNFT({walletAddress : address(wallet), owner : msg.sender});
@@ -110,11 +110,11 @@ contract IndexPool is ERC721, Ownable {
         bytes[] calldata _bridgeEncodedCalls
     ) external payable _maxDeposit_ {
         // Instantiate existing wallet
-        require(_owners[nftId] == msg.sender, "Only NFT owner can edit it");
+        require(ownerOf(nftId) == msg.sender, "Only NFT owner can edit it");
         Wallet wallet = Wallet(payable(nftIdToWallet[nftId]));
 
         // Run all bridges and calls to build the portfolio on Wallet
-        _delegateToWallet(msg.sender, inputTokens, inputAmounts, wallet);
+        _delegateToWallet(msg.value, msg.sender, inputTokens, inputAmounts, wallet, _bridgeAddresses, _bridgeEncodedCalls);
 
         emit LOG_EDIT_NFT(
             nftId,
@@ -143,20 +143,23 @@ contract IndexPool is ERC721, Ownable {
     }
 
     function _delegateToWallet(
+        uint256 ethAmount,
         address user,
-        address[] inputTokens,
-        address[] inputAmounts,
-        Wallet wallet)
-    internal payable {
+        address[] calldata inputTokens,
+        uint256[] calldata inputAmounts,
+        Wallet wallet,
+        address[] calldata _bridgeAddresses,
+        bytes[] calldata _bridgeEncodedCalls)
+    internal {
         // Transfer ERC20 tokens to Wallet
         _transferTokens(user, inputTokens, inputAmounts, address(wallet));
 
         // Pay fee to IndexPool
-        uint256 indexpoolFee = msg.value / 1000;
+        uint256 indexpoolFee = ethAmount / 1000;
         payable(indexpoolAddress).transfer(indexpoolFee);
 
         // Execute functions calls + transfer ETH to wallet
-        wallet.write{value : msg.value - indexpoolFee}(_bridgeAddresses, _bridgeEncodedCalls);
+        wallet.write{value : ethAmount - indexpoolFee}(_bridgeAddresses, _bridgeEncodedCalls);
     }
 
     function _mintNFT(address walletAddress, address owner) internal returns (uint256) {
