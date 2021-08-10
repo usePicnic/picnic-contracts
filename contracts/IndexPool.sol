@@ -110,7 +110,7 @@ contract IndexPool is ERC721, Ownable {
         bytes[] calldata _bridgeEncodedCalls
     ) external payable _maxDeposit_ {
         // Instantiate existing wallet
-        require(ownerOf(nftId) == msg.sender, "Only NFT owner can edit it");
+        require(ownerOf(nftId) == msg.sender, "INDEXPOOL: ONLY NFT OWNER CAN EDIT IT");
         Wallet wallet = Wallet(payable(nftIdToWallet[nftId]));
 
         // Run all bridges and calls to build the portfolio on Wallet

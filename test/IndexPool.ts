@@ -36,6 +36,11 @@ describe("IndexPool", function () {
 
     });
 
+    it("Registers portfolio", async function () {
+        // TODO check if this is correctly being stored in events
+        await indexPool.registerPortfolio('test');
+    });
+
     it("Mints NFT with empty calls", async function () {
         var _bridgeAddresses = [];
         var _bridgeEncodedCalls = [];
@@ -202,6 +207,57 @@ describe("IndexPool", function () {
         await expect(await indexPool.balanceOf(owner.address)).to.be.above(0);
     })
 
+    it("Rejects other address editing NFT", async function () {
+        var _bridgeAddresses = [
+            uniswapV2SwapBridge.address,
+            aaveV2Bridge.address,
+        ];
+        var _bridgeEncodedCalls = [
+            uniswapV2SwapBridge.interface.encodeFunctionData(
+                "tradeFromETHToTokens",
+                [
+                    ADDRESSES['UNISWAP_V2_ROUTER'],
+                    1,
+                    [
+                        TOKENS['WMAIN'],
+                        TOKENS['DAI'],
+                    ]
+                ],
+            ),
+            aaveV2Bridge.interface.encodeFunctionData(
+                "deposit",
+                [
+                    ADDRESSES['AAVE_V2_LENDING_POOL'],
+                    TOKENS['DAI'],
+                ]
+            )
+        ];
+
+        let overrides = {value: ethers.utils.parseEther("1.1")};
+        await indexPool.mintPortfolio(
+            owner.address,
+            owner.address,
+            [],
+            [],
+            _bridgeAddresses,
+            _bridgeEncodedCalls,
+            overrides
+        );
+
+        let otherIndexPool = indexPool.connect(other);
+
+        await expect(otherIndexPool.editPortfolio(
+            0,
+            owner.address,
+            owner.address,
+            [],
+            [],
+            _bridgeAddresses,
+            _bridgeEncodedCalls,
+            overrides
+        )).to.be.revertedWith("INDEXPOOL: ONLY NFT OWNER CAN EDIT IT");
+    })
+
     it("Rejects very large deposit", async function () {
         var _bridgeAddresses = [
             uniswapV2SwapBridge.address,
@@ -241,9 +297,54 @@ describe("IndexPool", function () {
         )).to.be.revertedWith("DEPOSIT ABOVE MAXIMUM AMOUNT (GUARDED LAUNCH)");
     })
 
+    it("Changes max deposit", async function () {
+
+        indexPool.setMaxDeposit(
+            ethers.utils.parseEther("1000")
+        )
+
+        var _bridgeAddresses = [
+            uniswapV2SwapBridge.address,
+            aaveV2Bridge.address,
+        ];
+        var _bridgeEncodedCalls = [
+            uniswapV2SwapBridge.interface.encodeFunctionData(
+                "tradeFromETHToTokens",
+                [
+                    ADDRESSES['UNISWAP_V2_ROUTER'],
+                    1,
+                    [
+                        TOKENS['WMAIN'],
+                        TOKENS['DAI'],
+                    ]
+                ],
+            ),
+            aaveV2Bridge.interface.encodeFunctionData(
+                "deposit",
+                [
+                    ADDRESSES['AAVE_V2_LENDING_POOL'],
+                    TOKENS['DAI'],
+                ]
+            )
+        ];
+
+        let overrides = {value: ethers.utils.parseEther("500")};
+        await indexPool.mintPortfolio(
+            owner.address,
+            owner.address,
+            [],
+            [],
+            _bridgeAddresses,
+            _bridgeEncodedCalls,
+            overrides
+        );
+
+        await expect(await indexPool.balanceOf(owner.address)).to.be.above(0);
+    })
+
     it("Rejects not indexpool calling setMaxDeposit", async function () {
 
-        let otherIndexPool = (await IndexPool.deploy()).connect(other);
+        let otherIndexPool = indexPool.connect(other);
 
         await expect(otherIndexPool.setMaxDeposit(
             ethers.utils.parseEther("101")
