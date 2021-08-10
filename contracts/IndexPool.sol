@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract IndexPool is ERC721, Ownable {
     event LOG_PORTFOLIO_REGISTERED(
         address creator,
-        bytes32 jsonString
+        string jsonString
     );
     event LOG_MINT_NFT(
         uint256 nftId,
@@ -69,7 +69,7 @@ contract IndexPool is ERC721, Ownable {
         maxDeposit = newMaxDeposit;
     }
 
-    function registerPortfolio(bytes32 jsonString) external {
+    function registerPortfolio(string calldata jsonString) external {
         emit LOG_PORTFOLIO_REGISTERED(msg.sender, jsonString);
     }
 
