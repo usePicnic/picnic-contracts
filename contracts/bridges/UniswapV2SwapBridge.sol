@@ -13,16 +13,16 @@ contract UniswapV2SwapBridge {
 
     event TradedFromTokensToETH(
         address wallet,
-        uint value,
+        uint256 value,
         address[] path,
-        uint[] amounts
+        uint256[] amounts
     );
 
     event TradedFromTokensToTokens(
         address wallet,
-        uint value,
+        uint256 value,
         address[] path,
-        uint[] amounts
+        uint256[] amounts
     );
 
     function tradeFromETHToTokens(
