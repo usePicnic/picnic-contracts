@@ -60,6 +60,7 @@ contract IndexPool is ERC721, Ownable {
     }
 
     function _transferTokens(
+        address from,
         address[] calldata inputTokens,
         uint256[] calldata inputAmounts,
         address toWallet
@@ -67,15 +68,8 @@ contract IndexPool is ERC721, Ownable {
         // TODO fee for Portfolio Creators / Finder?
         for (uint16 i = 0; i < inputTokens.length; i++) {
             uint256 indexpoolFee = inputAmounts[i] / 1000;
-            // if (inputTokens[i] == address(0))
-            // {
-            //     payable(creator).transfer(indexpoolFee);
-            //     payable(toWallet).transfer(inputAmounts[i] - indexpoolFee);
-            // }
-            // else {
-            IERC20(inputTokens[i]).transfer(creator, indexpoolFee);
-            IERC20(inputTokens[i]).transfer(toWallet, inputAmounts[i] - indexpoolFee);
-            // }
+            IERC20(inputTokens[i]).transferFrom(from, creator, indexpoolFee);
+            IERC20(inputTokens[i]).transferFrom(from, toWallet, inputAmounts[i] - indexpoolFee);
         }
     }
 
@@ -87,7 +81,7 @@ contract IndexPool is ERC721, Ownable {
     ) external payable {
         Wallet wallet = new Wallet();
 
-        _transferTokens(inputTokens, inputAmounts, address(wallet)); // TODO understand if there is a better
+        _transferTokens(msg.sender, inputTokens, inputAmounts, address(wallet)); // TODO understand if there is a better
 
         uint256 indexpoolFee = msg.value / 1000;
         payable(creator).transfer(indexpoolFee);
@@ -113,7 +107,7 @@ contract IndexPool is ERC721, Ownable {
     ) external payable {
         Wallet wallet = Wallet(payable(nftIdToWallet[nftId]));
 
-        _transferTokens(inputTokens, inputAmounts, address(wallet)); // TODO understand if there is a better
+        _transferTokens(msg.sender, inputTokens, inputAmounts, address(wallet)); // TODO understand if there is a better
 
         uint256 indexpoolFee = msg.value / 1000;
         payable(creator).transfer(indexpoolFee);
