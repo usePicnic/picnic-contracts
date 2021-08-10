@@ -1,13 +1,13 @@
-import {expect} from "chai";
-import {ethers} from "hardhat";
-import constants from "../constants";
+import { expect } from "chai";
+import { ethers } from "hardhat";
 
-const hre = require('hardhat');
+import constants from "../constants";
 
 describe("Withdraw", function () {
     let owner;
     let other;
     let aaveV2Bridge;
+    let UniswapV2SwapBridge;
     let uniswapV2SwapBridge;
     let wallet;
 
@@ -17,8 +17,8 @@ describe("Withdraw", function () {
     beforeEach(async function () {
       [owner, other] = await ethers.getSigners();
 
-      let UniswapV2SwapBridge = await ethers.getContractFactory("UniswapV2SwapBridge");
-      uniswapV2SwapBridge = (await UniswapV2SwapBridge.deploy()).connect(owner);
+      UniswapV2SwapBridge = await ethers.getContractFactory("UniswapV2SwapBridge");
+      uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
       await uniswapV2SwapBridge.deployed();
 
       let AaveV2Bridge = await ethers.getContractFactory("AaveV2Bridge");
@@ -28,44 +28,60 @@ describe("Withdraw", function () {
       let Wallet = await ethers.getContractFactory("Wallet");
       wallet = (await Wallet.deploy()).connect(owner);
       await wallet.deployed();
-
-      // await expect(wallet.deposit(_bridgeAddresses, _bridgeEncodedCalls))
-      //   .to.emit(greeterCaller, 'GREETING')
-      //   .withArgs('Hello, Sir Paul McCartney')
     });
 
-    it("Buys DAI on Uniswap and deposit on Aave", async function () {
-      var _bridgeAddresses = [
-        uniswapV2SwapBridge.address, 
-        aaveV2Bridge.address,
-      ];
-      var _bridgeEncodedCalls = [
-        uniswapV2SwapBridge.interface.encodeFunctionData(
-          "tradeFromETHToTokens",
-          [
-            ADDRESSES['UNISWAP_V2_ROUTER'],
-            1,
-            [
-              TOKENS['WMAIN'],
-              TOKENS['DAI'],
-            ]
-          ],
-        ),
-        aaveV2Bridge.interface.encodeFunctionData(
-          "deposit",
-          [
-            ADDRESSES['AAVE_V2_LENDING_POOL'],
+    it("Buy DAI on Uniswap and deposit on Aave", async function () {
+        var _bridgeAddresses = [
+            uniswapV2SwapBridge.address,
+            aaveV2Bridge.address,
+        ];
+        let pathUniswap = [
+            TOKENS['WMAIN'],
             TOKENS['DAI'],
-          ]
-        )
-      ];
+        ];
+        let value = ethers.utils.parseEther("1.1");
+        var _bridgeEncodedCalls = [
+            uniswapV2SwapBridge.interface.encodeFunctionData(
+                "tradeFromETHToTokens",
+                [
+                    ADDRESSES['UNISWAP_V2_ROUTER'],
+                    1,
+                    pathUniswap
+                ],
+            ),
+            aaveV2Bridge.interface.encodeFunctionData(
+                "deposit",
+                [
+                    ADDRESSES['AAVE_V2_LENDING_POOL'],
+                    TOKENS['DAI'],
+                ]
+            )
+        ];
 
-      let overrides = {value: ethers.utils.parseEther("1.1")};
-      const ret = await wallet.write(
-        _bridgeAddresses,
-        _bridgeEncodedCalls,
-        overrides
-      );
+        let blockNumber = await ethers.provider.getBlockNumber();
+        let overrides = { value: value };
+
+        await wallet.write(
+            _bridgeAddresses,
+            _bridgeEncodedCalls,
+            overrides
+        );
+
+        var filter = {
+            address: wallet.address,
+            fromBlock: blockNumber
+        };
+        let event = await ethers.provider.getLogs(filter)
+            .then((events) => {
+                return events
+                    .map(event => UniswapV2SwapBridge.interface.parseLog(event))
+                    .find(event => event.name == 'TradedFromETHToTokens');
+            });
+        
+        expect(event.args.value).to.equal(value);
+        expect(event.args.wallet).to.equal(wallet.address);
+        expect(event.args.path).to.eql(pathUniswap);
+        expect(event.args.amounts).to.be.an('array');
     })
 
     it("Buys DAI on Uniswap -> Sell DAI on Uniswap", async function () {
@@ -86,8 +102,8 @@ describe("Withdraw", function () {
             )
         ];
 
-        let overrides = {value: ethers.utils.parseEther("1.1")};
-        const ret = await wallet.write(
+        let overrides = { value: ethers.utils.parseEther("1.1") };
+        const receipt = await wallet.write(
             _bridgeAddresses,
             _bridgeEncodedCalls,
             overrides
@@ -149,8 +165,8 @@ describe("Withdraw", function () {
             )
         ];
 
-        let overrides = {value: ethers.utils.parseEther("1.1")};
-        const ret = await wallet.write(
+        let overrides = { value: ethers.utils.parseEther("1.1") };
+        const receipt = await wallet.write(
             _bridgeAddresses,
             _bridgeEncodedCalls,
             overrides

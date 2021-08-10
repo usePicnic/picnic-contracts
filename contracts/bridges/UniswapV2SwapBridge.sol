@@ -5,17 +5,24 @@ import "hardhat/console.sol";
 
 contract UniswapV2SwapBridge {
     event TradedFromETHToTokens(
-        // address wallet,
-        // address[] token,
-        // uint fromETH,
-        // uint[] toTokens
+        address wallet,
+        uint256 value,
+        address[] path,
+        uint256[] amounts
     );
 
     event TradedFromTokensToETH(
-        // address wallet,
-        // address token,
-        // uint fromTokens,
-        // uint toETH
+        address wallet,
+        uint value,
+        address[] path,
+        uint[] amounts
+    );
+
+    event TradedFromTokensToTokens(
+        address wallet,
+        uint value,
+        address[] path,
+        uint[] amounts
     );
 
     function tradeFromETHToTokens(
@@ -33,10 +40,10 @@ contract UniswapV2SwapBridge {
         );
 
         emit TradedFromETHToTokens(
-            // address(this),
-            // path[path.length-1],
-            // msg.value,
-            // amounts[amounts.length-1]
+            address(this),
+            msg.value,
+            path,
+            amounts
         );
     }
 
@@ -49,7 +56,7 @@ contract UniswapV2SwapBridge {
         uint256 balance = IERC20(path[0]).balanceOf(address(this));
 
         IERC20(path[0]).approve(uniswapRouter, balance);
-        _uniswapRouter.swapExactTokensForETH(
+        uint[] memory amounts = _uniswapRouter.swapExactTokensForETH(
             balance,
             amountOutMin,
             path,
@@ -58,10 +65,10 @@ contract UniswapV2SwapBridge {
         );
 
         emit TradedFromTokensToETH(
-            // address(this),
-            // path[path.length-1],
-            // msg.value,
-            // amounts[amounts.length-1]
+            address(this),
+            balance,
+            path,
+            amounts
         );
 
     }
@@ -75,7 +82,7 @@ contract UniswapV2SwapBridge {
         uint256 balance = IERC20(path[0]).balanceOf(address(this));
 
         IERC20(path[0]).approve(uniswapRouter, balance);
-        _uniswapRouter.swapExactTokensForTokens(
+        uint[] memory amounts = _uniswapRouter.swapExactTokensForTokens(
             balance,
             amountOutMin,
             path,
@@ -83,11 +90,11 @@ contract UniswapV2SwapBridge {
             block.timestamp + 100000
         );
 
-        emit TradedFromTokensToETH(
-        // address(this),
-        // path[path.length-1],
-        // msg.value,
-        // amounts[amounts.length-1]
+        emit TradedFromTokensToTokens(
+            address(this),
+            balance,
+            path,
+            amounts
         );
 
     }
