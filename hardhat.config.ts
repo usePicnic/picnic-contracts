@@ -3,6 +3,7 @@ import "@nomiclabs/hardhat-waffle";
 import "solidity-coverage";
 import "hardhat-gas-reporter";
 
+require('dotenv').config()
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -45,11 +46,16 @@ module.exports = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-      chainId: 7671,
       forking: {
         url: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_KEY}`, 
       }
     },
+    polygon: {
+      url: 'https://polygon-mainnet.infura.io/v3/${process.env.INFURA_KEY}',
+      accounts: {
+        mnemonic: process.env.POLYGON_TEST_MNEMONIC
+      }  
+    }
   },
   mocha: { timeout: '180000'},
   gasReporter: {

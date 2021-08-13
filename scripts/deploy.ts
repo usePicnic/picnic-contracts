@@ -9,6 +9,7 @@ import { readFileSync } from "fs";
 import fetch from "node-fetch";
 import constants from "../constants";
 
+require('dotenv').config()
 
 function delay(ms) {
   return new Promise( resolve => setTimeout(resolve, ms) );
