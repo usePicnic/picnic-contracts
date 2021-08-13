@@ -7,7 +7,7 @@ async function main() {
     await deployIndexPool();
 
     const files = readdirSync('./contracts/bridges/');
-    for (var i =0; i < files.length; i++){
+    for (var i = 0; i < files.length; i++) {
         await deployBridge(files[i].replace('.sol', ''))
     }
 }
