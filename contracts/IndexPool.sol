@@ -35,7 +35,7 @@ contract IndexPool is ERC721, Ownable {
 
     modifier _indexpoolOnly_() {
         require(
-            indexpoolAddress == msg.sender,
+            owner == msg.sender,
             "ONLY INDEXPOOL CAN CALL THIS FUNCTION"
         );
         _;
@@ -53,15 +53,15 @@ contract IndexPool is ERC721, Ownable {
     uint256 private constant BASE_ASSET = 1000000000000000000;
 
     // Contract properties
-    address indexpoolAddress;
+    address owner;
     uint256 public maxDeposit = 100 * BASE_ASSET;
 
     // NFT properties
     uint256 public tokenCounter = 0;
-    mapping(uint256 => address) public nftIdToWallet;
+    mapping(uint256 => address) private _nftIdToWallet;
 
     constructor() public ERC721("INDEXPOOL", "IPNFT") {
-        indexpoolAddress = msg.sender;
+        owner = msg.sender;
     }
 
     // Guarded launch
@@ -116,7 +116,7 @@ contract IndexPool is ERC721, Ownable {
     ) external payable _maxDeposit_ {
         // Instantiate existing wallet
         require(ownerOf(nftId) == msg.sender, "INDEXPOOL: ONLY NFT OWNER CAN EDIT IT");
-        Wallet wallet = Wallet(payable(nftIdToWallet[nftId]));
+        Wallet wallet = Wallet(payable(_nftIdToWallet[nftId]));
 
         // Run all bridges and calls to build the portfolio on Wallet
         _delegateToWallet(msg.value, msg.sender, inputTokens, inputAmounts, wallet, _bridgeAddresses, _bridgeEncodedCalls);
@@ -141,7 +141,7 @@ contract IndexPool is ERC721, Ownable {
         for (uint16 i = 0; i < inputTokens.length; i++) {
             // IndexPool Fee
             uint256 indexpoolFee = inputAmounts[i] / 1000;
-            IERC20(inputTokens[i]).transferFrom(from, indexpoolAddress, indexpoolFee);
+            IERC20(inputTokens[i]).transferFrom(from, owner, indexpoolFee);
 
             // Transfer ERC20 to Wallet
             IERC20(inputTokens[i]).transferFrom(from, toWallet, inputAmounts[i] - indexpoolFee);
@@ -162,7 +162,7 @@ contract IndexPool is ERC721, Ownable {
 
         // Pay fee to IndexPool
         uint256 indexpoolFee = ethAmount / 1000;
-        payable(indexpoolAddress).transfer(indexpoolFee);
+        payable(owner).transfer(indexpoolFee);
 
         // Execute functions calls + transfer ETH to wallet
         wallet.write{value : ethAmount - indexpoolFee}(_bridgeAddresses, _bridgeEncodedCalls);
@@ -171,12 +171,23 @@ contract IndexPool is ERC721, Ownable {
     function _mintNFT(address walletAddress, address owner) internal returns (uint256) {
         // Saving NFT data
         uint256 newItemId = tokenCounter;
-        nftIdToWallet[newItemId] = walletAddress;
+        _nftIdToWallet[newItemId] = walletAddress;
         tokenCounter = tokenCounter + 1;
 
         // Minting NFT
         _safeMint(owner, newItemId);
         return newItemId;
     }
+
+    // TODO we might need to implement a public walletOf method.
+    //
+    //    function walletOf(uint256 nftId) external view returns (address) {
+    //        return _nftIdToWallet[nftId];
+    //    }
+    //
+    // TODO we might need to be able to transfer ownership to a DAO
+    //    function transferOwnership(address newOwner) external _indexpoolOnly_ {
+    //        owner = newOwner;
+    //    }
 }
 
