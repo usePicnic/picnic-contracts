@@ -51,10 +51,11 @@ module.exports = {
       }
     },
     polygon: {
-      url: 'https://polygon-mainnet.infura.io/v3/${process.env.INFURA_KEY}',
+      url: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_KEY}`,
       accounts: {
         mnemonic: process.env.POLYGON_TEST_MNEMONIC
-      }  
+      },
+      gasPrice: 3*gwei
     }
   },
   mocha: { timeout: '180000'},

@@ -16,9 +16,9 @@ function delay(ms) {
 }
 
 async function main() {
-
+  console.log(process.env.HI);
   const [deployer] = await ethers.getSigners();
-  const ADDRESSES = constants['POLYGON'];
+  // const ADDRESSES = constants['POLYGON'];
 
   console.log(
     "Deploying contracts with the account:",
@@ -27,44 +27,48 @@ async function main() {
 
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  let Oracle = await ethers.getContractFactory("OraclePath");
+  // console.log("Deploying IndexPool contract");
+  // const IndexPool = await ethers.getContractFactory("IndexPool");
+  // const indexPool = await IndexPool.deploy();
 
-  let oracle = (await Oracle.deploy(ADDRESSES['FACTORY']));
+  // console.log(indexPool.address);
 
-  const Pool = await ethers.getContractFactory("Pool");
+  // deployer.
 
-  // DEPLOY
-  const pool = await Pool.deploy(ADDRESSES['ROUTER'], oracle.address);
+  // console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  console.log("Pool address:", pool.address);
+  // // DEPLOY
+  // const pool = await Pool.deploy(ADDRESSES['ROUTER'], oracle.address);
 
-  const nftAddress = await pool.getPortfolioNFTAddress();
+  // console.log("Pool address:", pool.address);
 
-  console.log("NFT Address", nftAddress)
+  // const nftAddress = await pool.getPortfolioNFTAddress();
 
-  // REGISTER ON SERVER
-  const poolFile = readFileSync('./artifacts/contracts/Pool.sol/Pool.json', 'utf8')
-  const poolContract = JSON.parse(poolFile)
+  // console.log("NFT Address", nftAddress)
 
-  const nftFile = readFileSync('./artifacts/contracts/nft/IndexPoolNFT.sol/IndexPoolNFT.json', 'utf8')
-  const nftContract = JSON.parse(nftFile)
+  // // REGISTER ON SERVER
+  // const poolFile = readFileSync('./artifacts/contracts/Pool.sol/Pool.json', 'utf8')
+  // const poolContract = JSON.parse(poolFile)
 
-  const response = await fetch(
-    'https://indexpool-appservice.azurewebsites.net/api/setcontract?code=yKjNRKdRLV4xl5fdmZU6bPveAg6lxpmxmRB3ocSXYTkrCUyXIa3QgA%3D%3D', {
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        networkName: "polygon-testnet",
-        address: pool.address,
-        abi: poolContract['abi'],
-        nftAddress: nftAddress,
-        nftAbi: nftContract['abi']
-      })
-    })
-  const responseText = await response.text()
-  console.log(responseText)
+  // const nftFile = readFileSync('./artifacts/contracts/nft/IndexPoolNFT.sol/IndexPoolNFT.json', 'utf8')
+  // const nftContract = JSON.parse(nftFile)
+
+  // const response = await fetch(
+  //   'https://indexpool-appservice.azurewebsites.net/api/setcontract?code=yKjNRKdRLV4xl5fdmZU6bPveAg6lxpmxmRB3ocSXYTkrCUyXIa3QgA%3D%3D', {
+  //     method: 'post',
+  //     headers: {
+  //       'Content-Type': 'application/json'
+  //     },
+  //     body: JSON.stringify({
+  //       networkName: "polygon-testnet",
+  //       address: pool.address,
+  //       abi: poolContract['abi'],
+  //       nftAddress: nftAddress,
+  //       nftAbi: nftContract['abi']
+  //     })
+  //   })
+  // const responseText = await response.text()
+  // console.log(responseText)
 }
 
 main()

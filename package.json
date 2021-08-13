@@ -8,8 +8,8 @@
     "lint": "./node_modules/.bin/solhint -f table contracts/**/*.sol",
     "compile": "hardhat compile",
     "coverage": "hardhat coverage",
-    "deploy": "hardhat run ./scripts/deploy.ts",
-    "undeploy": "hardhat run ./scripts/undeploy.ts"
+    "deploy": "hardhat run ./scripts/deploy.ts --network polygon",
+    "undeploy": "hardhat run ./scripts/undeploy.ts --network polygon"
   },
   "repository": {
     "type": "git",
