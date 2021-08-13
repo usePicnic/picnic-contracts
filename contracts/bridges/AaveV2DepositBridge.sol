@@ -7,7 +7,7 @@ import {IAaveIncentivesController} from "../interfaces/IAaveIncentivesController
 
 import "hardhat/console.sol";
 
-contract AaveV2Bridge {
+contract AaveV2DepositBridge {
     event Deposit (
         address wallet,
         address asset,
