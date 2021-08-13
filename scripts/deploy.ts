@@ -33,22 +33,23 @@ async function main() {
 
     console.log(`IndexPool contract deployed at: ${indexPool.address}`);
 
-    const indexPoolFile = readFileSync('./artifacts/contracts/IndexPool.sol/IndexPool.json', 'utf8')
-    const indexPoolContract = JSON.parse(indexPoolFile)
-
-    const response = await fetch(
-        'https://indexpool-appservice.azurewebsites.net/api/setcontract?code=yKjNRKdRLV4xl5fdmZU6bPveAg6lxpmxmRB3ocSXYTkrCUyXIa3QgA%3D%3D', {
-            method: 'post',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                networkName: "polygon",
-                address: indexPool.address,
-                abi: indexPoolContract['abi'],
-            })
-        })
-    console.log(`MongoDB updated with new IndexPool contract values`);
+    // const indexPoolFile = readFileSync('./artifacts/contracts/IndexPool.sol/IndexPool.json', 'utf8')
+    // const indexPoolContract = JSON.parse(indexPoolFile)
+    //
+    // // TODO setup new MongoDB data structure/API calls for current architecture
+    // const response = await fetch(
+    //     'https://indexpool-appservice.azurewebsites.net/api/setcontract?code=yKjNRKdRLV4xl5fdmZU6bPveAg6lxpmxmRB3ocSXYTkrCUyXIa3QgA%3D%3D', {
+    //         method: 'post',
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         },
+    //         body: JSON.stringify({
+    //             networkName: "polygon",
+    //             address: indexPool.address,
+    //             abi: indexPoolContract['abi'],
+    //         })
+    //     })
+    // console.log(`MongoDB updated with new IndexPool contract values`);
 }
 
 main()
