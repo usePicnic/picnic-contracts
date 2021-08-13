@@ -38,6 +38,7 @@
     "ethers": "^5.0.32",
     "hardhat": "^2.1.1",
     "hardhat-gas-reporter": "^1.0.4",
+    "mongodb": "^4.1.0",
     "node-fetch": "^2.6.1",
     "solc": "^0.8.4",
     "solhint": "^3.3.6",
