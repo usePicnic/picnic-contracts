@@ -35,7 +35,7 @@ contract IndexPool is ERC721, Ownable {
 
     modifier _indexpoolOnly_() {
         require(
-            owner == msg.sender,
+            indexpoolOwner == msg.sender,
             "ONLY INDEXPOOL CAN CALL THIS FUNCTION"
         );
         _;
@@ -53,7 +53,7 @@ contract IndexPool is ERC721, Ownable {
     uint256 private constant BASE_ASSET = 1000000000000000000;
 
     // Contract properties
-    address owner;
+    address indexpoolOwner;
     uint256 public maxDeposit = 100 * BASE_ASSET;
 
     // NFT properties
@@ -61,7 +61,7 @@ contract IndexPool is ERC721, Ownable {
     mapping(uint256 => address) private _nftIdToWallet;
 
     constructor() public ERC721("INDEXPOOL", "IPNFT") {
-        owner = msg.sender;
+        indexpoolOwner = msg.sender;
     }
 
     // Guarded launch
@@ -141,7 +141,7 @@ contract IndexPool is ERC721, Ownable {
         for (uint16 i = 0; i < inputTokens.length; i++) {
             // IndexPool Fee
             uint256 indexpoolFee = inputAmounts[i] / 1000;
-            IERC20(inputTokens[i]).transferFrom(from, owner, indexpoolFee);
+            IERC20(inputTokens[i]).transferFrom(from, indexpoolOwner, indexpoolFee);
 
             // Transfer ERC20 to Wallet
             IERC20(inputTokens[i]).transferFrom(from, toWallet, inputAmounts[i] - indexpoolFee);
@@ -162,7 +162,7 @@ contract IndexPool is ERC721, Ownable {
 
         // Pay fee to IndexPool
         uint256 indexpoolFee = ethAmount / 1000;
-        payable(owner).transfer(indexpoolFee);
+        payable(indexpoolOwner).transfer(indexpoolFee);
 
         // Execute functions calls + transfer ETH to wallet
         wallet.write{value : ethAmount - indexpoolFee}(_bridgeAddresses, _bridgeEncodedCalls);
@@ -175,7 +175,7 @@ contract IndexPool is ERC721, Ownable {
         tokenCounter = tokenCounter + 1;
 
         // Minting NFT
-        _safeMint(owner, newItemId);
+        _safeMint(indexpoolOwner, newItemId);
         return newItemId;
     }
 
