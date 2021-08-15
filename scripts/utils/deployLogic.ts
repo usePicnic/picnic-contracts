@@ -1,54 +1,56 @@
 import { ethers } from "hardhat";
-require('dotenv').config()
 import { readFileSync } from "fs";
-import {MongoClient} from 'mongodb';
+import { MongoClient } from 'mongodb';
 
-async function deployLogic(contractName: string, isBridge: boolean) {
-    console.log(contractName)
+type DeployLogicProps = {
+    networkName: string,
+    contractName: string,
+    filePath: string
+}
 
-    const uri = process.env.MONGODB_URI;
-    // @ts-ignore
-    const client = new MongoClient(uri, {useNewUrlParser: true, useUnifiedTopology: true});
-    await client.connect();
+const deployLogic = async ({ networkName, contractName, filePath } : DeployLogicProps) => {
+    const client = await MongoClient.connect(process.env.MONGODB_URI);
 
-    // TODO add logic to support multiple blockchains
-    let mongoContract = await client.db('indexpool').collection('contracts').findOne({'name':contractName});
+    let mongoContract = await client
+        .db('indexpool')
+        .collection('contracts')
+        .findOne(
+            {
+                'name': contractName,
+                'networkName': networkName
+            }
+        );        
 
-    if (mongoContract !== undefined){
-        console.log(`${contractName} is already deployed. If you want to redeploy it, please undeploy it first.`)
+    if (mongoContract !== undefined) {
+        console.log(`${contractName} is already deployed on ${networkName}. If you want to redeploy it, please undeploy it first.`)
         return
     }
 
-    console.log(`Deploying ${contractName}:`);
+    console.log(`Deploying ${contractName}...`);
     let contractInterface = await ethers.getContractFactory(contractName);
+
     const deployedContract = await contractInterface.deploy();
 
-    console.log(`${contractName} contract deployed at: ${deployedContract.address}`);
-
-    let filePath;
-    if (isBridge) {
-        filePath = `./artifacts/contracts/bridges/${contractName}.sol/${contractName}.json`;
-    }
-    else {
-        filePath = `./artifacts/contracts/${contractName}.sol/${contractName}.json`;
-    }
+    console.log(`${contractName} contract deployed on ${networkName} at: ${deployedContract.address}`);
 
     const contractFile = readFileSync(
         filePath,
         'utf8')
     const contract = JSON.parse(contractFile)
 
-    let network = await client.db('indexpool').collection('networks').findOne({'name':'polygon'});
-
     let insertData = {
-        network: network['_id'],
+        networkName: networkName,
         name: contractName,
         address: deployedContract.address,
         abi: contract['abi']
     }
 
-    await client.db('indexpool').collection('contracts').insertOne(insertData)
-    console.log(`${contractName} inserted into DB.`)
+    await client
+        .db('indexpool')
+        .collection('contracts')
+        .insertOne(insertData);
+    
+    console.log(`${contractName} on ${networkName} inserted into DB.`)
 }
 
 export default deployLogic;
