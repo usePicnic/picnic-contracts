@@ -56,6 +56,10 @@ contract IndexPool is ERC721, Ownable {
     address indexpoolOwner;
     uint256 public maxDeposit = 100 * BASE_ASSET;
 
+    // Portfolios
+    uint256 private portfolioCounter = 0;
+    mapping(uint256 => address) private _portfolioIdToCreator;
+
     // NFT properties
     uint256 public tokenCounter = 0;
     mapping(uint256 => address) private _nftIdToWallet;
@@ -72,9 +76,10 @@ contract IndexPool is ERC721, Ownable {
         maxDeposit = newMaxDeposit;
     }
 
-    function registerPortfolio(uint portfolioId, string calldata jsonString) external {
-        // portfolioId = msg.sender + portfolioId
+    function registerPortfolio(string calldata jsonString) external {
+        uint256 portfolioId = uint256(keccak256(abi.encodePacked(msg.sender, portfolioCounter, block.timestamp)));
         emit LOG_PORTFOLIO_REGISTERED(msg.sender, portfolioId, jsonString);
+        portfolioCounter++;
     }
 
     function mintPortfolio(
