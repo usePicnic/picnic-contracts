@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IIndexPool.sol";
 
 
-contract IndexPool is IIndexPool, ERC721, Ownable { // TODO review ownable
+contract IndexPool is IIndexPool, ERC721, Ownable {
     event LOG_PORTFOLIO_REGISTERED(
         address creator,
         uint256 portfolioId,
@@ -34,14 +34,6 @@ contract IndexPool is IIndexPool, ERC721, Ownable { // TODO review ownable
         uint256 ethAmount
     );
 
-    modifier _indexpoolOnly_() {
-        require(
-            indexpoolOwner == msg.sender,
-            "ONLY INDEXPOOL CAN CALL THIS FUNCTION"
-        );
-        _;
-    }
-
     modifier _maxDeposit_() {
         require(
             msg.value <= maxDeposit,
@@ -54,7 +46,6 @@ contract IndexPool is IIndexPool, ERC721, Ownable { // TODO review ownable
     uint256 private constant BASE_ASSET = 1000000000000000000;
 
     // Contract properties
-    address indexpoolOwner;
     uint256 public maxDeposit = 100 * BASE_ASSET;
 
     // Portfolios
@@ -65,14 +56,13 @@ contract IndexPool is IIndexPool, ERC721, Ownable { // TODO review ownable
     uint256 public tokenCounter = 0;
     mapping(uint256 => address) private _nftIdToWallet;
 
-    constructor() public ERC721("INDEXPOOL", "IPNFT") {
-        indexpoolOwner = msg.sender;
+    constructor() public ERC721("INDEXPOOL", "IPNFT") Ownable() {
     }
 
     // Guarded launch
     function setMaxDeposit(uint256 newMaxDeposit)
     external
-    _indexpoolOnly_
+    onlyOwner
     override
     {
         maxDeposit = newMaxDeposit;
@@ -99,7 +89,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable { // TODO review ownable
         _delegateToWallet(msg.value, msg.sender, inputTokens, inputAmounts, wallet, _bridgeAddresses, _bridgeEncodedCalls);
 
         // Mint NFT
-        uint256 nftId = _mintNFT({walletAddress : address(wallet), owner : msg.sender});
+        uint256 nftId = _mintNFT({walletAddress : address(wallet), nftOwner : msg.sender});
 
         emit LOG_MINT_NFT(
             nftId,
@@ -148,7 +138,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable { // TODO review ownable
         for (uint16 i = 0; i < inputTokens.length; i++) {
             // IndexPool Fee
             uint256 indexpoolFee = inputAmounts[i] / 1000;
-            IERC20(inputTokens[i]).transferFrom(from, indexpoolOwner, indexpoolFee);
+            IERC20(inputTokens[i]).transferFrom(from, owner(), indexpoolFee);
 
             // Transfer ERC20 to Wallet
             IERC20(inputTokens[i]).transferFrom(from, toWallet, inputAmounts[i] - indexpoolFee);
@@ -169,20 +159,20 @@ contract IndexPool is IIndexPool, ERC721, Ownable { // TODO review ownable
 
         // Pay fee to IndexPool
         uint256 indexpoolFee = ethAmount / 1000;
-        payable(indexpoolOwner).transfer(indexpoolFee);
+        payable(owner()).transfer(indexpoolFee);
 
         // Execute functions calls + transfer ETH to wallet
         wallet.write{value : ethAmount - indexpoolFee}(_bridgeAddresses, _bridgeEncodedCalls);
     }
 
-    function _mintNFT(address walletAddress, address owner) internal returns (uint256) {
+    function _mintNFT(address walletAddress, address nftOwner) internal returns (uint256) {
         // Saving NFT data
         uint256 newItemId = tokenCounter;
         _nftIdToWallet[newItemId] = walletAddress;
         tokenCounter = tokenCounter + 1;
 
         // Minting NFT
-        _safeMint(indexpoolOwner, newItemId);
+        _safeMint(nftOwner, newItemId);
         return newItemId;
     }
 
@@ -192,9 +182,5 @@ contract IndexPool is IIndexPool, ERC721, Ownable { // TODO review ownable
     //        return _nftIdToWallet[nftId];
     //    }
     //
-    // TODO we might need to be able to transfer ownership to a DAO
-    //    function transferOwnership(address newOwner) external _indexpoolOnly_ {
-    //        owner = newOwner;
-    //    }
 }
 
