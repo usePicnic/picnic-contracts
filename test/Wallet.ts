@@ -59,6 +59,7 @@ describe("Withdraw", function () {
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['DAI'],
+                    100000
                 ]
             )
         ];
@@ -167,6 +168,7 @@ describe("Withdraw", function () {
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['DAI'],
+                    100000
                 ]
             ),
             aaveV2DepositBridge.interface.encodeFunctionData(
@@ -175,7 +177,8 @@ describe("Withdraw", function () {
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['DAI'],
                     ["0x27F8D03b3a2196956ED754baDc28D73be8830A6e"],
-                    "0x357D51124f59836DeD84c8a1730D72B749d8BC23"
+                    "0x357D51124f59836DeD84c8a1730D72B749d8BC23",
+                    100000
                 ]
             )
         ];
@@ -194,7 +197,7 @@ describe("Withdraw", function () {
         expect(event.args.path).to.eql([ TOKENS['WMAIN'], TOKENS['DAI'] ]);
         expect(event.args.amounts).to.be.an('array');
 
-        event = await getFirstEvent({ address: wallet.address }, aaveV2DepositBridge, 'Deposit');
+        event = await getFirstEvent({ address: wallet.address }, AaveV2DepositBridge, 'Deposit');
 
         // TODO: Check amount
         expect(event.args.wallet).to.equal(wallet.address);
@@ -203,7 +206,7 @@ describe("Withdraw", function () {
 
         // TODO: Check amount
         // TODO: Check claimed reward
-        event = await getFirstEvent({ address: wallet.address }, aaveV2DepositBridge, 'Withdraw');
+        event = await getFirstEvent({ address: wallet.address }, AaveV2DepositBridge, 'Withdraw');
         expect(event.args.wallet).to.equal(wallet.address);
         expect(event.args.asset).to.equal(TOKENS['DAI']);
         expect(event.args.assets).to.eql(["0x27F8D03b3a2196956ED754baDc28D73be8830A6e"]);
@@ -232,6 +235,7 @@ describe("Withdraw", function () {
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['DAI'],
+                    100000
                 ]
             ),
             aaveV2DepositBridge.interface.encodeFunctionData(
@@ -240,7 +244,8 @@ describe("Withdraw", function () {
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['DAI'],
                     ["0x27F8D03b3a2196956ED754baDc28D73be8830A6e"],
-                    "0x357D51124f59836DeD84c8a1730D72B749d8BC23"
+                    "0x357D51124f59836DeD84c8a1730D72B749d8BC23",
+                    100000
                 ]
             )
         ];
@@ -277,6 +282,7 @@ describe("Withdraw", function () {
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['QUICK'],
+                    100000
                 ]
             ),
             aaveV2DepositBridge.interface.encodeFunctionData(
@@ -285,7 +291,8 @@ describe("Withdraw", function () {
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['QUICK'],
                     [TOKENS['QUICK']],
-                    "0x357D51124f59836DeD84c8a1730D72B749d8BC23"
+                    "0x357D51124f59836DeD84c8a1730D72B749d8BC23",
+                    100000
                 ]
             )
         ];

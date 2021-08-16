@@ -81,6 +81,7 @@ describe("IndexPool", function () {
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['DAI'],
+                    100000
                 ]
             )
         ];
@@ -136,6 +137,7 @@ describe("IndexPool", function () {
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['WMAIN'],
+                    100000
                 ]
             )
         ];
@@ -178,6 +180,7 @@ describe("IndexPool", function () {
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['DAI'],
+                    100000
                 ]
             )
         ];
@@ -229,6 +232,7 @@ describe("IndexPool", function () {
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['DAI'],
+                    100000
                 ]
             )
         ];
@@ -280,6 +284,7 @@ describe("IndexPool", function () {
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['DAI'],
+                    100000
                 ]
             )
         ];
@@ -324,6 +329,7 @@ describe("IndexPool", function () {
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['DAI'],
+                    100000
                 ]
             )
         ];
