@@ -21,10 +21,13 @@ contract AaveV2DepositBridge {
         uint256 claimedReward
     );
 
-    function deposit(address aaveLendingPoolAddress, address asset, uint256 percentage)
+    function deposit(address asset, uint256 percentage)
         public
         payable
     {
+        // Hardcoded to make call easier to understand for the user (UI will help explain/debug it)
+        address aaveLendingPoolAddress = 0x8dFf5E27EA6b7AC08EbFdf9eB090F32ee9a30fcf;
+
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
         uint256 amount = IERC20(asset).balanceOf(address(this)) * percentage / 100000;
         IERC20(asset).approve(aaveLendingPoolAddress, amount);
@@ -38,12 +41,14 @@ contract AaveV2DepositBridge {
     }
 
     function withdraw(
-        address aaveLendingPoolAddress,
         address asset,
         address[] calldata assets,
         address incentivesController,
         uint256 percentage
     ) public payable {
+        // Hardcoded to make call easier to understand for the user (UI will help explain/debug it)
+        address aaveLendingPoolAddress = 0x8dFf5E27EA6b7AC08EbFdf9eB090F32ee9a30fcf;
+
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
         IAaveIncentivesController distributor = IAaveIncentivesController(
             incentivesController

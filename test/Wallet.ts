@@ -57,7 +57,6 @@ describe("Withdraw", function () {
             aaveV2DepositBridge.interface.encodeFunctionData(
                 "deposit",
                 [
-                    ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['DAI'],
                     100000
                 ]
@@ -166,7 +165,6 @@ describe("Withdraw", function () {
             aaveV2DepositBridge.interface.encodeFunctionData(
                 "deposit",
                 [
-                    ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['DAI'],
                     100000
                 ]
@@ -174,7 +172,6 @@ describe("Withdraw", function () {
             aaveV2DepositBridge.interface.encodeFunctionData(
                 "withdraw",
                 [
-                    ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['DAI'],
                     ["0x27F8D03b3a2196956ED754baDc28D73be8830A6e"],
                     "0x357D51124f59836DeD84c8a1730D72B749d8BC23",
@@ -233,7 +230,6 @@ describe("Withdraw", function () {
             aaveV2DepositBridge.interface.encodeFunctionData(
                 "deposit",
                 [
-                    ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['DAI'],
                     100000
                 ]
@@ -241,7 +237,6 @@ describe("Withdraw", function () {
             aaveV2DepositBridge.interface.encodeFunctionData(
                 "withdraw",
                 [
-                    ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['DAI'],
                     ["0x27F8D03b3a2196956ED754baDc28D73be8830A6e"],
                     "0x357D51124f59836DeD84c8a1730D72B749d8BC23",
@@ -280,7 +275,6 @@ describe("Withdraw", function () {
             aaveV2DepositBridge.interface.encodeFunctionData(
                 "deposit",
                 [
-                    ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['QUICK'],
                     100000
                 ]
@@ -288,7 +282,6 @@ describe("Withdraw", function () {
             aaveV2DepositBridge.interface.encodeFunctionData(
                 "withdraw",
                 [
-                    ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['QUICK'],
                     [TOKENS['QUICK']],
                     "0x357D51124f59836DeD84c8a1730D72B749d8BC23",
