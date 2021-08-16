@@ -4,9 +4,10 @@ import "./Wallet.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./interfaces/IIndexPool.sol";
 
 
-contract IndexPool is ERC721, Ownable {
+contract IndexPool is IIndexPool, ERC721, Ownable { // TODO review ownable
     event LOG_PORTFOLIO_REGISTERED(
         address creator,
         uint256 portfolioId,
@@ -57,8 +58,8 @@ contract IndexPool is ERC721, Ownable {
     uint256 public maxDeposit = 100 * BASE_ASSET;
 
     // Portfolios
-    uint256 private portfolioCounter = 0;
-    mapping(uint256 => address) private _portfolioIdToCreator;
+    uint256 private portfolioCounter = 0; // TODO review if/why is this necessary?
+    mapping(uint256 => address) private _portfolioIdToCreator; // TODO review if/why is this necessary?
 
     // NFT properties
     uint256 public tokenCounter = 0;
@@ -72,11 +73,12 @@ contract IndexPool is ERC721, Ownable {
     function setMaxDeposit(uint256 newMaxDeposit)
     external
     _indexpoolOnly_
+    override
     {
         maxDeposit = newMaxDeposit;
     }
 
-    function registerPortfolio(string calldata jsonString) external {
+    function registerPortfolio(string calldata jsonString) external override {
         uint256 portfolioId = uint256(keccak256(abi.encodePacked(msg.sender, portfolioCounter, block.timestamp)));
         emit LOG_PORTFOLIO_REGISTERED(msg.sender, portfolioId, jsonString);
         portfolioCounter++;
@@ -89,7 +91,7 @@ contract IndexPool is ERC721, Ownable {
         uint256[] calldata inputAmounts,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) external payable _maxDeposit_ {
+    ) external payable _maxDeposit_ override {
         // Create new wallet
         Wallet wallet = new Wallet();
 
@@ -118,7 +120,7 @@ contract IndexPool is ERC721, Ownable {
         uint256[] calldata inputAmounts,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) external payable _maxDeposit_ {
+    ) external payable _maxDeposit_ override {
         // Instantiate existing wallet
         require(ownerOf(nftId) == msg.sender, "INDEXPOOL: ONLY NFT OWNER CAN EDIT IT");
         Wallet wallet = Wallet(payable(_nftIdToWallet[nftId]));
