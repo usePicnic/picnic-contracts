@@ -10,8 +10,8 @@ import constants from "../constants";
 describe("Withdraw", function () {
     let owner;
     let other;
-    let AaveV2Bridge;
-    let aaveV2Bridge;
+    let AaveV2DepositBridge;
+    let aaveV2DepositBridge;
     let UniswapV2SwapBridge;
     let uniswapV2SwapBridge;
     let wallet;
@@ -26,9 +26,9 @@ describe("Withdraw", function () {
         uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
         await uniswapV2SwapBridge.deployed();
 
-        AaveV2Bridge = await ethers.getContractFactory("AaveV2Bridge");
-        aaveV2Bridge = (await AaveV2Bridge.deploy()).connect(owner);
-        await aaveV2Bridge.deployed();
+        AaveV2DepositBridge = await ethers.getContractFactory("AaveV2DepositBridge");
+        aaveV2DepositBridge = (await AaveV2DepositBridge.deploy()).connect(owner);
+        await aaveV2DepositBridge.deployed();
 
         let Wallet = await ethers.getContractFactory("Wallet");
         wallet = (await Wallet.deploy()).connect(owner);
@@ -38,7 +38,7 @@ describe("Withdraw", function () {
     it("Buy DAI on Uniswap and deposit on Aave", async function () {
         var _bridgeAddresses = [
             uniswapV2SwapBridge.address,
-            aaveV2Bridge.address,
+            aaveV2DepositBridge.address,
         ];
         let pathUniswap = [
             TOKENS['WMAIN'],
@@ -54,7 +54,7 @@ describe("Withdraw", function () {
                     pathUniswap
                 ],
             ),
-            aaveV2Bridge.interface.encodeFunctionData(
+            aaveV2DepositBridge.interface.encodeFunctionData(
                 "deposit",
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
@@ -147,8 +147,8 @@ describe("Withdraw", function () {
     it("Buys DAI on Uniswap and deposit on Aave and withdraw on Aave", async function () {
         var _bridgeAddresses = [
             uniswapV2SwapBridge.address,
-            aaveV2Bridge.address,
-            aaveV2Bridge.address,
+            aaveV2DepositBridge.address,
+            aaveV2DepositBridge.address,
         ];
         var _bridgeEncodedCalls = [
             uniswapV2SwapBridge.interface.encodeFunctionData(
@@ -162,14 +162,14 @@ describe("Withdraw", function () {
                     ]
                 ],
             ),
-            aaveV2Bridge.interface.encodeFunctionData(
+            aaveV2DepositBridge.interface.encodeFunctionData(
                 "deposit",
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['DAI'],
                 ]
             ),
-            aaveV2Bridge.interface.encodeFunctionData(
+            aaveV2DepositBridge.interface.encodeFunctionData(
                 "withdraw",
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
@@ -194,7 +194,7 @@ describe("Withdraw", function () {
         expect(event.args.path).to.eql([ TOKENS['WMAIN'], TOKENS['DAI'] ]);
         expect(event.args.amounts).to.be.an('array');
 
-        event = await getFirstEvent({ address: wallet.address }, AaveV2Bridge, 'Deposit');
+        event = await getFirstEvent({ address: wallet.address }, aaveV2DepositBridge, 'Deposit');
 
         // TODO: Check amount
         expect(event.args.wallet).to.equal(wallet.address);
@@ -203,7 +203,7 @@ describe("Withdraw", function () {
 
         // TODO: Check amount
         // TODO: Check claimed reward
-        event = await getFirstEvent({ address: wallet.address }, AaveV2Bridge, 'Withdraw');
+        event = await getFirstEvent({ address: wallet.address }, aaveV2DepositBridge, 'Withdraw');
         expect(event.args.wallet).to.equal(wallet.address);
         expect(event.args.asset).to.equal(TOKENS['DAI']);
         expect(event.args.assets).to.eql(["0x27F8D03b3a2196956ED754baDc28D73be8830A6e"]);
@@ -212,8 +212,8 @@ describe("Withdraw", function () {
     it("Rejects write from other user", async function () {
         var _bridgeAddresses = [
             uniswapV2SwapBridge.address,
-            aaveV2Bridge.address,
-            aaveV2Bridge.address,
+            aaveV2DepositBridge.address,
+            aaveV2DepositBridge.address,
         ];
         var _bridgeEncodedCalls = [
             uniswapV2SwapBridge.interface.encodeFunctionData(
@@ -227,14 +227,14 @@ describe("Withdraw", function () {
                     ]
                 ],
             ),
-            aaveV2Bridge.interface.encodeFunctionData(
+            aaveV2DepositBridge.interface.encodeFunctionData(
                 "deposit",
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['DAI'],
                 ]
             ),
-            aaveV2Bridge.interface.encodeFunctionData(
+            aaveV2DepositBridge.interface.encodeFunctionData(
                 "withdraw",
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
@@ -257,8 +257,8 @@ describe("Withdraw", function () {
     it("Rejects failed bridge call", async function () {
         var _bridgeAddresses = [
             uniswapV2SwapBridge.address,
-            aaveV2Bridge.address,
-            aaveV2Bridge.address,
+            aaveV2DepositBridge.address,
+            aaveV2DepositBridge.address,
         ];
         var _bridgeEncodedCalls = [
             uniswapV2SwapBridge.interface.encodeFunctionData(
@@ -272,14 +272,14 @@ describe("Withdraw", function () {
                     ]
                 ],
             ),
-            aaveV2Bridge.interface.encodeFunctionData(
+            aaveV2DepositBridge.interface.encodeFunctionData(
                 "deposit",
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
                     TOKENS['QUICK'],
                 ]
             ),
-            aaveV2Bridge.interface.encodeFunctionData(
+            aaveV2DepositBridge.interface.encodeFunctionData(
                 "withdraw",
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],

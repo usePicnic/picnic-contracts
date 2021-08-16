@@ -10,7 +10,7 @@ describe("IndexPool", function () {
     let provider;
     let IndexPool;
     let indexPool;
-    let aaveV2Bridge;
+    let aaveV2DepositBridge;
     let uniswapV2SwapBridge;
     let uniswapV2Router02;
 
@@ -28,9 +28,9 @@ describe("IndexPool", function () {
         uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
         await uniswapV2SwapBridge.deployed();
 
-        let AaveV2Bridge = await ethers.getContractFactory("AaveV2Bridge");
-        aaveV2Bridge = await AaveV2Bridge.deploy();
-        await aaveV2Bridge.deployed();
+        let AaveV2DepositBridge = await ethers.getContractFactory("AaveV2DepositBridge");
+        aaveV2DepositBridge = await AaveV2DepositBridge.deploy();
+        await aaveV2DepositBridge.deployed();
 
         uniswapV2Router02 = await ethers.getContractAt("IUniswapV2Router02", ADDRESSES["UNISWAP_V2_ROUTER"]);
 
@@ -62,7 +62,7 @@ describe("IndexPool", function () {
     it("Mints NFT with 2 calls", async function () {
         var _bridgeAddresses = [
             uniswapV2SwapBridge.address,
-            aaveV2Bridge.address,
+            aaveV2DepositBridge.address,
         ];
         var _bridgeEncodedCalls = [
             uniswapV2SwapBridge.interface.encodeFunctionData(
@@ -76,7 +76,7 @@ describe("IndexPool", function () {
                     ]
                 ],
             ),
-            aaveV2Bridge.interface.encodeFunctionData(
+            aaveV2DepositBridge.interface.encodeFunctionData(
                 "deposit",
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
@@ -117,7 +117,7 @@ describe("IndexPool", function () {
 
         var _bridgeAddresses = [
             uniswapV2SwapBridge.address,
-            aaveV2Bridge.address,
+            aaveV2DepositBridge.address,
         ];
         var _bridgeEncodedCalls = [
             uniswapV2SwapBridge.interface.encodeFunctionData(
@@ -131,7 +131,7 @@ describe("IndexPool", function () {
                     ]
                 ],
             ),
-            aaveV2Bridge.interface.encodeFunctionData(
+            aaveV2DepositBridge.interface.encodeFunctionData(
                 "deposit",
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
@@ -159,7 +159,7 @@ describe("IndexPool", function () {
     it("Mints NFT and then Edits NFT", async function () {
         var _bridgeAddresses = [
             uniswapV2SwapBridge.address,
-            aaveV2Bridge.address,
+            aaveV2DepositBridge.address,
         ];
         var _bridgeEncodedCalls = [
             uniswapV2SwapBridge.interface.encodeFunctionData(
@@ -173,7 +173,7 @@ describe("IndexPool", function () {
                     ]
                 ],
             ),
-            aaveV2Bridge.interface.encodeFunctionData(
+            aaveV2DepositBridge.interface.encodeFunctionData(
                 "deposit",
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
@@ -210,7 +210,7 @@ describe("IndexPool", function () {
     it("Rejects other address editing NFT", async function () {
         var _bridgeAddresses = [
             uniswapV2SwapBridge.address,
-            aaveV2Bridge.address,
+            aaveV2DepositBridge.address,
         ];
         var _bridgeEncodedCalls = [
             uniswapV2SwapBridge.interface.encodeFunctionData(
@@ -224,7 +224,7 @@ describe("IndexPool", function () {
                     ]
                 ],
             ),
-            aaveV2Bridge.interface.encodeFunctionData(
+            aaveV2DepositBridge.interface.encodeFunctionData(
                 "deposit",
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
@@ -261,7 +261,7 @@ describe("IndexPool", function () {
     it("Rejects very large deposit", async function () {
         var _bridgeAddresses = [
             uniswapV2SwapBridge.address,
-            aaveV2Bridge.address,
+            aaveV2DepositBridge.address,
         ];
         var _bridgeEncodedCalls = [
             uniswapV2SwapBridge.interface.encodeFunctionData(
@@ -275,7 +275,7 @@ describe("IndexPool", function () {
                     ]
                 ],
             ),
-            aaveV2Bridge.interface.encodeFunctionData(
+            aaveV2DepositBridge.interface.encodeFunctionData(
                 "deposit",
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
@@ -305,7 +305,7 @@ describe("IndexPool", function () {
 
         var _bridgeAddresses = [
             uniswapV2SwapBridge.address,
-            aaveV2Bridge.address,
+            aaveV2DepositBridge.address,
         ];
         var _bridgeEncodedCalls = [
             uniswapV2SwapBridge.interface.encodeFunctionData(
@@ -319,7 +319,7 @@ describe("IndexPool", function () {
                     ]
                 ],
             ),
-            aaveV2Bridge.interface.encodeFunctionData(
+            aaveV2DepositBridge.interface.encodeFunctionData(
                 "deposit",
                 [
                     ADDRESSES['AAVE_V2_LENDING_POOL'],
