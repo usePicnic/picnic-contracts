@@ -348,7 +348,7 @@ describe("IndexPool", function () {
 
         await expect(otherIndexPool.setMaxDeposit(
             ethers.utils.parseEther("101")
-        )).to.be.revertedWith("ONLY INDEXPOOL CAN CALL THIS FUNCTION");
+        )).to.be.revertedWith("Ownable: caller is not the owner");
     })
 })
 
