@@ -5,22 +5,16 @@ import "hardhat/console.sol";
 
 contract UniswapV2SwapBridge {
     event TradedFromETHToTokens(
-        address wallet,
-        uint256 value,
         address[] path,
         uint256[] amounts
     );
 
     event TradedFromTokensToETH(
-        address wallet,
-        uint256 value,
         address[] path,
         uint256[] amounts
     );
 
     event TradedFromTokensToTokens(
-        address wallet,
-        uint256 value,
         address[] path,
         uint256[] amounts
     );
