@@ -9,8 +9,10 @@ import "hardhat/console.sol";
 
 contract AaveV2DepositBridge {
     event Deposit (
-        address asset,
-        uint256 amount
+        address assetIn,
+        uint256 amountIn,
+        address assetOut,
+        uint256 amountOut
     );
     event Withdraw (
         address asset,
@@ -19,7 +21,7 @@ contract AaveV2DepositBridge {
         uint256 claimedRewards
     );
 
-    function deposit(address asset, uint256 percentage)
+    function deposit(address assetIn, uint256 percentage)
         public
         payable
     {
@@ -27,13 +29,23 @@ contract AaveV2DepositBridge {
         address aaveLendingPoolAddress = 0x8dFf5E27EA6b7AC08EbFdf9eB090F32ee9a30fcf;
 
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
-        uint256 amount = IERC20(asset).balanceOf(address(this)) * percentage / 100000;
-        IERC20(asset).approve(aaveLendingPoolAddress, amount);
-        _aaveLendingPool.deposit(asset, amount, address(this), 0);
 
+        uint256 amountIn = IERC20(assetIn).balanceOf(address(this)) * percentage / 100000;
+        IERC20(assetIn).approve(aaveLendingPoolAddress, amountIn);
+        _aaveLendingPool.deposit(assetIn, amountIn, address(this), 0);
+
+        console.log('aave');
+        address assetOut = _aaveLendingPool.getReserveData(assetIn).aTokenAddress;
+        console.log(assetOut);
+
+        uint256 amountOut = IERC20(assetOut).balanceOf(address(this)) * percentage / 100000;
+
+        // TODO how to get amDAI from aave contract
         emit Deposit(
-            asset,
-            amount
+            assetIn,
+            amountIn,
+            assetOut,
+            amountOut
         );
     }
 
