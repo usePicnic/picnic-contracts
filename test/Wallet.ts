@@ -73,8 +73,6 @@ describe("Withdraw", function () {
 
         var event = await getFirstEvent({ address: wallet.address }, UniswapV2SwapBridge, 'TradedFromETHToTokens');
 
-        expect(event.args.value).to.equal(value);
-        expect(event.args.wallet).to.equal(wallet.address);
         expect(event.args.path).to.eql(pathUniswap);
         expect(event.args.amounts).to.be.an('array');
     })
@@ -107,8 +105,7 @@ describe("Withdraw", function () {
         );
 
         var event = await getFirstEvent({ address: wallet.address }, UniswapV2SwapBridge, 'TradedFromETHToTokens');
-        expect(event.args.value).to.equal(value);
-        expect(event.args.wallet).to.equal(wallet.address);
+
         expect(event.args.path).to.eql(pathUniswap);
         expect(event.args.amounts).to.be.an('array');
 
@@ -137,9 +134,6 @@ describe("Withdraw", function () {
 
         // TODO: Need to test value by checking balance
         // TODO: Need to check amount numbers
-        // expect(event.args.value).to.equal(value);
-
-        expect(event.args.wallet).to.equal(wallet.address);
         expect(event.args.path).to.eql(pathUniswap);
         expect(event.args.amounts).to.be.an('array');
     })
@@ -174,7 +168,6 @@ describe("Withdraw", function () {
                 [
                     TOKENS['DAI'],
                     ["0x27F8D03b3a2196956ED754baDc28D73be8830A6e"],
-                    "0x357D51124f59836DeD84c8a1730D72B749d8BC23",
                     100000
                 ]
             )
@@ -189,8 +182,7 @@ describe("Withdraw", function () {
 
         var event = await getFirstEvent({ address: wallet.address }, UniswapV2SwapBridge, 'TradedFromETHToTokens');
         
-        expect(event.args.wallet).to.equal(wallet.address);
-        expect(event.args.value).to.equal(ethers.utils.parseEther("1.1"));
+        expect(event.args.amounts[0]).to.equal(ethers.utils.parseEther("1.1"));
         expect(event.args.path).to.eql([ TOKENS['WMAIN'], TOKENS['DAI'] ]);
         expect(event.args.amounts).to.be.an('array');
 
@@ -204,7 +196,6 @@ describe("Withdraw", function () {
         // TODO: Check amount
         // TODO: Check claimed reward
         event = await getFirstEvent({ address: wallet.address }, AaveV2DepositBridge, 'Withdraw');
-        expect(event.args.wallet).to.equal(wallet.address);
         expect(event.args.asset).to.equal(TOKENS['DAI']);
         expect(event.args.assets).to.eql(["0x27F8D03b3a2196956ED754baDc28D73be8830A6e"]);
     })
@@ -239,7 +230,6 @@ describe("Withdraw", function () {
                 [
                     TOKENS['DAI'],
                     ["0x27F8D03b3a2196956ED754baDc28D73be8830A6e"],
-                    "0x357D51124f59836DeD84c8a1730D72B749d8BC23",
                     100000
                 ]
             )
@@ -284,7 +274,6 @@ describe("Withdraw", function () {
                 [
                     TOKENS['QUICK'],
                     [TOKENS['QUICK']],
-                    "0x357D51124f59836DeD84c8a1730D72B749d8BC23",
                     100000
                 ]
             )
