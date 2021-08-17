@@ -9,16 +9,14 @@ import "hardhat/console.sol";
 
 contract AaveV2DepositBridge {
     event Deposit (
-        address wallet,
         address asset,
         uint256 amount
     );
     event Withdraw (
-        address wallet,
         address asset,
-        address[] assets,
         uint256 amount,
-        uint256 claimedReward
+        address claimedAssets,
+        uint256 claimedRewards
     );
 
     function deposit(address asset, uint256 percentage)
@@ -34,24 +32,24 @@ contract AaveV2DepositBridge {
         _aaveLendingPool.deposit(asset, amount, address(this), 0);
 
         emit Deposit(
-            address(this),
             asset,
             amount
         );
     }
 
     function withdraw(
-        address asset,
-        address[] calldata assets,
-        address incentivesController,
+        address asset, // DAI
+        address[] calldata assets, // amDAI
         uint256 percentage
     ) public payable {
         // Hardcoded to make call easier to understand for the user (UI will help explain/debug it)
         address aaveLendingPoolAddress = 0x8dFf5E27EA6b7AC08EbFdf9eB090F32ee9a30fcf;
 
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
+
+        address incentivesControllerAddress = 0x357D51124f59836DeD84c8a1730D72B749d8BC23;
         IAaveIncentivesController distributor = IAaveIncentivesController(
-            incentivesController
+            incentivesControllerAddress
         );
         uint256 amountToClaim = distributor.getRewardsBalance(
             assets,
@@ -62,11 +60,13 @@ contract AaveV2DepositBridge {
         uint256 balance = IERC20(assets[0]).balanceOf(address(this)) * percentage / 100000;
         _aaveLendingPool.withdraw(asset, balance, address(this));
 
+        // TODO check if we can get the claimedAsset address from the distributor
+        address claimedAsset = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270; // WMATIC address
+
         emit Withdraw(
-            address(this),
             asset,
-            assets,
             balance,
+            claimedAsset,
             claimedReward
         );
     }
