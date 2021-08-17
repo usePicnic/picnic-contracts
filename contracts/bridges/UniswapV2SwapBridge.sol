@@ -34,8 +34,6 @@ contract UniswapV2SwapBridge {
         );
 
         emit TradedFromETHToTokens(
-            address(this),
-            msg.value,
             path,
             amounts
         );
@@ -59,8 +57,6 @@ contract UniswapV2SwapBridge {
         );
 
         emit TradedFromTokensToETH(
-            address(this),
-            balance,
             path,
             amounts
         );
@@ -85,8 +81,6 @@ contract UniswapV2SwapBridge {
         );
 
         emit TradedFromTokensToTokens(
-            address(this),
-            balance,
             path,
             amounts
         );
