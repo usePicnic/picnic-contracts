@@ -1,10 +1,10 @@
 pragma solidity 0.6.12;
+pragma experimental ABIEncoderV2;
 
 import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
 import {ILendingPool} from "@aave/protocol-v2/contracts/interfaces/ILendingPool.sol";
 import {ILendingPoolAddressesProvider} from "@aave/protocol-v2/contracts/interfaces/ILendingPoolAddressesProvider.sol";
 import {IAaveIncentivesController} from "../interfaces/IAaveIncentivesController.sol";
-
 import "hardhat/console.sol";
 
 contract AaveV2DepositBridge {
@@ -34,13 +34,9 @@ contract AaveV2DepositBridge {
         IERC20(assetIn).approve(aaveLendingPoolAddress, amountIn);
         _aaveLendingPool.deposit(assetIn, amountIn, address(this), 0);
 
-        console.log('aave');
         address assetOut = _aaveLendingPool.getReserveData(assetIn).aTokenAddress;
-        console.log(assetOut);
+        uint256 amountOut = IERC20(assetOut).balanceOf(address(this)); // TODO do final balance - initial balance
 
-        uint256 amountOut = IERC20(assetOut).balanceOf(address(this)) * percentage / 100000;
-
-        // TODO how to get amDAI from aave contract
         emit Deposit(
             assetIn,
             amountIn,
