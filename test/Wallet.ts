@@ -189,7 +189,6 @@ describe("Withdraw", function () {
         event = await getFirstEvent({ address: wallet.address }, AaveV2DepositBridge, 'Deposit');
 
         // TODO: Check amount
-        expect(event.args.wallet).to.equal(wallet.address);
         expect(event.args.asset).to.equal(TOKENS['DAI']);
         // expect(event.args.amount).to.equal(ethers.utils.parseEther("1.1"));
 
@@ -197,7 +196,6 @@ describe("Withdraw", function () {
         // TODO: Check claimed reward
         event = await getFirstEvent({ address: wallet.address }, AaveV2DepositBridge, 'Withdraw');
         expect(event.args.asset).to.equal(TOKENS['DAI']);
-        expect(event.args.assets).to.eql(["0x27F8D03b3a2196956ED754baDc28D73be8830A6e"]);
     })
 
     it("Rejects write from other user", async function () {
