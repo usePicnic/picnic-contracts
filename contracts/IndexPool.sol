@@ -62,6 +62,7 @@ contract IndexPool is ERC721, Ownable {
 
     // Contract properties
     uint256 public maxDeposit = 100 * BASE_ASSET;
+    uint256 public fee = 10;
 
     // Portfolios
     uint256 private portfolioCounter = 0; // TODO review if/why is this necessary?
@@ -71,8 +72,7 @@ contract IndexPool is ERC721, Ownable {
     uint256 public tokenCounter = 0;
     mapping(uint256 => address) private _nftIdToWallet;
 
-    constructor() public ERC721("INDEXPOOL", "IPNFT") Ownable() {
-    }
+    constructor() public ERC721("INDEXPOOL", "IPNFT") Ownable() {}
 
     // Guarded launch
     function setMaxDeposit(uint256 newMaxDeposit)
@@ -80,6 +80,14 @@ contract IndexPool is ERC721, Ownable {
     onlyOwner
     {
         maxDeposit = newMaxDeposit;
+    }
+
+    function setFee(uint256 newFee)
+    external
+    onlyOwner
+    {
+        require(newFee <= 100, "INDEXPOOL: MAX FEE IS 1%");
+        fee = newFee;
     }
 
     function walletOf(uint256 nftId) public view returns (address) {
@@ -171,14 +179,14 @@ contract IndexPool is ERC721, Ownable {
         uint256 nftId
     ) internal {
         // Pay fee to IndexPool
-        uint256 indexpoolFee = ethAmount / 1000;
+        uint256 indexpoolFee = fee * ethAmount / 10000;
         address walletAddress = walletOf(nftId);
         payable(owner()).transfer(indexpoolFee);
         payable(walletAddress).transfer(ethAmount - indexpoolFee);
 
         for (uint16 i = 0; i < inputs.tokens.length; i++) {
             // IndexPool Fee
-            indexpoolFee = inputs.amounts[i] / 1000;
+            indexpoolFee = fee * inputs.amounts[i] / 10000;
 
             IERC20(inputs.tokens[i]).transferFrom(from, owner(), indexpoolFee); // owner = contract owner (Ownable)
             IERC20(inputs.tokens[i]).transferFrom(from, walletAddress, inputs.amounts[i] - indexpoolFee);
