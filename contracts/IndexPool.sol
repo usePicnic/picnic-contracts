@@ -101,6 +101,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
             inputAmounts,
             msg.value);
     }
+    // TODO make requires check length input/output tokens and amounts
 
     function editPortfolio(
         uint256 nftId,
@@ -108,6 +109,9 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         address creator,
         address[] calldata inputTokens,
         uint256[] calldata inputAmounts,
+//        address[] calldata outputTokens,
+//        uint256[] calldata outputAmounts,
+//        uint256 outputEth,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) external payable _maxDeposit_ override {
@@ -127,6 +131,8 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
             inputTokens,
             inputAmounts,
             msg.value);
+
+        //_withdraw(outputTokens, outputAmounts, outputEth);
     }
 
     function _transferTokens(
@@ -134,7 +140,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         address[] calldata inputTokens,
         uint256[] calldata inputAmounts,
         address toWallet
-    ) private {
+    ) internal {
         for (uint16 i = 0; i < inputTokens.length; i++) {
             // IndexPool Fee
             uint256 indexpoolFee = inputAmounts[i] / 1000;
