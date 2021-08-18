@@ -21,12 +21,14 @@ contract UniswapV2SwapBridge {
 
     function tradeFromETHToTokens(
         address uniswapRouter,
+        uint256 amountIn,
         uint256 amountOutMin,
         address[] calldata path
     ) public payable {
         IUniswapV2Router02 _uniswapRouter = IUniswapV2Router02(uniswapRouter);
 
-        uint[] memory amounts = _uniswapRouter.swapExactETHForTokens{value: msg.value}(
+        // TODO what happens if approve amountIn > balance?
+        uint[] memory amounts = _uniswapRouter.swapExactETHForTokens{value: amountIn}(
             amountOutMin,
             path,
             address(this),
@@ -41,15 +43,16 @@ contract UniswapV2SwapBridge {
 
     function tradeFromTokensToETH(
         address uniswapRouter,
+        uint256 amountIn,
         uint256 amountOutMin,
         address[] calldata path
     ) public payable {
         IUniswapV2Router02 _uniswapRouter = IUniswapV2Router02(uniswapRouter);
-        uint256 balance = IERC20(path[0]).balanceOf(address(this));
 
-        IERC20(path[0]).approve(uniswapRouter, balance);
+        // TODO what happens if approve value > balance? (what tokens can break this? should use safeerc20?)
+        IERC20(path[0]).approve(uniswapRouter, amountIn);
         uint[] memory amounts = _uniswapRouter.swapExactTokensForETH(
-            balance,
+            amountIn,
             amountOutMin,
             path,
             address(this),
@@ -65,15 +68,16 @@ contract UniswapV2SwapBridge {
 
     function tradeFromTokensToTokens(
         address uniswapRouter,
+        uint256 amountIn,
         uint256 amountOutMin,
         address[] calldata path
     ) public payable {
         IUniswapV2Router02 _uniswapRouter = IUniswapV2Router02(uniswapRouter);
-        uint256 balance = IERC20(path[0]).balanceOf(address(this));
 
-        IERC20(path[0]).approve(uniswapRouter, balance);
+        // TODO what happens if approve value > balance? (what tokens can break this? should use safeerc20?)
+        IERC20(path[0]).approve(uniswapRouter, amountIn);
         uint[] memory amounts = _uniswapRouter.swapExactTokensForTokens(
-            balance,
+            amountIn,
             amountOutMin,
             path,
             address(this),

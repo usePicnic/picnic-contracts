@@ -50,6 +50,7 @@ describe("Withdraw", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
+                    BigInt(value) * BigInt(999) / BigInt(1000),
                     1,
                     pathUniswap
                 ],
@@ -91,6 +92,7 @@ describe("Withdraw", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
+                    BigInt(value) * BigInt(999) / BigInt(1000),
                     1,
                     pathUniswap
                 ],
@@ -149,6 +151,7 @@ describe("Withdraw", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
+                    BigInt(ethers.utils.parseEther("1.1") ) * BigInt(999) / BigInt(1000),
                     1,
                     [
                         TOKENS['WMAIN'],
@@ -209,6 +212,7 @@ describe("Withdraw", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
+                    BigInt(ethers.utils.parseEther("1.1") ) * BigInt(999) / BigInt(1000),
                     1,
                     [
                         TOKENS['WMAIN'],
@@ -253,6 +257,7 @@ describe("Withdraw", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
+                    BigInt(ethers.utils.parseEther("1.1") ) * BigInt(999) / BigInt(1000),
                     1,
                     [
                         TOKENS['WMAIN'],
