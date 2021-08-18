@@ -29,14 +29,20 @@ contract Wallet is IWallet {
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) external override payable _ownerOnly_ {
-        for (uint16 i = 0; i < _bridgeAddresses.length; i++) {
-            bool isSuccess;
+        bool isSuccess;
+        bytes memory result;
 
-            (isSuccess, ) = _bridgeAddresses[i].delegatecall(_bridgeEncodedCalls[i]);
-            require(
-                isSuccess == true,
-                "WALLET: BRIDGE CALL MUST BE SUCCESSFUL"
-            );
+        for (uint16 i = 0; i < _bridgeAddresses.length; i++) {
+            (isSuccess, result) = _bridgeAddresses[i].delegatecall(_bridgeEncodedCalls[i]);
+            // TODO should we keep using assembly?
+            if (isSuccess == false) {
+                assembly {
+                    let ptr := mload(0x40)
+                    let size := returndatasize()
+                    returndatacopy(ptr, 0, size)
+                    revert(ptr, size)
+                }
+            }
         }
     }
 
