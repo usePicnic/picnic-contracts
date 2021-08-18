@@ -141,15 +141,11 @@ describe("IndexPool", function () {
             )
         ];
 
-
-
-        await indexPool.mintPortfolio(
-            owner.address,
-            owner.address,
-            [TOKENS["DAI"]],
-            [daiBalance],
+        await indexPool.createPortfolio(
+            {'tokens':[TOKENS["DAI"]], 'amounts':[daiBalance]},
             _bridgeAddresses,
-            _bridgeEncodedCalls
+            _bridgeEncodedCalls,
+            overrides
         );
 
         await expect(await indexPool.balanceOf(owner.address)).to.be.above(0);
@@ -183,11 +179,8 @@ describe("IndexPool", function () {
         ];
 
         let overrides = {value: ethers.utils.parseEther("1")};
-        await indexPool.mintPortfolio(
-            owner.address,
-            owner.address,
-            [],
-            [],
+        await indexPool.createPortfolio(
+            {'tokens':[], 'amounts':[]},
             _bridgeAddresses,
             _bridgeEncodedCalls,
             overrides
@@ -195,10 +188,7 @@ describe("IndexPool", function () {
 
         await indexPool.editPortfolio(
             0,
-            owner.address,
-            owner.address,
-            [],
-            [],
+            {'tokens':[], 'amounts':[]},
             _bridgeAddresses,
             _bridgeEncodedCalls,
             overrides
@@ -235,11 +225,8 @@ describe("IndexPool", function () {
         ];
 
         let overrides = {value: ethers.utils.parseEther("1")};
-        await indexPool.mintPortfolio(
-            owner.address,
-            owner.address,
-            [],
-            [],
+        await indexPool.createPortfolio(
+            {'tokens':[], 'amounts':[]},
             _bridgeAddresses,
             _bridgeEncodedCalls,
             overrides
@@ -249,14 +236,11 @@ describe("IndexPool", function () {
 
         await expect(otherIndexPool.editPortfolio(
             0,
-            owner.address,
-            owner.address,
-            [],
-            [],
+            {'tokens':[], 'amounts':[]},
             _bridgeAddresses,
             _bridgeEncodedCalls,
             overrides
-        )).to.be.revertedWith("INDEXPOOL: ONLY NFT OWNER CAN EDIT IT");
+        )).to.be.revertedWith("INDEXPOOL: ONLY NFT OWNER CAN CALL THIS FUNCTION");
     })
 
     it("Rejects very large deposit", async function () {
@@ -288,11 +272,8 @@ describe("IndexPool", function () {
 
         let overrides = {value: ethers.utils.parseEther("101")};
 
-        await expect(indexPool.mintPortfolio(
-            owner.address,
-            owner.address,
-            [],
-            [],
+        await expect(indexPool.createPortfolio(
+            {'tokens':[], 'amounts':[]},
             _bridgeAddresses,
             _bridgeEncodedCalls,
             overrides
@@ -332,11 +313,8 @@ describe("IndexPool", function () {
         ];
 
         let overrides = {value: ethers.utils.parseEther("500")};
-        await indexPool.mintPortfolio(
-            owner.address,
-            owner.address,
-            [],
-            [],
+        await indexPool.createPortfolio(
+            {'tokens':[], 'amounts':[]},
             _bridgeAddresses,
             _bridgeEncodedCalls,
             overrides
