@@ -46,7 +46,7 @@ describe("IndexPool", function () {
         var _bridgeAddresses = [];
         var _bridgeEncodedCalls = [];
 
-        let overrides = {value: ethers.utils.parseEther("1.1")};
+        let overrides = {value: ethers.utils.parseEther("1")};
         await indexPool.mintPortfolio(
             owner.address,
             owner.address,
@@ -70,7 +70,7 @@ describe("IndexPool", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    BigInt(ethers.utils.parseEther("1.1") ) * BigInt(999) / BigInt(1000),
+                    ethers.utils.parseEther(".999"),
                     1,
                     [
                         TOKENS['WMAIN'],
@@ -87,7 +87,7 @@ describe("IndexPool", function () {
             )
         ];
 
-        let overrides = {value: ethers.utils.parseEther("1.1")};
+        let overrides = {value: ethers.utils.parseEther("1")};
         await indexPool.mintPortfolio(
             owner.address,
             owner.address,
@@ -130,7 +130,7 @@ describe("IndexPool", function () {
                 "tradeFromTokensToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    BigInt(ethers.utils.parseEther("0.5")) , // arbitrary amount
+                    ethers.utils.parseEther("1") , // arbitrary amount
                     1,
                     [
                         TOKENS['DAI'],
@@ -171,7 +171,7 @@ describe("IndexPool", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    BigInt(ethers.utils.parseEther("1.1") ) * BigInt(999) / BigInt(1000),
+                    ethers.utils.parseEther("0.999"),
                     1,
                     [
                         TOKENS['WMAIN'],
@@ -188,7 +188,7 @@ describe("IndexPool", function () {
             )
         ];
 
-        let overrides = {value: ethers.utils.parseEther("1.1")};
+        let overrides = {value: ethers.utils.parseEther("1")};
         await indexPool.mintPortfolio(
             owner.address,
             owner.address,
@@ -223,7 +223,7 @@ describe("IndexPool", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    BigInt(ethers.utils.parseEther("1.1") ) * BigInt(999) / BigInt(1000),
+                    ethers.utils.parseEther("0.999"),
                     1,
                     [
                         TOKENS['WMAIN'],
@@ -240,7 +240,7 @@ describe("IndexPool", function () {
             )
         ];
 
-        let overrides = {value: ethers.utils.parseEther("1.1")};
+        let overrides = {value: ethers.utils.parseEther("1")};
         await indexPool.mintPortfolio(
             owner.address,
             owner.address,
@@ -275,7 +275,7 @@ describe("IndexPool", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    BigInt(ethers.utils.parseEther("100")),
+                    ethers.utils.parseEther("100"),
                     1,
                     [
                         TOKENS['WMAIN'],
@@ -320,7 +320,7 @@ describe("IndexPool", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    BigInt(ethers.utils.parseEther("499")),
+                    ethers.utils.parseEther("499"),
                     1,
                     [
                         TOKENS['WMAIN'],

@@ -44,14 +44,14 @@ describe("Wallet", function () {
             TOKENS['WMAIN'],
             TOKENS['DAI'],
         ];
-        let value = ethers.utils.parseEther("1.1");
+        let value = ethers.utils.parseEther("1");
         var _bridgeEncodedCalls = [
             uniswapV2SwapBridge.interface.encodeFunctionData(
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    BigInt(value) * BigInt(999) / BigInt(1000),
-                    1,
+                    value,
+                    ethers.utils.parseEther("0.999"),
                     pathUniswap
                 ],
             ),
@@ -83,7 +83,7 @@ describe("Wallet", function () {
             TOKENS['WMAIN'],
             TOKENS['DAI'],
         ];
-        let value = ethers.utils.parseEther("1.1");
+        let value = ethers.utils.parseEther("1");
         var _bridgeAddresses = [
             uniswapV2SwapBridge.address
         ];
@@ -92,7 +92,7 @@ describe("Wallet", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    BigInt(value) * BigInt(999) / BigInt(1000),
+                    ethers.utils.parseEther("0.999"),
                     1,
                     pathUniswap
                 ],
@@ -121,7 +121,7 @@ describe("Wallet", function () {
                 "tradeFromTokensToETH",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    BigInt(value) / BigInt(10),
+                    ethers.utils.parseEther("0.1"),
                     1,
                     pathUniswap
                 ],
@@ -152,7 +152,7 @@ describe("Wallet", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    BigInt(ethers.utils.parseEther("1.1") ) * BigInt(999) / BigInt(1000),
+                    ethers.utils.parseEther("0.999"),
                     1,
                     [
                         TOKENS['WMAIN'],
@@ -176,7 +176,7 @@ describe("Wallet", function () {
             )
         ];
 
-        let overrides = { value: ethers.utils.parseEther("1.1") };
+        let overrides = { value: ethers.utils.parseEther("1") };
         await wallet.write(
             _bridgeAddresses,
             _bridgeEncodedCalls,
@@ -185,7 +185,7 @@ describe("Wallet", function () {
 
         var event = await getFirstEvent({ address: wallet.address }, UniswapV2SwapBridge, 'TradedFromETHToTokens');
         
-        // expect(event.args.amounts[0]).to.equal(ethers.utils.parseEther("1.1"));
+        // expect(event.args.amounts[0]).to.equal(ethers.utils.parseEther("1"));
         // expect(event.args.path).to.eql([ TOKENS['WMAIN'], TOKENS['DAI'] ]);
         // expect(event.args.amounts).to.be.an('array');
 
@@ -193,7 +193,7 @@ describe("Wallet", function () {
 
         // TODO: Check amount
         // expect(event.args.asset).to.equal(TOKENS['DAI']);
-        // expect(event.args.amount).to.equal(ethers.utils.parseEther("1.1"));
+        // expect(event.args.amount).to.equal(ethers.utils.parseEther("1"));
 
         // TODO: Check amount
         // TODO: Check claimed reward
@@ -212,7 +212,7 @@ describe("Wallet", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    BigInt(ethers.utils.parseEther("1.1") ) * BigInt(999) / BigInt(1000),
+                    ethers.utils.parseEther("0.999"),
                     1,
                     [
                         TOKENS['WMAIN'],
@@ -236,7 +236,7 @@ describe("Wallet", function () {
             )
         ];
 
-        let overrides = { value: ethers.utils.parseEther("1.1") };
+        let overrides = { value: ethers.utils.parseEther("1") };
 
         await expect(wallet.connect(other).write(
             _bridgeAddresses,
@@ -256,7 +256,7 @@ describe("Wallet", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    BigInt(ethers.utils.parseEther("1.1") ) * BigInt(999) / BigInt(1000),
+                    ethers.utils.parseEther("0.999"),
                     1,
                     [
                         TOKENS['WMAIN'],
@@ -280,7 +280,7 @@ describe("Wallet", function () {
             )
         ];
 
-        let overrides = { value: ethers.utils.parseEther("1.1") };
+        let overrides = { value: ethers.utils.parseEther("1") };
 
         await expect(wallet.write(
             _bridgeAddresses,
