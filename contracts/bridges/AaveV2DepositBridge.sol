@@ -83,13 +83,13 @@ contract AaveV2DepositBridge {
         address aaveLendingPoolAddress = 0x8dFf5E27EA6b7AC08EbFdf9eB090F32ee9a30fcf;
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
 
-        uint256 amountOut = IERC20(assetOut).balanceOf(address(this)) * percentageOut / 100000;
-        _aaveLendingPool.withdraw(assetOut, amountOut, address(this));
-
         address assetIn = _aaveLendingPool.getReserveData(assetOut).aTokenAddress;
+        uint256 amountIn = IERC20(assetIn).balanceOf(address(this)) * percentageOut / 100000;
+
+        _aaveLendingPool.withdraw(assetOut, amountIn, address(this));
 
         // TODO do final balance - initial balance
-        uint256 amountIn = IERC20(assetIn).balanceOf(address(this));
+        uint256 amountOut = IERC20(assetOut).balanceOf(address(this));
 
         emit Withdraw(
             assetIn,
