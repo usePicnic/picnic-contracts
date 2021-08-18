@@ -6,6 +6,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IIndexPool.sol";
 
+// TODO we are missing the finderAddress to calculate incentives
+// TODO we are missing the portfolioId to calculate marketCap
 
 contract IndexPool is ERC721, Ownable {
     struct TokenData {
@@ -13,10 +15,30 @@ contract IndexPool is ERC721, Ownable {
         uint256[] amounts;
     }
 
-    event LOG_PORTFOLIO_REGISTERED(
+    event INDEXPOOL_PORTFOLIO_REGISTERED(
         address creator,
         uint256 portfolioId,
         string jsonString
+    );
+
+    event INDEXPOOL_MINT_NFT(
+        uint256 nftId,
+        address wallet,
+        address nftOwner
+    );
+
+    event INDEXPOOL_DEPOSIT(
+        uint256 nftId,
+        address[] inputTokens,
+        uint256[] inputAmounts,
+        uint256 ethAmount
+    );
+
+    event INDEXPOOL_WITHDRAW(
+        uint256 nftId,
+        address[] outputTokens,
+        uint256[] outputAmounts,
+        uint256 ethAmount
     );
 
     modifier _maxDeposit_() {
@@ -66,7 +88,7 @@ contract IndexPool is ERC721, Ownable {
 
     function registerPortfolio(string calldata jsonString) external  {
         uint256 portfolioId = uint256(keccak256(abi.encodePacked(msg.sender, portfolioCounter, block.timestamp)));
-        emit LOG_PORTFOLIO_REGISTERED(msg.sender, portfolioId, jsonString);
+        emit INDEXPOOL_PORTFOLIO_REGISTERED(msg.sender, portfolioId, jsonString);
         portfolioCounter++;
     }
 
@@ -134,10 +156,10 @@ contract IndexPool is ERC721, Ownable {
         // Minting NFT
         _safeMint(nftOwner, nftId);
 
-//        emit INDEXPOOL_MINT_NFT(
-//            nftId,
-//            address(wallet),
-//            msg.sender);
+        emit INDEXPOOL_MINT_NFT(
+            nftId,
+            address(wallet),
+            msg.sender);
 
         return nftId;
     }
@@ -161,7 +183,7 @@ contract IndexPool is ERC721, Ownable {
             IERC20(inputs.tokens[i]).transferFrom(from, owner(), indexpoolFee); // owner = contract owner (Ownable)
             IERC20(inputs.tokens[i]).transferFrom(from, walletAddress, inputs.amounts[i] - indexpoolFee);
         }
-        //emit INDEXPOOL_DEPOSIT(nftId, inputTokens, inputAmounts, ethAmount);
+        emit INDEXPOOL_DEPOSIT(nftId, inputs.tokens, inputs.amounts, ethAmount);
     }
 
     function _withdrawFromWallet(
@@ -174,5 +196,7 @@ contract IndexPool is ERC721, Ownable {
 
         Wallet wallet = Wallet(payable(walletOf(nftId)));
         (outputAmounts, outputEth) = wallet.withdraw(outputs.tokens, outputs.amounts, outputEthPercentage, ownerOf(nftId));
+
+        emit INDEXPOOL_WITHDRAW(nftId, outputs.tokens, outputAmounts, outputEth);
     }
 }

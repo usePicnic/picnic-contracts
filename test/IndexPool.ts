@@ -47,11 +47,8 @@ describe("IndexPool", function () {
         var _bridgeEncodedCalls = [];
 
         let overrides = {value: ethers.utils.parseEther("1")};
-        await indexPool.mintPortfolio(
-            owner.address,
-            owner.address,
-            [],
-            [],
+        await indexPool.createPortfolio(
+            {'tokens':[], 'amounts':[]},
             _bridgeAddresses,
             _bridgeEncodedCalls,
             overrides
@@ -88,11 +85,8 @@ describe("IndexPool", function () {
         ];
 
         let overrides = {value: ethers.utils.parseEther("1")};
-        await indexPool.mintPortfolio(
-            owner.address,
-            owner.address,
-            [],
-            [],
+        await indexPool.createPortfolio(
+            {'tokens':[], 'amounts':[]},
             _bridgeAddresses,
             _bridgeEncodedCalls,
             overrides
