@@ -2,6 +2,7 @@ import {expect} from "chai";
 import {ethers} from "hardhat";
 
 import constants from "../constants";
+import {BigNumber} from "ethers";
 
 describe("IndexPool", function () {
 
@@ -69,6 +70,7 @@ describe("IndexPool", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
+                    BigInt(ethers.utils.parseEther("1.1") ) * BigInt(999) / BigInt(1000),
                     1,
                     [
                         TOKENS['WMAIN'],
@@ -115,6 +117,10 @@ describe("IndexPool", function () {
             overrides
         )
 
+        let dai = (await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])).connect(owner);
+        let daiBalance = await dai.balanceOf(owner.address);
+        await dai.approve(indexPool.address, daiBalance);
+
         var _bridgeAddresses = [
             uniswapV2SwapBridge.address,
             aaveV2DepositBridge.address,
@@ -124,6 +130,7 @@ describe("IndexPool", function () {
                 "tradeFromTokensToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
+                    BigInt(ethers.utils.parseEther("0.5")) , // arbitrary amount
                     1,
                     [
                         TOKENS['DAI'],
@@ -140,9 +147,7 @@ describe("IndexPool", function () {
             )
         ];
 
-        let dai = (await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])).connect(owner);
-        let daiBalance = await dai.balanceOf(owner.address);
-        await dai.approve(indexPool.address, daiBalance);
+
 
         await indexPool.mintPortfolio(
             owner.address,
@@ -166,6 +171,7 @@ describe("IndexPool", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
+                    BigInt(ethers.utils.parseEther("1.1") ) * BigInt(999) / BigInt(1000),
                     1,
                     [
                         TOKENS['WMAIN'],
@@ -217,6 +223,7 @@ describe("IndexPool", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
+                    BigInt(ethers.utils.parseEther("1.1") ) * BigInt(999) / BigInt(1000),
                     1,
                     [
                         TOKENS['WMAIN'],
@@ -268,6 +275,7 @@ describe("IndexPool", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
+                    BigInt(ethers.utils.parseEther("100")),
                     1,
                     [
                         TOKENS['WMAIN'],
@@ -312,6 +320,7 @@ describe("IndexPool", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
+                    BigInt(ethers.utils.parseEther("499")),
                     1,
                     [
                         TOKENS['WMAIN'],
