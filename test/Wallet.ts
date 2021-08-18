@@ -170,7 +170,6 @@ describe("Withdraw", function () {
                 "withdraw",
                 [
                     TOKENS['DAI'],
-                    ["0x27F8D03b3a2196956ED754baDc28D73be8830A6e"],
                     100000
                 ]
             )
@@ -231,7 +230,6 @@ describe("Withdraw", function () {
                 "withdraw",
                 [
                     TOKENS['DAI'],
-                    ["0x27F8D03b3a2196956ED754baDc28D73be8830A6e"],
                     100000
                 ]
             )
@@ -276,7 +274,6 @@ describe("Withdraw", function () {
                 "withdraw",
                 [
                     TOKENS['QUICK'],
-                    [TOKENS['QUICK']],
                     100000
                 ]
             )
