@@ -7,8 +7,9 @@ interface IWallet {
 
     function read(address[] calldata _bridgeAddresses, bytes[] calldata _bridgeEncodedCalls) external view;
 
-    function withdraw(address[] calldata outputTokens,
+    function withdraw(
+        address[] calldata outputTokens,
         uint256[] calldata outputPercentages,
         uint256 outputEthPercentage,
-        address user) external;
+        address user) external returns (uint256[] memory, uint256);
 }

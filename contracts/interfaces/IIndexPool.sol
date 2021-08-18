@@ -20,6 +20,9 @@ interface IIndexPool is IERC721 { // TODO should we add interface for ownable?
         address creator,
         address[] calldata inputTokens,
         uint256[] calldata inputAmounts,
+        address[] calldata outputTokens,
+        uint256[] calldata outputPercentages,
+        uint256 outputEthPercentage,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) external payable;

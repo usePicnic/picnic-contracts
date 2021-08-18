@@ -7,37 +7,30 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IIndexPool.sol";
 
 
-contract IndexPool is IIndexPool, ERC721, Ownable {
+contract IndexPool is ERC721, Ownable {
+    struct TokenData {
+        address[] tokens;
+        uint256[] amounts;
+    }
+
     event LOG_PORTFOLIO_REGISTERED(
         address creator,
         uint256 portfolioId,
         string jsonString
     );
-    event LOG_MINT_NFT(
-        uint256 nftId,
-        address wallet,
-        address owner,
-        address finder,
-        address creator,
-        address[] inputTokens,
-        uint256[] inputAmounts,
-        uint256 ethAmount
-    );
-    event LOG_EDIT_NFT(
-        uint256 nftId,
-        address wallet,
-        address owner,
-        address finder,
-        address creator,
-        address[] inputTokens,
-        uint256[] inputAmounts,
-        uint256 ethAmount
-    );
 
     modifier _maxDeposit_() {
         require(
             msg.value <= maxDeposit,
-            "DEPOSIT ABOVE MAXIMUM AMOUNT (GUARDED LAUNCH)"
+            "INDEXPOOL: DEPOSIT ABOVE MAXIMUM AMOUNT (GUARDED LAUNCH)"
+        );
+        _;
+    }
+
+    modifier _onlyNFTOwner_(uint256 nftId) {
+        require(
+            msg.sender == ownerOf(nftId),
+            "INDEXPOOL: ONLY NFT OWNER CAN CALL THIS FUNCTION"
         );
         _;
     }
@@ -63,130 +56,123 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
     function setMaxDeposit(uint256 newMaxDeposit)
     external
     onlyOwner
-    override
     {
         maxDeposit = newMaxDeposit;
     }
 
-    function registerPortfolio(string calldata jsonString) external override {
+    function walletOf(uint256 nftId) public view returns (address) {
+        return _nftIdToWallet[nftId];
+    }
+
+    function registerPortfolio(string calldata jsonString) external  {
         uint256 portfolioId = uint256(keccak256(abi.encodePacked(msg.sender, portfolioCounter, block.timestamp)));
         emit LOG_PORTFOLIO_REGISTERED(msg.sender, portfolioId, jsonString);
         portfolioCounter++;
     }
 
-    function mintPortfolio(
-        address finder,
-        address creator,
-        address[] calldata inputTokens,
-        uint256[] calldata inputAmounts,
+    // TODO make requires check length input/output tokens and amounts
+    // TODO Check min amounts
+
+    function createPortfolio(
+        TokenData calldata inputs,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) external payable _maxDeposit_ override {
-        // Create new wallet
-        Wallet wallet = new Wallet();
-
-        // Run all bridges and calls to build the portfolio on Wallet
-        _delegateToWallet(msg.value, msg.sender, inputTokens, inputAmounts, wallet, _bridgeAddresses, _bridgeEncodedCalls);
-
-        // Mint NFT
-        uint256 nftId = _mintNFT({walletAddress : address(wallet), nftOwner : msg.sender});
-
-        emit LOG_MINT_NFT(
+    ) payable external {
+        uint256 nftId = _mintNFT(msg.sender);
+        editPortfolio(
             nftId,
-            address(wallet),
-            msg.sender,
-            finder,
-            creator,
-            inputTokens,
-            inputAmounts,
-            msg.value);
+            inputs,
+            _bridgeAddresses,
+            _bridgeEncodedCalls
+            );
     }
-    // TODO make requires check length input/output tokens and amounts
 
     function editPortfolio(
         uint256 nftId,
-        address finder,
-        address creator,
-        address[] calldata inputTokens,
-        uint256[] calldata inputAmounts,
-//        address[] calldata outputTokens,
-//        uint256[] calldata outputAmounts,
-//        uint256 outputEth,
+        TokenData calldata inputs,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) external payable _maxDeposit_ override {
-        // Instantiate existing wallet
-        require(ownerOf(nftId) == msg.sender, "INDEXPOOL: ONLY NFT OWNER CAN EDIT IT");
-        Wallet wallet = Wallet(payable(_nftIdToWallet[nftId]));
+    ) payable public _onlyNFTOwner_(nftId) {
+        address walletAddress = walletOf(nftId);
+        _depositToWallet(msg.sender, inputs, msg.value, nftId);
 
-        // Run all bridges and calls to build the portfolio on Wallet
-        _delegateToWallet(msg.value, msg.sender, inputTokens, inputAmounts, wallet, _bridgeAddresses, _bridgeEncodedCalls);
-
-        emit LOG_EDIT_NFT(
-            nftId,
-            address(wallet),
-            msg.sender,
-            finder,
-            creator,
-            inputTokens,
-            inputAmounts,
-            msg.value);
-
-        //_withdraw(outputTokens, outputAmounts, outputEth);
+        Wallet wallet = Wallet(payable(walletAddress));
+        wallet.write(_bridgeAddresses, _bridgeEncodedCalls);
     }
 
-    function _transferTokens(
-        address from,
-        address[] calldata inputTokens,
-        uint256[] calldata inputAmounts,
-        address toWallet
-    ) internal {
-        for (uint16 i = 0; i < inputTokens.length; i++) {
-            // IndexPool Fee
-            uint256 indexpoolFee = inputAmounts[i] / 1000;
-            IERC20(inputTokens[i]).transferFrom(from, owner(), indexpoolFee);
-
-            // Transfer ERC20 to Wallet
-            IERC20(inputTokens[i]).transferFrom(from, toWallet, inputAmounts[i] - indexpoolFee);
-        }
-    }
-
-    function _delegateToWallet(
-        uint256 ethAmount,
-        address user,
-        address[] calldata inputTokens,
-        uint256[] calldata inputAmounts,
-        Wallet wallet,
+    function withdrawPortfolio(
+        uint256 nftId,
+        TokenData calldata inputs,
+        TokenData calldata outputs,
+        uint256 outputEthPercentage,
         address[] calldata _bridgeAddresses,
-        bytes[] calldata _bridgeEncodedCalls)
-    internal {
-        // Transfer ERC20 tokens to Wallet
-        _transferTokens(user, inputTokens, inputAmounts, address(wallet));
+        bytes[] calldata _bridgeEncodedCalls
+    ) payable external _onlyNFTOwner_(nftId) {
+        editPortfolio(
+            nftId,
+            inputs,
+            _bridgeAddresses,
+            _bridgeEncodedCalls
+        );
 
-        // Pay fee to IndexPool
-        uint256 indexpoolFee = ethAmount / 1000;
-        payable(owner()).transfer(indexpoolFee);
+        address walletAddress = walletOf(nftId);
+        Wallet wallet = Wallet(payable(walletAddress));
+        wallet.write(_bridgeAddresses, _bridgeEncodedCalls);
 
-        // Execute functions calls + transfer ETH to wallet
-        wallet.write{value : ethAmount - indexpoolFee}(_bridgeAddresses, _bridgeEncodedCalls);
+        _withdrawFromWallet(nftId, outputs, outputEthPercentage);
     }
 
-    function _mintNFT(address walletAddress, address nftOwner) internal returns (uint256) {
+    function _mintNFT(address nftOwner) internal returns (uint256){
+        // Create new wallet
+        Wallet wallet = new Wallet();
+
         // Saving NFT data
-        uint256 newItemId = tokenCounter;
-        _nftIdToWallet[newItemId] = walletAddress;
+        uint256 nftId = tokenCounter;
+        _nftIdToWallet[nftId] = address(wallet);
         tokenCounter = tokenCounter + 1;
 
         // Minting NFT
-        _safeMint(nftOwner, newItemId);
-        return newItemId;
+        _safeMint(nftOwner, nftId);
+
+//        emit INDEXPOOL_MINT_NFT(
+//            nftId,
+//            address(wallet),
+//            msg.sender);
+
+        return nftId;
     }
 
-    // TODO we might need to implement a public walletOf method.
-    //
-    //    function walletOf(uint256 nftId) external view returns (address) {
-    //        return _nftIdToWallet[nftId];
-    //    }
-    //
-}
+    function _depositToWallet(
+        address from,
+        TokenData calldata inputs,
+        uint256 ethAmount,
+        uint256 nftId
+    ) internal {
+        // Pay fee to IndexPool
+        uint256 indexpoolFee = ethAmount / 1000;
+        address walletAddress = walletOf(nftId);
+        payable(owner()).transfer(indexpoolFee);
+        payable(walletAddress).transfer(ethAmount - indexpoolFee);
 
+        for (uint16 i = 0; i < inputs.tokens.length; i++) {
+            // IndexPool Fee
+            indexpoolFee = inputs.amounts[i] / 1000;
+
+            IERC20(inputs.tokens[i]).transferFrom(from, owner(), indexpoolFee); // owner = contract owner (Ownable)
+            IERC20(inputs.tokens[i]).transferFrom(from, walletAddress, inputs.amounts[i] - indexpoolFee);
+        }
+        //emit INDEXPOOL_DEPOSIT(nftId, inputTokens, inputAmounts, ethAmount);
+    }
+
+    function _withdrawFromWallet(
+        uint256 nftId,
+        TokenData calldata outputs,
+        uint256 outputEthPercentage
+    ) internal {
+        uint256[] memory outputAmounts;
+        uint256 outputEth;
+
+        Wallet wallet = Wallet(payable(walletOf(nftId)));
+        (outputAmounts, outputEth) = wallet.withdraw(outputs.tokens, outputs.amounts, outputEthPercentage, ownerOf(nftId));
+    }
+}
