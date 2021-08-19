@@ -1,6 +1,7 @@
 import deployLogic from "./utils/deployLogic";
 import {ethers} from "hardhat";
 import {BigNumber} from "ethers";
+import { MongoClient } from 'mongodb';
 
 const hre = require("hardhat");
 const prompts = require("prompts");
@@ -33,6 +34,8 @@ async function main() {
         return;
     }
 
+    const startBockNumber = await ethers.getBlockNumber();
+
     const [deployer] = await ethers.getSigners();
     console.log("Deploying contracts with the account:", deployer.address);
 
@@ -53,16 +56,45 @@ async function main() {
         return;
     }
 
+    var allOk = true;
     for (const c of contractsToDeploy) {
-        await deployLogic({
+        const isOk = await deployLogic({
             networkName: networkName,
             contractName: c.contractName,
             filePath: c.filePath
         })
+        if (!isOk) {
+            allOk = false;
+        }
     }
     const balanceEnd = await deployer.getBalance();
     console.log("Account balance:", weiToString(balanceEnd));
     console.log("Cost to deploy:", weiToString(balanceBegin.sub(balanceEnd)));
+
+    if (!allOk) {
+        console.log('There was a problem during deployment. Will not set network blockNumber.')
+    } else {
+        const client = new MongoClient(process.env.MONGODB_URI);
+        try {
+            await client.connect();
+    
+            console.log(`Setting network blockNumber to ${startBockNumber}`)
+    
+            await client
+                .db('indexpool')
+                .collection('networks')
+                .updateOne(
+                    {
+                        'name' : networkName
+                    },
+                    {
+                        'latestBlock': startBockNumber
+                    }
+                );
+        } finally {
+            await client.close();
+        }
+    }
 }
 
 main()
