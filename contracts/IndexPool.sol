@@ -130,7 +130,7 @@ contract IndexPool is ERC721, Ownable {
         wallet.write(_bridgeAddresses, _bridgeEncodedCalls);
     }
 
-    function withdrawPortfolio(
+    function editAndWithdrawPortfolio(
         uint256 nftId,
         TokenData calldata inputs,
         TokenData calldata outputs,
@@ -144,7 +144,16 @@ contract IndexPool is ERC721, Ownable {
             _bridgeAddresses,
             _bridgeEncodedCalls
         );
+        _withdrawFromWallet(nftId, outputs, outputEthPercentage);
+    }
 
+    function withdrawPortfolio(
+        uint256 nftId,
+        TokenData calldata outputs,
+        uint256 outputEthPercentage,
+        address[] calldata _bridgeAddresses,
+        bytes[] calldata _bridgeEncodedCalls
+    ) external _onlyNFTOwner_(nftId) {
         address walletAddress = walletOf(nftId);
         Wallet wallet = Wallet(payable(walletAddress));
         wallet.write(_bridgeAddresses, _bridgeEncodedCalls);
