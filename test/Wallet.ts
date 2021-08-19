@@ -50,7 +50,7 @@ describe("Wallet", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    value,
+                    100000,
                     ethers.utils.parseEther("0.999"),
                     pathUniswap
                 ],
@@ -92,7 +92,7 @@ describe("Wallet", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    ethers.utils.parseEther("0.999"),
+                    100000,
                     1,
                     pathUniswap
                 ],
@@ -121,7 +121,7 @@ describe("Wallet", function () {
                 "tradeFromTokensToETH",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    ethers.utils.parseEther("0.1"),
+                    100000,
                     1,
                     pathUniswap
                 ],
@@ -152,7 +152,7 @@ describe("Wallet", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    ethers.utils.parseEther("0.999"),
+                    100000,
                     1,
                     [
                         TOKENS['WMAIN'],
@@ -212,7 +212,7 @@ describe("Wallet", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    ethers.utils.parseEther("0.999"),
+                    100000,
                     1,
                     [
                         TOKENS['WMAIN'],
@@ -256,7 +256,7 @@ describe("Wallet", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    ethers.utils.parseEther("0.999"),
+                    100000,
                     1,
                     [
                         TOKENS['WMAIN'],

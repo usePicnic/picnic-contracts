@@ -67,7 +67,7 @@ describe("IndexPool", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    ethers.utils.parseEther(".999"),
+                    100000,
                     1,
                     [
                         TOKENS['WMAIN'],
@@ -105,7 +105,7 @@ describe("IndexPool", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    ethers.utils.parseEther(".999"),
+                    100000,
                     1,
                     [
                         TOKENS['WMAIN'],
@@ -201,7 +201,7 @@ describe("IndexPool", function () {
                 "tradeFromTokensToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    ethers.utils.parseEther("1"), // arbitrary amount
+                    100000, // arbitrary amount
                     1,
                     [
                         TOKENS['DAI'],
@@ -238,7 +238,7 @@ describe("IndexPool", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    ethers.utils.parseEther("0.999"),
+                    100000,
                     1,
                     [
                         TOKENS['WMAIN'],
@@ -284,7 +284,7 @@ describe("IndexPool", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    ethers.utils.parseEther("0.999"),
+                    100000,
                     1,
                     [
                         TOKENS['WMAIN'],
@@ -330,7 +330,7 @@ describe("IndexPool", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    ethers.utils.parseEther("100"),
+                    100000,
                     1,
                     [
                         TOKENS['WMAIN'],
@@ -372,7 +372,7 @@ describe("IndexPool", function () {
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
-                    ethers.utils.parseEther("499"),
+                    100000,
                     1,
                     [
                         TOKENS['WMAIN'],
