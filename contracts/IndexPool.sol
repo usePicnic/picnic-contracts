@@ -109,7 +109,7 @@ contract IndexPool is ERC721, Ownable {
         bytes[] calldata _bridgeEncodedCalls
     ) payable external _maxDeposit_ {
         uint256 nftId = _mintNFT(msg.sender);
-        editPortfolio(
+        depositPortfolio(
             nftId,
             inputs,
             _bridgeAddresses,
@@ -117,7 +117,7 @@ contract IndexPool is ERC721, Ownable {
             );
     }
 
-    function editPortfolio(
+    function depositPortfolio(
         uint256 nftId,
         TokenData calldata inputs,
         address[] calldata _bridgeAddresses,
@@ -130,7 +130,7 @@ contract IndexPool is ERC721, Ownable {
         wallet.write(_bridgeAddresses, _bridgeEncodedCalls);
     }
 
-    function editAndWithdrawPortfolio(
+    function depositAndWithdrawPortfolio(
         uint256 nftId,
         TokenData calldata inputs,
         TokenData calldata outputs,
@@ -138,7 +138,7 @@ contract IndexPool is ERC721, Ownable {
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) payable external _onlyNFTOwner_(nftId) {
-        editPortfolio(
+        depositPortfolio(
             nftId,
             inputs,
             _bridgeAddresses,
