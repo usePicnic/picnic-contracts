@@ -4,6 +4,12 @@ const prompts = require("prompts");
 
 async function main() {
     const networkName = hre.hardhatArguments.network;
+
+    if (networkName === undefined) {
+        console.log('Please set a network before deploying :D');
+        return;
+    }
+
     const response = await prompts(
         [
             {
