@@ -34,7 +34,7 @@ async function main() {
         return;
     }
 
-    const startBockNumber = await ethers.getBlockNumber();
+    const startBlockNumber = await ethers.provider.getBlockNumber();
 
     const [deployer] = await ethers.getSigners();
     console.log("Deploying contracts with the account:", deployer.address);
@@ -78,7 +78,7 @@ async function main() {
         try {
             await client.connect();
     
-            console.log(`Setting network blockNumber to ${startBockNumber}`)
+            console.log(`Setting network blockNumber to ${startBlockNumber}`)
     
             await client
                 .db('indexpool')
@@ -88,7 +88,7 @@ async function main() {
                         'name' : networkName
                     },
                     {
-                        'latestBlock': startBockNumber
+                        'latestBlock': startBlockNumber
                     }
                 );
         } finally {
