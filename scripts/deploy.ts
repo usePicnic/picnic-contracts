@@ -1,7 +1,7 @@
 import deployLogic from "./utils/deployLogic";
 import {ethers} from "hardhat";
 import {BigNumber} from "ethers";
-import { MongoClient } from 'mongodb';
+import {MongoClient} from 'mongodb';
 
 const hre = require("hardhat");
 const prompts = require("prompts");
@@ -77,18 +77,20 @@ async function main() {
         const client = new MongoClient(process.env.MONGODB_URI);
         try {
             await client.connect();
-    
+
             console.log(`Setting network blockNumber to ${startBlockNumber}`)
-    
+
             await client
                 .db('indexpool')
                 .collection('networks')
                 .updateOne(
                     {
-                        'name' : networkName
+                        'name': networkName
                     },
                     {
-                        'latestBlock': startBlockNumber
+                        $set: {
+                            'latestBlock': startBlockNumber
+                        }
                     }
                 );
         } finally {
