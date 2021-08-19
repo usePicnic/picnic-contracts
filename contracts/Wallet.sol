@@ -52,21 +52,20 @@ contract Wallet is IWallet {
         uint256[] calldata outputPercentages,
         uint256 outputEthPercentage,
         address user) external override _ownerOnly_ returns (uint256[] memory, uint256){
-        uint256 outputAmount;
-        {
-            uint256[] memory outputTokenAmounts = new uint256[](outputTokens.length);
-            for (uint16 i = 0; i < outputTokens.length; i++) {
-                outputTokenAmounts[i] = IERC20(outputTokens[i]).balanceOf(address(this)) * outputPercentages[i] / 100000;
-                IERC20(outputTokens[i]).transfer(user, outputAmount);
-            }
-            uint256 outputEthAmount;
-            if (outputEthPercentage > 0) {
-                outputEthAmount = address(this).balance * outputEthPercentage / 100000;
-                payable(user).transfer(outputAmount);
-            }
 
-            return (outputTokenAmounts, outputEthAmount);
+        uint256[] memory outputTokenAmounts = new uint256[](outputTokens.length);
+        for (uint16 i = 0; i < outputTokens.length; i++) {
+            // TODO require pct > 0
+            outputTokenAmounts[i] = IERC20(outputTokens[i]).balanceOf(address(this)) * outputPercentages[i] / 100000;
+            IERC20(outputTokens[i]).transfer(user, outputTokenAmounts[i]);
         }
+        uint256 outputEthAmount;
+        if (outputEthPercentage > 0) {
+            outputEthAmount = address(this).balance * outputEthPercentage / 100000;
+            payable(user).transfer(outputEthAmount);
+        }
+
+        return (outputTokenAmounts, outputEthAmount);
     }
 
     // TODO should we have a read function? or should we read all data we need from events?
