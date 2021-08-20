@@ -1,10 +1,9 @@
-pragma solidity 0.6.12;
+pragma solidity ^0.8.6;
 pragma experimental ABIEncoderV2;
 
-// TODO should we be using IERC20 from uniswap instead of openzeppelin ? why ?
-import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
-import {ILendingPool} from "@aave/protocol-v2/contracts/interfaces/ILendingPool.sol";
-import {ILendingPoolAddressesProvider} from "@aave/protocol-v2/contracts/interfaces/ILendingPoolAddressesProvider.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+import {ILendingPool} from "../interfaces/ILendingPool.sol";
 import {IAaveIncentivesController} from "../interfaces/IAaveIncentivesController.sol";
 import "hardhat/console.sol";
 

@@ -1,6 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
-
-pragma solidity 0.6.12;
+pragma solidity ^0.8.6;
 
 interface IAaveIncentivesController {
     function getRewardsBalance(address[] calldata assets, address user) external view returns (uint256);
