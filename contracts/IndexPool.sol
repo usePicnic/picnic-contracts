@@ -1,10 +1,10 @@
 pragma solidity ^0.8.6;
 
 import "./Wallet.sol";
+import "./interfaces/IIndexPool.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./interfaces/IIndexPool.sol";
 
 // TODO we are missing the finderAddress to calculate incentives
 // TODO we are missing the portfolioId to calculate marketCap
@@ -72,7 +72,7 @@ contract IndexPool is ERC721, Ownable {
     uint256 public tokenCounter = 0;
     mapping(uint256 => address) private _nftIdToWallet;
 
-    constructor() public ERC721("INDEXPOOL", "IPNFT") Ownable() {}
+    constructor() ERC721("INDEXPOOL", "IPNFT") Ownable() {}
 
     // Guarded launch
     function setMaxDeposit(uint256 newMaxDeposit)
@@ -94,7 +94,7 @@ contract IndexPool is ERC721, Ownable {
         return _nftIdToWallet[nftId];
     }
 
-    function registerPortfolio(string calldata jsonString) external  {
+    function registerPortfolio(string calldata jsonString) external {
         uint256 portfolioId = uint256(keccak256(abi.encodePacked(msg.sender, portfolioCounter, block.timestamp)));
         emit INDEXPOOL_PORTFOLIO_REGISTERED(msg.sender, portfolioId, jsonString);
         portfolioCounter++;
@@ -114,7 +114,7 @@ contract IndexPool is ERC721, Ownable {
             inputs,
             _bridgeAddresses,
             _bridgeEncodedCalls
-            );
+        );
     }
 
     function depositPortfolio(
@@ -123,11 +123,8 @@ contract IndexPool is ERC721, Ownable {
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) payable public _onlyNFTOwner_(nftId) _maxDeposit_ {
-        address walletAddress = walletOf(nftId);
         _depositToWallet(msg.sender, inputs, msg.value, nftId);
-
-        Wallet wallet = Wallet(payable(walletAddress));
-        wallet.write(_bridgeAddresses, _bridgeEncodedCalls);
+        _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
     }
 
     function depositAndWithdrawPortfolio(
@@ -138,12 +135,8 @@ contract IndexPool is ERC721, Ownable {
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) payable external _onlyNFTOwner_(nftId) {
-        depositPortfolio(
-            nftId,
-            inputs,
-            _bridgeAddresses,
-            _bridgeEncodedCalls
-        );
+        _depositToWallet(msg.sender, inputs, msg.value, nftId);
+        _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
         _withdrawFromWallet(nftId, outputs, outputEthPercentage);
     }
 
@@ -154,10 +147,7 @@ contract IndexPool is ERC721, Ownable {
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) external _onlyNFTOwner_(nftId) {
-        address walletAddress = walletOf(nftId);
-        Wallet wallet = Wallet(payable(walletAddress));
-        wallet.write(_bridgeAddresses, _bridgeEncodedCalls);
-
+        _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
         _withdrawFromWallet(nftId, outputs, outputEthPercentage);
     }
 
@@ -197,10 +187,21 @@ contract IndexPool is ERC721, Ownable {
             // IndexPool Fee
             indexpoolFee = fee * inputs.amounts[i] / 10000;
 
-            IERC20(inputs.tokens[i]).transferFrom(from, owner(), indexpoolFee); // owner = contract owner (Ownable)
+            IERC20(inputs.tokens[i]).transferFrom(from, owner(), indexpoolFee);
+            // owner = contract owner (Ownable)
             IERC20(inputs.tokens[i]).transferFrom(from, walletAddress, inputs.amounts[i] - indexpoolFee);
         }
         emit INDEXPOOL_DEPOSIT(nftId, inputs.tokens, inputs.amounts, ethAmount);
+    }
+
+    function _writeToWallet(
+        uint256 nftId,
+        address[] calldata _bridgeAddresses,
+        bytes[] calldata _bridgeEncodedCalls
+    ) internal {
+        address walletAddress = walletOf(nftId);
+        Wallet wallet = Wallet(payable(walletAddress));
+        wallet.write(_bridgeAddresses, _bridgeEncodedCalls);
     }
 
     function _withdrawFromWallet(
