@@ -3,8 +3,8 @@ pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import {ILendingPool} from "../interfaces/ILendingPool.sol";
-import {IAaveIncentivesController} from "../interfaces/IAaveIncentivesController.sol";
+import {ILendingPool} from "./interfaces/ILendingPool.sol";
+import {IAaveIncentivesController} from "./interfaces/IAaveIncentivesController.sol";
 import "hardhat/console.sol";
 
 contract AaveV2DepositBridge {

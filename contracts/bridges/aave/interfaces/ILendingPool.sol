@@ -1,6 +1,6 @@
 pragma solidity ^0.8.6;
 
-import {DataTypes} from './DataTypes.sol';
+import {DataTypes} from '../libraries/DataTypes.sol';
 
 interface ILendingPool {
     function deposit(address asset, uint256 amount, address onBehalfOf, uint16 referralCode) external;
