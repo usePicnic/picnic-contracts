@@ -1,31 +1,45 @@
 pragma solidity ^0.8.6;
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "../libraries/IPDataTypes.sol";
 
 pragma experimental ABIEncoderV2; // TODO is this necessary?
 
 interface IIndexPool is IERC721 { // TODO should we add interface for ownable?
     function setMaxDeposit(uint256 newMaxDeposit) external;
+
+    function setFee(uint256 newFee) external;
+
     function registerPortfolio(string calldata jsonString) external;
-    function mintPortfolio(
-        address finder,
-        address creator,
-        address[] calldata inputTokens,
-        uint256[] calldata inputAmounts,
+
+    function createPortfolio(
+        IPDataTypes.TokenData calldata inputs,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) external payable;
-    function editPortfolio(
+    ) payable external;
+
+    function depositPortfolio(
         uint256 nftId,
-        address finder,
-        address creator,
-        address[] calldata inputTokens,
-        uint256[] calldata inputAmounts,
-        address[] calldata outputTokens,
-        uint256[] calldata outputPercentages,
+        IPDataTypes.TokenData calldata inputs,
+        address[] calldata _bridgeAddresses,
+        bytes[] calldata _bridgeEncodedCalls
+    ) payable external;
+
+    function depositAndWithdrawPortfolio(
+        uint256 nftId,
+        IPDataTypes.TokenData calldata inputs,
+        IPDataTypes.TokenData calldata outputs,
         uint256 outputEthPercentage,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) external payable;
+    ) payable external;
+
+    function withdrawPortfolio(
+        uint256 nftId,
+        IPDataTypes.TokenData calldata outputs,
+        uint256 outputEthPercentage,
+        address[] calldata _bridgeAddresses,
+        bytes[] calldata _bridgeEncodedCalls
+    ) external;
 }
 
 

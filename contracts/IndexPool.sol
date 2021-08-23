@@ -2,18 +2,12 @@ pragma solidity ^0.8.6;
 
 import "./Wallet.sol";
 import "./interfaces/IIndexPool.sol";
+import "./libraries/IPDataTypes.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-// TODO we are missing the finderAddress to calculate incentives
-// TODO we are missing the portfolioId to calculate marketCap
-
-contract IndexPool is ERC721, Ownable {
-    struct TokenData {
-        address[] tokens;
-        uint256[] amounts;
-    }
+contract IndexPool is IIndexPool, ERC721, Ownable {
 
     event INDEXPOOL_PORTFOLIO_REGISTERED(
         address creator,
@@ -78,6 +72,7 @@ contract IndexPool is ERC721, Ownable {
     function setMaxDeposit(uint256 newMaxDeposit)
     external
     onlyOwner
+    override
     {
         maxDeposit = newMaxDeposit;
     }
@@ -85,16 +80,17 @@ contract IndexPool is ERC721, Ownable {
     function setFee(uint256 newFee)
     external
     onlyOwner
+    override
     {
         require(newFee <= 100, "INDEXPOOL: MAX FEE IS 1%");
         fee = newFee;
     }
 
-    function walletOf(uint256 nftId) public view returns (address) {
+    function walletOf(uint256 nftId) public view returns (address)  {
         return _nftIdToWallet[nftId];
     }
 
-    function registerPortfolio(string calldata jsonString) external {
+    function registerPortfolio(string calldata jsonString) external override {
         uint256 portfolioId = uint256(keccak256(abi.encodePacked(msg.sender, portfolioCounter, block.timestamp)));
         emit INDEXPOOL_PORTFOLIO_REGISTERED(msg.sender, portfolioId, jsonString);
         portfolioCounter++;
@@ -104,10 +100,10 @@ contract IndexPool is ERC721, Ownable {
     // TODO Check min amounts
 
     function createPortfolio(
-        TokenData calldata inputs,
+        IPDataTypes.TokenData calldata inputs,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) payable external _maxDeposit_ {
+    ) payable external _maxDeposit_ override {
         uint256 nftId = _mintNFT(msg.sender);
         depositPortfolio(
             nftId,
@@ -119,22 +115,22 @@ contract IndexPool is ERC721, Ownable {
 
     function depositPortfolio(
         uint256 nftId,
-        TokenData calldata inputs,
+        IPDataTypes.TokenData calldata inputs,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) payable public _onlyNFTOwner_(nftId) _maxDeposit_ {
+    ) payable public _onlyNFTOwner_(nftId) _maxDeposit_ override {
         _depositToWallet(msg.sender, inputs, msg.value, nftId);
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
     }
 
     function depositAndWithdrawPortfolio(
         uint256 nftId,
-        TokenData calldata inputs,
-        TokenData calldata outputs,
+        IPDataTypes.TokenData calldata inputs,
+        IPDataTypes.TokenData calldata outputs,
         uint256 outputEthPercentage,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) payable external _onlyNFTOwner_(nftId) {
+    ) payable external _onlyNFTOwner_(nftId) _maxDeposit_ override {
         _depositToWallet(msg.sender, inputs, msg.value, nftId);
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
         _withdrawFromWallet(nftId, outputs, outputEthPercentage);
@@ -142,11 +138,11 @@ contract IndexPool is ERC721, Ownable {
 
     function withdrawPortfolio(
         uint256 nftId,
-        TokenData calldata outputs,
+        IPDataTypes.TokenData calldata outputs,
         uint256 outputEthPercentage,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) external _onlyNFTOwner_(nftId) {
+    ) external _onlyNFTOwner_(nftId) override {
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
         _withdrawFromWallet(nftId, outputs, outputEthPercentage);
     }
@@ -173,7 +169,7 @@ contract IndexPool is ERC721, Ownable {
 
     function _depositToWallet(
         address from,
-        TokenData calldata inputs,
+        IPDataTypes.TokenData calldata inputs,
         uint256 ethAmount,
         uint256 nftId
     ) internal {
@@ -206,7 +202,7 @@ contract IndexPool is ERC721, Ownable {
 
     function _withdrawFromWallet(
         uint256 nftId,
-        TokenData calldata outputs,
+        IPDataTypes.TokenData calldata outputs,
         uint256 outputEthPercentage
     ) internal {
         uint256[] memory outputAmounts;
