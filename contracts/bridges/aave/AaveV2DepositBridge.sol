@@ -17,6 +17,7 @@ contract AaveV2DepositBridge {
     event Withdraw (
         address assetIn,
         uint256 amountIn,
+        uint256 percentageOut,
         address assetOut,
         uint256 amountOut
     );
@@ -93,6 +94,7 @@ contract AaveV2DepositBridge {
         emit Withdraw(
             assetIn,
             amountIn,
+            percentageOut,
             assetOut,
             amountOut
         );
