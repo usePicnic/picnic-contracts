@@ -18,11 +18,11 @@ const contractsToDeploy = [
     {contractName: "IndexPool", filePath: "./artifacts/contracts/IndexPool.sol/IndexPool.json"},
     {
         contractName: "AaveV2DepositBridge",
-        filePath: "./artifacts/contracts/bridges/AaveV2DepositBridge.sol/AaveV2DepositBridge.json"
+        filePath: "./artifacts/contracts/bridges/AaveV2DepositBridge/AaveV2DepositBridge.sol/AaveV2DepositBridge.json"
     },
     {
         contractName: "UniswapV2SwapBridge",
-        filePath: "./artifacts/contracts/bridges/UniswapV2SwapBridge.sol/UniswapV2SwapBridge.json"
+        filePath: "./artifacts/contracts/bridges/UniswapV2SwapBridge/UniswapV2SwapBridge.sol/UniswapV2SwapBridge.json"
     },
 ]
 
