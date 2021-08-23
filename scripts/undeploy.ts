@@ -46,6 +46,25 @@ async function main() {
                 networkName: networkName
             }
         );
+
+    await client
+        .db('indexpool')
+        .collection('transactions')
+        .deleteMany(
+            {
+                networkName: networkName
+            }
+        );
+
+    await client
+        .db('indexpool')
+        .collection('nfts')
+        .deleteMany(
+            {
+                networkName: networkName
+            }
+        );
+
     console.log("Undeploy is done :D");
 }
 
