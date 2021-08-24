@@ -9,12 +9,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract IndexPool is IIndexPool, ERC721, Ownable {
 
-    event INDEXPOOL_PORTFOLIO_REGISTERED(
-        address creator,
-        uint256 portfolioId,
-        string jsonString
-    );
-
     event INDEXPOOL_MINT_NFT(
         uint256 nftId,
         address wallet,
@@ -58,10 +52,6 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
     uint256 public maxDeposit = 100 * BASE_ASSET;
     uint256 public fee = 10;
 
-    // Portfolios
-    uint256 private portfolioCounter = 0; // TODO review if/why is this necessary?
-    mapping(uint256 => address) private _portfolioIdToCreator; // TODO review if/why is this necessary?
-
     // NFT properties
     uint256 public tokenCounter = 0;
     mapping(uint256 => address) private _nftIdToWallet;
@@ -82,18 +72,12 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
     onlyOwner
     override
     {
-        require(newFee <= 100, "INDEXPOOL: MAX FEE IS 1%");
+        require(newFee <= 1000, "INDEXPOOL: MAX FEE IS 1%");
         fee = newFee;
     }
 
     function walletOf(uint256 nftId) public view returns (address)  {
         return _nftIdToWallet[nftId];
-    }
-
-    function registerPortfolio(string calldata jsonString) external override {
-        uint256 portfolioId = uint256(keccak256(abi.encodePacked(msg.sender, portfolioCounter, block.timestamp)));
-        emit INDEXPOOL_PORTFOLIO_REGISTERED(msg.sender, portfolioId, jsonString);
-        portfolioCounter++;
     }
 
     // TODO make requires check length input/output tokens and amounts
@@ -174,14 +158,14 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         uint256 nftId
     ) internal {
         // Pay fee to IndexPool
-        uint256 indexpoolFee = fee * ethAmount / 10000;
+        uint256 indexpoolFee = fee * ethAmount / 100000;
         address walletAddress = walletOf(nftId);
         payable(owner()).transfer(indexpoolFee);
         payable(walletAddress).transfer(ethAmount - indexpoolFee);
 
         for (uint16 i = 0; i < inputs.tokens.length; i++) {
             // IndexPool Fee
-            indexpoolFee = fee * inputs.amounts[i] / 10000;
+            indexpoolFee = fee * inputs.amounts[i] / 100000;
 
             IERC20(inputs.tokens[i]).transferFrom(from, owner(), indexpoolFee);
             // owner = contract owner (Ownable)
