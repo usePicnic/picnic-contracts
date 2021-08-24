@@ -276,8 +276,8 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
       * @notice Transfer ETH and ERC20 tokens back to the owner of the corresponding NFT.
       *
       * @param nftId NFT Id
-      * @param outputs ERC20 token addresses and percentages that will exit the Wallet and go to owner
-      * @param ethAmount ETH percentage that will exit the Wallet and go to owner
+      * @param outputs ERC20 token addresses and percentages that will exit the Wallet and go to NFT owner
+      * @param ethAmount ETH percentage that will exit the Wallet and go to NFT owner
       */
     function _withdrawFromWallet(
         uint256 nftId,

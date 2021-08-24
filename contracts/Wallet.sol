@@ -44,6 +44,9 @@ contract Wallet is IWallet {
       *
       * @dev This gives the bridges control over the Wallet funds, so they can make all the transactions necessary to
       * build a portfolio. We need to ensure that all the bridges we support on the UI are as safe as they can be.
+      *
+      * @param _bridgeAddresses Addresses of deployed bridges that will be called
+      * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
       */
     function write(
         address[] calldata _bridgeAddresses,
@@ -66,36 +69,42 @@ contract Wallet is IWallet {
         }
     }
 
+    // TODO using different data structure here than in IndexPool.sol
     /**
       * @notice Withdraw funds from wallet back to NFT owner.
       *
       * @dev Transfer requested percentages back to NFT owner.
+      *
+      * @param outputTokens ERC20 token addresses that will exit the Wallet and go to NFT owner
+      * @param outputPercentages ERC20 token percentages that will exit the Wallet and go to NFT owner
+      * @param outputEthPercentage percentage of ETH that will exit the Wallet and go to NFT owner
+      * @param user NFT owner address
       */
     function withdraw(
         address[] calldata outputTokens,
         uint256[] calldata outputPercentages,
         uint256 outputEthPercentage,
-        address user) external override _ownerOnly_ returns (uint256[] memory, uint256){
+        address nftOwner) external override _ownerOnly_ returns (uint256[] memory, uint256){
 
         uint256[] memory outputTokenAmounts = new uint256[](outputTokens.length);
         for (uint16 i = 0; i < outputTokens.length; i++) {
             require(outputPercentages[i] > 0, "INDEXPOOL WALLET: ERC20 TOKENS WITHDRAWS NEED TO BE > 0");
             outputTokenAmounts[i] = IERC20(outputTokens[i]).balanceOf(address(this)) * outputPercentages[i] / 100000;
-            IERC20(outputTokens[i]).transfer(user, outputTokenAmounts[i]);
+            IERC20(outputTokens[i]).transfer(nftOwner, outputTokenAmounts[i]);
         }
         uint256 outputEthAmount;
         if (outputEthPercentage > 0) {
             outputEthAmount = address(this).balance * outputEthPercentage / 100000;
-            payable(user).transfer(outputEthAmount);
+            payable(nftOwner).transfer(outputEthAmount);
         }
 
         return (outputTokenAmounts, outputEthAmount);
     }
 
     // TODO should we have a read function? or should we read all data we need from events?
-    function read(
-        address[] calldata _bridgeAddresses,
-        bytes[] calldata _bridgeEncodedCalls
-    ) external view override _ownerOnly_ {
-    }
+    //    function read(
+    //        address[] calldata _bridgeAddresses,
+    //        bytes[] calldata _bridgeEncodedCalls
+    //    ) external view override _ownerOnly_ {
+    //    }
 }
