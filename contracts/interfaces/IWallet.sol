@@ -2,7 +2,7 @@ pragma solidity ^0.8.6;
 import "../libraries/IPDataTypes.sol";
 
 interface IWallet {
-    function write(address[] calldata _bridgeAddresses, bytes[] calldata _bridgeEncodedCalls) payable external;
+    function write(address[] calldata _bridgeAddresses, bytes[] calldata _bridgeEncodedCalls) external;
 
     function withdraw(
         IPDataTypes.TokenData calldata outputs,

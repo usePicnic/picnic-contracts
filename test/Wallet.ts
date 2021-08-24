@@ -44,14 +44,13 @@ describe("Wallet", function () {
             TOKENS['WMAIN'],
             TOKENS['DAI'],
         ];
-        let value = ethers.utils.parseEther("1");
         var _bridgeEncodedCalls = [
             uniswapV2SwapBridge.interface.encodeFunctionData(
                 "tradeFromETHToTokens",
                 [
                     ADDRESSES['UNISWAP_V2_ROUTER'],
                     100000,
-                    ethers.utils.parseEther("0.999"),
+                    1,
                     pathUniswap
                 ],
             ),
@@ -64,12 +63,16 @@ describe("Wallet", function () {
             )
         ];
 
-        let overrides = { value: value };
+        const transactionHash = await owner.sendTransaction({
+            to: wallet.address,
+            value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
+        });
+
+        await transactionHash.wait();
 
         await wallet.write(
             _bridgeAddresses,
             _bridgeEncodedCalls,
-            overrides
         );
 
         var event = await getFirstEvent({ address: wallet.address }, UniswapV2SwapBridge, 'TradedFromETHToTokens');
@@ -83,7 +86,6 @@ describe("Wallet", function () {
             TOKENS['WMAIN'],
             TOKENS['DAI'],
         ];
-        let value = ethers.utils.parseEther("1");
         var _bridgeAddresses = [
             uniswapV2SwapBridge.address
         ];
@@ -99,11 +101,16 @@ describe("Wallet", function () {
             )
         ];
 
-        let overrides = { value: value };
+        const transactionHash = await owner.sendTransaction({
+            to: wallet.address,
+            value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
+        });
+
+        await transactionHash.wait();
+
         await wallet.write(
             _bridgeAddresses,
             _bridgeEncodedCalls,
-            overrides
         );
 
         var event = await getFirstEvent({ address: wallet.address }, UniswapV2SwapBridge, 'TradedFromETHToTokens');
@@ -176,11 +183,16 @@ describe("Wallet", function () {
             )
         ];
 
-        let overrides = { value: ethers.utils.parseEther("1") };
+        const transactionHash = await owner.sendTransaction({
+            to: wallet.address,
+            value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
+        });
+
+        await transactionHash.wait();
+
         await wallet.write(
             _bridgeAddresses,
             _bridgeEncodedCalls,
-            overrides
         );
 
         var event = await getFirstEvent({ address: wallet.address }, UniswapV2SwapBridge, 'TradedFromETHToTokens');
@@ -236,12 +248,16 @@ describe("Wallet", function () {
             )
         ];
 
-        let overrides = { value: ethers.utils.parseEther("1") };
+        const transactionHash = await owner.sendTransaction({
+            to: wallet.address,
+            value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
+        });
+
+        await transactionHash.wait();
 
         await expect(wallet.connect(other).write(
             _bridgeAddresses,
             _bridgeEncodedCalls,
-            overrides
         )).to.be.revertedWith("WALLET: ONLY WALLET OWNER CAN CALL THIS FUNCTION");
     })
 
@@ -280,12 +296,16 @@ describe("Wallet", function () {
             )
         ];
 
-        let overrides = { value: ethers.utils.parseEther("1") };
+        const transactionHash = await owner.sendTransaction({
+            to: wallet.address,
+            value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
+        });
+
+        await transactionHash.wait();
 
         await expect(wallet.write(
             _bridgeAddresses,
             _bridgeEncodedCalls,
-            overrides
         )).to.be.revertedWith("revert 1"); // revert 1 means no collateral available
     })
 });
