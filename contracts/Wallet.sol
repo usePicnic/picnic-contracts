@@ -1,8 +1,5 @@
 pragma solidity ^0.8.6;
 
-// TODO are there any risks in using this experimental ABIEncoderV2? Reference: Aave uses it also
-pragma experimental ABIEncoderV2;
-
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IWallet.sol";
