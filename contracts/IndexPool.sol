@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract IndexPool is IIndexPool, ERC721, Ownable {
 
+    // Events
     event INDEXPOOL_MINT_NFT(
         uint256 nftId,
         address wallet,
@@ -29,6 +30,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         uint256 ethAmount
     );
 
+    // Modifiers
     modifier _maxDeposit_() {
         require(
             msg.value <= maxDeposit,
@@ -50,15 +52,16 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
 
     // Contract properties
     uint256 public maxDeposit = 100 * BASE_ASSET;
-    uint256 public fee = 10;
+    uint256 public fee = 100;
 
     // NFT properties
     uint256 public tokenCounter = 0;
     mapping(uint256 => address) private _nftIdToWallet;
 
+    // Constructor
     constructor() ERC721("INDEXPOOL", "IPNFT") Ownable() {}
 
-    // Guarded launch
+    // External functions
     function setMaxDeposit(uint256 newMaxDeposit)
     external
     onlyOwner
@@ -89,12 +92,8 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         bytes[] calldata _bridgeEncodedCalls
     ) payable external _maxDeposit_ override {
         uint256 nftId = _mintNFT(msg.sender);
-        depositPortfolio(
-            nftId,
-            inputs,
-            _bridgeAddresses,
-            _bridgeEncodedCalls
-        );
+        _depositToWallet(msg.sender, inputs, msg.value, nftId);
+        _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
     }
 
     function depositPortfolio(
@@ -102,7 +101,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         IPDataTypes.TokenData calldata inputs,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) payable public _onlyNFTOwner_(nftId) _maxDeposit_ override {
+    ) payable external _onlyNFTOwner_(nftId) _maxDeposit_ override {
         _depositToWallet(msg.sender, inputs, msg.value, nftId);
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
     }
@@ -131,6 +130,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         _withdrawFromWallet(nftId, outputs, outputEthPercentage);
     }
 
+    // Internal functions
     function _mintNFT(address nftOwner) internal returns (uint256){
         // Create new wallet
         Wallet wallet = new Wallet();

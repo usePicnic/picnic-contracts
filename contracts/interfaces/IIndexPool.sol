@@ -9,8 +9,6 @@ interface IIndexPool is IERC721 { // TODO should we add interface for ownable?
 
     function setFee(uint256 newFee) external;
 
-    function registerPortfolio(string calldata jsonString) external;
-
     function createPortfolio(
         IPDataTypes.TokenData calldata inputs,
         address[] calldata _bridgeAddresses,
