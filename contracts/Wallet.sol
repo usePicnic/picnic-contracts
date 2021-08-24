@@ -46,10 +46,12 @@ contract Wallet is IWallet {
       * @param _bridgeAddresses Addresses of deployed bridges that will be called
       * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
       */
+
+    // TODO should we remove payable? it is painful to do unit tests for Wallet without it.
     function write(
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) external override _ownerOnly_ {
+    ) payable external override _ownerOnly_ {
         bool isSuccess;
         bytes memory result;
 
