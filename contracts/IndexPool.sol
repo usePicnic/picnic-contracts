@@ -277,7 +277,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
       *
       * @param nftId NFT Id
       * @param outputs ERC20 token addresses and percentages that will exit the Wallet and go to NFT owner
-      * @param ethAmount ETH percentage that will exit the Wallet and go to NFT owner
+      * @param outputEthPercentage ETH percentage that will exit the Wallet and go to NFT owner
       */
     function _withdrawFromWallet(
         uint256 nftId,
@@ -288,10 +288,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         uint256 outputEth;
 
         Wallet wallet = Wallet(payable(walletOf(nftId)));
-        (outputAmounts, outputEth) = wallet.withdraw(outputs.tokens,
-            outputs.amounts,
-            outputEthPercentage,
-            ownerOf(nftId));
+        (outputAmounts, outputEth) = wallet.withdraw(outputs, outputEthPercentage, ownerOf(nftId));
 
         emit INDEXPOOL_WITHDRAW(nftId, outputs.tokens, outputAmounts, outputEth);
     }

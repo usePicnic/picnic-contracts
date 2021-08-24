@@ -6,6 +6,7 @@ pragma experimental ABIEncoderV2;
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IWallet.sol";
+import "./libraries/IPDataTypes.sol";
 
 /**
  * @title Wallet
@@ -69,28 +70,25 @@ contract Wallet is IWallet {
         }
     }
 
-    // TODO using different data structure here than in IndexPool.sol
     /**
       * @notice Withdraw funds from wallet back to NFT owner.
       *
       * @dev Transfer requested percentages back to NFT owner.
       *
-      * @param outputTokens ERC20 token addresses that will exit the Wallet and go to NFT owner
-      * @param outputPercentages ERC20 token percentages that will exit the Wallet and go to NFT owner
+      * @param outputs ERC20 token addresses and percentages that will exit the Wallet and go to NFT owner
       * @param outputEthPercentage percentage of ETH that will exit the Wallet and go to NFT owner
-      * @param user NFT owner address
+      * @param nftOwner NFT owner address
       */
     function withdraw(
-        address[] calldata outputTokens,
-        uint256[] calldata outputPercentages,
+        IPDataTypes.TokenData calldata outputs,
         uint256 outputEthPercentage,
         address nftOwner) external override _ownerOnly_ returns (uint256[] memory, uint256){
 
-        uint256[] memory outputTokenAmounts = new uint256[](outputTokens.length);
-        for (uint16 i = 0; i < outputTokens.length; i++) {
-            require(outputPercentages[i] > 0, "INDEXPOOL WALLET: ERC20 TOKENS WITHDRAWS NEED TO BE > 0");
-            outputTokenAmounts[i] = IERC20(outputTokens[i]).balanceOf(address(this)) * outputPercentages[i] / 100000;
-            IERC20(outputTokens[i]).transfer(nftOwner, outputTokenAmounts[i]);
+        uint256[] memory outputTokenAmounts = new uint256[](outputs.tokens.length);
+        for (uint16 i = 0; i < outputs.tokens.length; i++) {
+            require(outputs.amounts[i] > 0, "INDEXPOOL WALLET: ERC20 TOKENS WITHDRAWS NEED TO BE > 0");
+            outputTokenAmounts[i] = IERC20(outputs.tokens[i]).balanceOf(address(this)) * outputs.amounts[i] / 100000;
+            IERC20(outputs.tokens[i]).transfer(nftOwner, outputTokenAmounts[i]);
         }
         uint256 outputEthAmount;
         if (outputEthPercentage > 0) {
