@@ -1,13 +1,25 @@
 pragma solidity ^0.8.6;
 
+// TODO are there any risks in using this experimental ABIEncoderV2? Reference: Aave uses it also
 pragma experimental ABIEncoderV2;
 
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IWallet.sol";
 
+/**
+ * @title Wallet
+ * @author IndexPool
+ *
+ * @notice Wallet holds assets for an NFT and it interact with bridges to integrate with other DeFi protocols.
+ *
+ * @dev Wallet holds the funds and is quite extensible as we decided to go with an architecture of delegate calls and
+ * bridges, which are contracts that shapes the interfaces we interact with other protocols.
+ */
 contract Wallet is IWallet {
     address creator;
+
+    // Wallet only talks with IndexPool contract
     modifier _ownerOnly_() {
         require(
             creator == msg.sender,
@@ -16,6 +28,7 @@ contract Wallet is IWallet {
         _;
     }
 
+    // This is needed for Wallet to receive funds from a contract
     event Received(address sender, uint256 amount);
 
     receive() external payable {
@@ -26,16 +39,22 @@ contract Wallet is IWallet {
         creator = msg.sender;
     }
 
+    /**
+      * @notice This is how the Wallet interact with DeFi protocols.
+      *
+      * @dev This gives the bridges control over the Wallet funds, so they can make all the transactions necessary to
+      * build a portfolio. We need to ensure that all the bridges we support on the UI are as safe as they can be.
+      */
     function write(
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) external override payable _ownerOnly_ {
+    ) external override _ownerOnly_ {
         bool isSuccess;
         bytes memory result;
 
         for (uint16 i = 0; i < _bridgeAddresses.length; i++) {
             (isSuccess, result) = _bridgeAddresses[i].delegatecall(_bridgeEncodedCalls[i]);
-            // TODO should we keep using assembly?
+            // Assembly code was the only way we found to display clean revert error messages from delegate calls
             if (isSuccess == false) {
                 assembly {
                     let ptr := mload(0x40)
@@ -47,6 +66,11 @@ contract Wallet is IWallet {
         }
     }
 
+    /**
+      * @notice Withdraw funds from wallet back to NFT owner.
+      *
+      * @dev Transfer requested percentages back to NFT owner.
+      */
     function withdraw(
         address[] calldata outputTokens,
         uint256[] calldata outputPercentages,
@@ -55,7 +79,7 @@ contract Wallet is IWallet {
 
         uint256[] memory outputTokenAmounts = new uint256[](outputTokens.length);
         for (uint16 i = 0; i < outputTokens.length; i++) {
-            // TODO require pct > 0
+            require(outputPercentages[i] > 0, "INDEXPOOL WALLET: ERC20 TOKENS WITHDRAWS NEED TO BE > 0");
             outputTokenAmounts[i] = IERC20(outputTokens[i]).balanceOf(address(this)) * outputPercentages[i] / 100000;
             IERC20(outputTokens[i]).transfer(user, outputTokenAmounts[i]);
         }
