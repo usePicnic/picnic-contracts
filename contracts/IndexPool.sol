@@ -7,6 +7,23 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+/**
+ * @title IndexPool
+ * @author IndexPool
+ *
+ * @notice Coordinates portfolio creation, deposits/withdrawals, and fee payments.
+ *
+ * @dev This contract has 3 main functions:
+ *
+ * 1. Mint and manage NFTs
+ * 1.1 Track ownership of NFTs
+ * 1.2 Track NFT and Wallet relationship
+ * 2. Create and manage wallets
+ * 2.1 Control deposits / withdrawals to wallets
+ * 2.2 Control the permissions for delegate calls to bridges
+ * 3. Collect fees for the IndexPool protocol
+ */
+
 contract IndexPool is IIndexPool, ERC721, Ownable {
 
     // Events
@@ -30,15 +47,6 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         uint256 ethAmount
     );
 
-    // Modifiers
-    modifier _maxDeposit_() {
-        require(
-            msg.value <= maxDeposit,
-            "INDEXPOOL: DEPOSIT ABOVE MAXIMUM AMOUNT (GUARDED LAUNCH)"
-        );
-        _;
-    }
-
     modifier _onlyNFTOwner_(uint256 nftId) {
         require(
             msg.sender == ownerOf(nftId),
@@ -50,10 +58,6 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
     // Constants
     uint256 private constant BASE_ASSET = 1000000000000000000;
 
-    // Contract properties
-    uint256 public maxDeposit = 100 * BASE_ASSET;
-    uint256 public fee = 100;
-
     // NFT properties
     uint256 public tokenCounter = 0;
     mapping(uint256 => address) private _nftIdToWallet;
@@ -62,23 +66,12 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
     constructor() ERC721("INDEXPOOL", "IPNFT") Ownable() {}
 
     // External functions
-    function setMaxDeposit(uint256 newMaxDeposit)
-    external
-    onlyOwner
-    override
-    {
-        maxDeposit = newMaxDeposit;
-    }
 
-    function setFee(uint256 newFee)
-    external
-    onlyOwner
-    override
-    {
-        require(newFee <= 1000, "INDEXPOOL: MAX FEE IS 1%");
-        fee = newFee;
-    }
-
+    /**
+     * @notice Returns wallet address of a given NFT id.
+     *
+     * @dev Each NFT id has its own Wallet, which is a contract that holds funds separately from other users funds.
+     */
     function walletOf(uint256 nftId) public view returns (address)  {
         return _nftIdToWallet[nftId];
     }
@@ -86,26 +79,55 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
     // TODO make requires check length input/output tokens and amounts
     // TODO Check min amounts
 
+    // TODO what is a bridge?
+    // TODO make diagram
+    /**
+     * @notice Create a portfolio.
+     *
+     * @dev The first step to create a portfolio is composed of 3 steps:
+     *
+     * 1. Mint an NFT and Wallet for the corresponding NFT.
+     * 2. Transfer resources (ETH and ERC20 tokens) to Wallet.
+     * 3. Process bridge calls (interact with Uniswap/Aave...).
+     */
     function createPortfolio(
         IPDataTypes.TokenData calldata inputs,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) payable external _maxDeposit_ override {
+    ) payable external override {
         uint256 nftId = _mintNFT(msg.sender);
-        _depositToWallet(msg.sender, inputs, msg.value, nftId);
+        _depositToWallet(inputs, msg.value, nftId);
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
     }
 
+    /**
+     * @notice Deposit more funds into an existing portfolio.
+     *
+     * @dev The deposit function is composed of 2 steps:
+     *
+     * 1. Transfer resources (ETH and ERC20 tokens) to Wallet.
+     * 2. Process bridge calls (interact with Uniswap/Aave...).
+     */
     function depositPortfolio(
         uint256 nftId,
         IPDataTypes.TokenData calldata inputs,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) payable external _onlyNFTOwner_(nftId) _maxDeposit_ override {
-        _depositToWallet(msg.sender, inputs, msg.value, nftId);
+    ) payable external _onlyNFTOwner_(nftId) override {
+        _depositToWallet(inputs, msg.value, nftId);
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
     }
 
+    // TODO is this really necessary?
+    /**
+     * @notice Deposit more funds into an existing portfolio.
+     *
+     * @dev The depositAndWithdraw function is composed of 3 steps:
+     *
+     * 1. Transfer resources (ETH and ERC20 tokens) to Wallet.
+     * 2. Process bridge calls (interact with Uniswap/Aave...).
+     * 3. Transfer resources (ETH and ERC20 tokens) to NFT owner.
+     */
     function depositAndWithdrawPortfolio(
         uint256 nftId,
         IPDataTypes.TokenData calldata inputs,
@@ -113,12 +135,20 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         uint256 outputEthPercentage,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) payable external _onlyNFTOwner_(nftId) _maxDeposit_ override {
-        _depositToWallet(msg.sender, inputs, msg.value, nftId);
+    ) payable external _onlyNFTOwner_(nftId) override {
+        _depositToWallet(inputs, msg.value, nftId);
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
         _withdrawFromWallet(nftId, outputs, outputEthPercentage);
     }
 
+    /**
+     * @notice Deposit more funds into an existing portfolio.
+     *
+     * @dev The withdraw function is composed of 3 steps:
+     *
+     * 1. Process bridge calls (interact with Uniswap/Aave...).
+     * 2. Transfer resources (ETH and ERC20 tokens) to NFT owner.
+     */
     function withdrawPortfolio(
         uint256 nftId,
         IPDataTypes.TokenData calldata outputs,
@@ -131,16 +161,23 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
     }
 
     // Internal functions
+
+    /**
+     * @notice Mints an NFT given an NFT owner.
+     *
+     * @dev All NFTs inside this contract have a wallet linked to it. So, whenever an NFT is minted a new wallet is
+     * created that will hold funds that corresponds to the portfolio owned by this NFT.
+     */
     function _mintNFT(address nftOwner) internal returns (uint256){
         // Create new wallet
         Wallet wallet = new Wallet();
 
-        // Saving NFT data
+        // Save NFT data
         uint256 nftId = tokenCounter;
         _nftIdToWallet[nftId] = address(wallet);
         tokenCounter = tokenCounter + 1;
 
-        // Minting NFT
+        // Mint NFT
         _safeMint(nftOwner, nftId);
 
         emit INDEXPOOL_MINT_NFT(
@@ -151,29 +188,46 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         return nftId;
     }
 
+    /**
+      * @notice Transfer deposited ETH and ERC20 tokens to the Wallet linked to the referenced NFT.
+      *
+      * @dev Transfer assets to the corresponding Wallet going through the following steps:
+      * 1. Transfer deposited ETH into the IndexPool contract to the Wallet contract.
+      * 2. Transfer approved ERC20 tokens from the user account to the Wallet contract.
+      * 3. Charge 0.1% fee for IndexPool
+      */
     function _depositToWallet(
-        address from,
         IPDataTypes.TokenData calldata inputs,
         uint256 ethAmount,
         uint256 nftId
     ) internal {
         // Pay fee to IndexPool
-        uint256 indexpoolFee = fee * ethAmount / 100000;
+        uint256 indexpoolFee = ethAmount / 1000;
+        // 0.1% fee on deposits
         address walletAddress = walletOf(nftId);
-        payable(owner()).transfer(indexpoolFee);
+        address indexpoolAddress = owner();
+        // owner() = contract owner = IndexPool (Ownable)
+
+        payable(indexpoolAddress).transfer(indexpoolFee);
         payable(walletAddress).transfer(ethAmount - indexpoolFee);
 
         for (uint16 i = 0; i < inputs.tokens.length; i++) {
             // IndexPool Fee
-            indexpoolFee = fee * inputs.amounts[i] / 100000;
+            indexpoolFee = inputs.amounts[i] / 1000;
+            // 0.1% fee on deposits
 
-            IERC20(inputs.tokens[i]).transferFrom(from, owner(), indexpoolFee);
-            // owner = contract owner (Ownable)
-            IERC20(inputs.tokens[i]).transferFrom(from, walletAddress, inputs.amounts[i] - indexpoolFee);
+            IERC20(inputs.tokens[i]).transferFrom(ownerOf(nftId), indexpoolAddress, indexpoolFee);
+            IERC20(inputs.tokens[i]).transferFrom(ownerOf(nftId), walletAddress, inputs.amounts[i] - indexpoolFee);
         }
         emit INDEXPOOL_DEPOSIT(nftId, inputs.tokens, inputs.amounts, ethAmount);
     }
 
+    /**
+      * @notice This is how IndexPool communicates with other protocols.
+      *
+      * @dev This is where the magic happens. Bridges interact with delegate calls to enable IndexPool to interact with
+      * a wide and expanding variety of protocols.
+      */
     function _writeToWallet(
         uint256 nftId,
         address[] calldata _bridgeAddresses,
@@ -184,6 +238,11 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         wallet.write(_bridgeAddresses, _bridgeEncodedCalls);
     }
 
+    /**
+      * @notice Transfer ETH and ERC20 tokens back to the owner of the corresponding NFT.
+      *
+      * @dev Transfer assets from the corresponding Wallet to the NFT owner. Wallet contract does the heavy lifting.
+      */
     function _withdrawFromWallet(
         uint256 nftId,
         IPDataTypes.TokenData calldata outputs,
@@ -193,7 +252,10 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         uint256 outputEth;
 
         Wallet wallet = Wallet(payable(walletOf(nftId)));
-        (outputAmounts, outputEth) = wallet.withdraw(outputs.tokens, outputs.amounts, outputEthPercentage, ownerOf(nftId));
+        (outputAmounts, outputEth) = wallet.withdraw(outputs.tokens,
+            outputs.amounts,
+            outputEthPercentage,
+            ownerOf(nftId));
 
         emit INDEXPOOL_WITHDRAW(nftId, outputs.tokens, outputAmounts, outputEth);
     }

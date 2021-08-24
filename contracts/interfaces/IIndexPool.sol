@@ -5,10 +5,6 @@ import "../libraries/IPDataTypes.sol";
 pragma experimental ABIEncoderV2; // TODO is this necessary?
 
 interface IIndexPool is IERC721 { // TODO should we add interface for ownable?
-    function setMaxDeposit(uint256 newMaxDeposit) external;
-
-    function setFee(uint256 newFee) external;
-
     function createPortfolio(
         IPDataTypes.TokenData calldata inputs,
         address[] calldata _bridgeAddresses,
