@@ -71,6 +71,8 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
      * @notice Returns wallet address of a given NFT id.
      *
      * @dev Each NFT id has its own Wallet, which is a contract that holds funds separately from other users funds.
+     *
+     * @param nftId NFT Id
      */
     function walletOf(uint256 nftId) public view returns (address)  {
         return _nftIdToWallet[nftId];
@@ -89,6 +91,10 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
      * 1. Mint an NFT and Wallet for the corresponding NFT.
      * 2. Transfer resources (ETH and ERC20 tokens) to Wallet.
      * 3. Process bridge calls (interact with Uniswap/Aave...).
+     *
+     * @param inputs ERC20 token addresses and amounts that will enter the contract
+     * @param _bridgeAddresses Addresses of deployed bridges that will be called
+     * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
      */
     function createPortfolio(
         IPDataTypes.TokenData calldata inputs,
@@ -96,7 +102,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         bytes[] calldata _bridgeEncodedCalls
     ) payable external override {
         uint256 nftId = _mintNFT(msg.sender);
-        _depositToWallet(inputs, msg.value, nftId);
+        _depositToWallet(nftId, inputs, msg.value);
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
     }
 
@@ -107,6 +113,11 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
      *
      * 1. Transfer resources (ETH and ERC20 tokens) to Wallet.
      * 2. Process bridge calls (interact with Uniswap/Aave...).
+     *
+     * @param nftId NFT Id
+     * @param inputs ERC20 token addresses and amounts that will enter the contract
+     * @param _bridgeAddresses Addresses of deployed bridges that will be called
+     * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
      */
     function depositPortfolio(
         uint256 nftId,
@@ -114,7 +125,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) payable external _onlyNFTOwner_(nftId) override {
-        _depositToWallet(inputs, msg.value, nftId);
+        _depositToWallet(nftId, inputs, msg.value);
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
     }
 
@@ -127,6 +138,13 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
      * 1. Transfer resources (ETH and ERC20 tokens) to Wallet.
      * 2. Process bridge calls (interact with Uniswap/Aave...).
      * 3. Transfer resources (ETH and ERC20 tokens) to NFT owner.
+     *
+     * @param nftId NFT Id
+     * @param inputs ERC20 token addresses and amounts that will enter the contract
+     * @param outputs ERC20 token addresses and percentages that will exit the contract
+     * @param outputEthPercentage percentage of ETH in wallet that will exit the contract
+     * @param _bridgeAddresses Addresses of deployed bridges that will be called
+     * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
      */
     function depositAndWithdrawPortfolio(
         uint256 nftId,
@@ -136,7 +154,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) payable external _onlyNFTOwner_(nftId) override {
-        _depositToWallet(inputs, msg.value, nftId);
+        _depositToWallet(nftId, inputs, msg.value);
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
         _withdrawFromWallet(nftId, outputs, outputEthPercentage);
     }
@@ -148,6 +166,12 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
      *
      * 1. Process bridge calls (interact with Uniswap/Aave...).
      * 2. Transfer resources (ETH and ERC20 tokens) to NFT owner.
+     *
+     * @param nftId NFT Id
+     * @param outputs ERC20 token addresses and percentages that will exit the contract
+     * @param outputEthPercentage percentage of ETH in wallet that will exit the contract
+     * @param _bridgeAddresses Addresses of deployed bridges that will be called
+     * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
      */
     function withdrawPortfolio(
         uint256 nftId,
@@ -167,6 +191,8 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
      *
      * @dev All NFTs inside this contract have a wallet linked to it. So, whenever an NFT is minted a new wallet is
      * created that will hold funds that corresponds to the portfolio owned by this NFT.
+     *
+     * @param nftOwner address of NFT owner
      */
     function _mintNFT(address nftOwner) internal returns (uint256){
         // Create new wallet
@@ -195,11 +221,15 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
       * 1. Transfer deposited ETH into the IndexPool contract to the Wallet contract.
       * 2. Transfer approved ERC20 tokens from the user account to the Wallet contract.
       * 3. Charge 0.1% fee for IndexPool
+      *
+      * @param nftId NFT Id
+      * @param inputs ERC20 token addresses and amounts that entered the contract and will go to Wallet
+      * @param ethAmount ETH amount that entered the contract and will go to Wallet
       */
     function _depositToWallet(
+        uint256 nftId,
         IPDataTypes.TokenData calldata inputs,
-        uint256 ethAmount,
-        uint256 nftId
+        uint256 ethAmount
     ) internal {
         // Pay fee to IndexPool
         uint256 indexpoolFee = ethAmount / 1000;
@@ -227,6 +257,10 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
       *
       * @dev This is where the magic happens. Bridges interact with delegate calls to enable IndexPool to interact with
       * a wide and expanding variety of protocols.
+      *
+      * @param nftId NFT Id
+      * @param _bridgeAddresses Addresses of deployed bridges that will be called
+      * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
       */
     function _writeToWallet(
         uint256 nftId,
@@ -241,7 +275,9 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
     /**
       * @notice Transfer ETH and ERC20 tokens back to the owner of the corresponding NFT.
       *
-      * @dev Transfer assets from the corresponding Wallet to the NFT owner. Wallet contract does the heavy lifting.
+      * @param nftId NFT Id
+      * @param outputs ERC20 token addresses and percentages that will exit the Wallet and go to owner
+      * @param ethAmount ETH percentage that will exit the Wallet and go to owner
       */
     function _withdrawFromWallet(
         uint256 nftId,
