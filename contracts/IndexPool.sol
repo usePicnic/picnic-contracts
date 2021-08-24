@@ -5,6 +5,7 @@ import "./interfaces/IIndexPool.sol";
 import "./libraries/IPDataTypes.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
@@ -25,6 +26,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  */
 
 contract IndexPool is IIndexPool, ERC721, Ownable {
+    using SafeERC20 for IERC20;    
 
     // Events
     event INDEXPOOL_MINT_NFT(
@@ -246,8 +248,8 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
             indexpoolFee = inputs.amounts[i] / 1000;
             // 0.1% fee on deposits
 
-            IERC20(inputs.tokens[i]).transferFrom(ownerOf(nftId), indexpoolAddress, indexpoolFee);
-            IERC20(inputs.tokens[i]).transferFrom(ownerOf(nftId), walletAddress, inputs.amounts[i] - indexpoolFee);
+            IERC20(inputs.tokens[i]).safeTransferFrom(ownerOf(nftId), indexpoolAddress, indexpoolFee);
+            IERC20(inputs.tokens[i]).safeTransferFrom(ownerOf(nftId), walletAddress, inputs.amounts[i] - indexpoolFee);
         }
         emit INDEXPOOL_DEPOSIT(nftId, inputs.tokens, inputs.amounts, ethAmount);
     }

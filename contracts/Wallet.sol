@@ -2,6 +2,7 @@ pragma solidity ^0.8.6;
 
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IWallet.sol";
 import "./libraries/IPDataTypes.sol";
 
@@ -15,6 +16,8 @@ import "./libraries/IPDataTypes.sol";
  * bridges, which are contracts that shapes the interfaces we interact with other protocols.
  */
 contract Wallet is IWallet {
+    using SafeERC20 for IERC20;
+
     address creator;
 
     // Wallet only talks with IndexPool contract
@@ -85,7 +88,7 @@ contract Wallet is IWallet {
         for (uint16 i = 0; i < outputs.tokens.length; i++) {
             require(outputs.amounts[i] > 0, "INDEXPOOL WALLET: ERC20 TOKENS WITHDRAWS NEED TO BE > 0");
             outputTokenAmounts[i] = IERC20(outputs.tokens[i]).balanceOf(address(this)) * outputs.amounts[i] / 100000;
-            IERC20(outputs.tokens[i]).transfer(nftOwner, outputTokenAmounts[i]);
+            IERC20(outputs.tokens[i]).safeTransfer(nftOwner, outputTokenAmounts[i]);
         }
         uint256 outputEthAmount;
         if (outputEthPercentage > 0) {
