@@ -4,7 +4,6 @@ import "./Wallet.sol";
 import "./interfaces/IIndexPool.sol";
 import "./libraries/IPDataTypes.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -26,7 +25,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  */
 
 contract IndexPool is IIndexPool, ERC721, Ownable {
-    using SafeERC20 for IERC20;    
+    using SafeERC20 for IERC20;
 
     // Events
     event INDEXPOOL_MINT_NFT(
@@ -57,10 +56,10 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         _;
     }
 
-    modifier checkInputs(IPDataTypes.TokenData calldata inputs, uint256 ethAmount) {
+    modifier checkIO(IPDataTypes.TokenData calldata inputs, uint256 ethAmount) {
         require(
             inputs.tokens.length == inputs.amounts.length,
-            "INDEXPOOL: INPUTS: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS"
+            "INDEXPOOL: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS"
         );
         for (uint16 i = 0; i < inputs.amounts.length; i++) {
             require(
@@ -71,24 +70,6 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         require(
             inputs.amounts.length > 0 || ethAmount > 0, // ERC20 Tokens or ETH is needed
             "INDEXPOOL: A DEPOSIT IN ETHER OR ERC20 TOKENS IS NEEDED"
-        );
-        _;
-    }
-
-    modifier checkOutputs(IPDataTypes.TokenData calldata outputs, uint256 ethAmount) {
-        require(
-            outputs.tokens.length == outputs.amounts.length,
-            "INDEXPOOL: OUTPUTS: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS"
-        );
-        for (uint16 i = 0; i < outputs.amounts.length; i++) {
-            require(
-                outputs.amounts[i] > 0,
-                "INDEXPOOL WALLET: ERC20 TOKENS WITHDRAWALS NEED TO BE > 0"
-            );
-        }
-        require(
-            outputs.amounts.length > 0 || ethAmount > 0, // ERC20 Tokens or ETH is needed
-            "INDEXPOOL: A WITHDRAWAL IN ETHER OR ERC20 TOKENS IS NEEDED"
         );
         _;
     }
@@ -134,7 +115,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) payable external
-        checkInputs(inputs, msg.value) override
+        checkIO(inputs, msg.value) override
     {
         uint256 nftId = _mintNFT(msg.sender);
         _depositToWallet(nftId, inputs, msg.value);
@@ -160,47 +141,14 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) payable external
-        checkInputs(inputs, msg.value)
+        checkIO(inputs, msg.value)
         onlyNFTOwner(nftId) override
     {
         _depositToWallet(nftId, inputs, msg.value);
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
     }
 
-    /**
-     * @notice Deposit more funds into an existing portfolio.
-     *
-     * @dev The depositAndWithdraw function is composed of 3 steps:
-     *
-     * 1. Transfer resources (ETH and ERC20 tokens) to Wallet.
-     * 2. Process bridge calls (interact with Uniswap/Aave...).
-     * 3. Transfer resources (ETH and ERC20 tokens) to NFT owner.
-     *
-     * @param nftId NFT Id
-     * @param inputs ERC20 token addresses and amounts that will enter the contract
-     * @param outputs ERC20 token addresses and percentages that will exit the contract
-     * @param outputEthPercentage percentage of ETH in wallet that will exit the contract
-     * @param _bridgeAddresses Addresses of deployed bridges that will be called
-     * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
-     */
-    function depositAndWithdrawPortfolio(
-        uint256 nftId,
-        IPDataTypes.TokenData calldata inputs,
-        IPDataTypes.TokenData calldata outputs,
-        uint256 outputEthPercentage,
-        address[] calldata _bridgeAddresses,
-        bytes[] calldata _bridgeEncodedCalls
-    ) payable external
-        checkInputs(inputs, msg.value)
-        checkOutputs(outputs, outputEthPercentage)
-        onlyNFTOwner(nftId) override
-    {
-        _depositToWallet(nftId, inputs, msg.value);
-        _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
-        _withdrawFromWallet(nftId, outputs, outputEthPercentage);
-    }
-
-    /**
+     /**
      * @notice Deposit more funds into an existing portfolio.
      *
      * @dev The withdraw function is composed of 3 steps:
@@ -221,7 +169,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) external
-        checkOutputs(outputs, outputEthPercentage)
+        checkIO(outputs, outputEthPercentage)
         onlyNFTOwner(nftId) override
     {
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
