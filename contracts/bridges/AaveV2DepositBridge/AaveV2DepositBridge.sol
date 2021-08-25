@@ -28,8 +28,7 @@ contract AaveV2DepositBridge {
     );
 
     function deposit(address assetIn, uint256 percentage)
-    public
-    payable
+    public    
     {
         // Hardcoded to make call easier to understand for the user (UI will help explain/debug it)
         address aaveLendingPoolAddress = 0x8dFf5E27EA6b7AC08EbFdf9eB090F32ee9a30fcf;
@@ -77,7 +76,7 @@ contract AaveV2DepositBridge {
         emit Harvest(claimedAsset, claimedReward);
     }
 
-    function withdraw(address assetOut, uint256 percentageOut) public payable {
+    function withdraw(address assetOut, uint256 percentageOut) public {
         // Hardcoded to make call easier to understand for the user (UI will help explain/debug it)
         address aaveLendingPoolAddress = 0x8dFf5E27EA6b7AC08EbFdf9eB090F32ee9a30fcf;
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
