@@ -86,7 +86,7 @@ describe("IndexPool", function () {
             // Wait transaction to complete
             tx.wait();
 
-            // Wallet ETH balance should be above 0
+            // Wallet DAI balance should be above 0
             let walletAddress = await indexpool.walletOf(0);
             let walletDaiBalance = await dai.balanceOf(walletAddress);
             expect(walletDaiBalance).to.be.above(0);
