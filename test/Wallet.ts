@@ -38,7 +38,6 @@ describe("Wallet", function () {
     });
 
     it("Writes (Buys DAI on Uniswap)", async function () {
-
         // Set bridges addresses
         var _bridgeAddresses = [
             uniswapV2SwapBridge.address,
@@ -83,11 +82,8 @@ describe("Wallet", function () {
     })
 
     it("Withdraws Ether", async function () {
-
-        // Set bridges addresses
+        // Set bridges addresses and encoded calls
         var _bridgeAddresses = [];
-
-        // Set encoded calls
         var _bridgeEncodedCalls = [];
 
         // Transfer money to wallet (similar as IndexPool contract would have done)
@@ -97,6 +93,9 @@ describe("Wallet", function () {
         });
         await transactionHash.wait();
 
+        // Get ETH balance in owner's wallet before calling withdraw
+        let previousBalance = await owner.getBalance()
+
         // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
         await wallet.withdraw(
             {'tokens': [], 'amounts': []},
@@ -104,18 +103,38 @@ describe("Wallet", function () {
             owner.address
         );
 
-        // TODO
-        // Wallet DAI amount should be 0
-        // let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])
-        // let daiBalance = await dai.balanceOf(wallet.address);
-        // expect(daiBalance).to.be.above(0);
+        // Get ETH balance in owner's wallet after calling withdraw
+        let currentBalance = await owner.getBalance()
+
+        // Balance after withdrawing should be higher than before
+        expect(currentBalance).to.be.above(previousBalance);
     })
 
-    it("Withdraws ERC20 Tokens", async function () {
-        // TODO
-        // Set empty bridges addresses and  encoded calls
-        var _bridgeAddresses = [];
-        var _bridgeEncodedCalls = [];
+    it("Withdraws ERC20 Tokens (after buying DAI)", async function () {
+        // STEP 1: Buys DAI
+        // Set bridges addresses
+        var _bridgeAddresses = [
+            uniswapV2SwapBridge.address,
+        ];
+
+        // Set path
+        let pathUniswap = [
+            TOKENS['WMAIN'],
+            TOKENS['DAI'],
+        ];
+
+        // Set encoded calls
+        var _bridgeEncodedCalls = [
+            uniswapV2SwapBridge.interface.encodeFunctionData(
+                "tradeFromETHToTokens",
+                [
+                    ADDRESSES['UNISWAP_V2_ROUTER'],
+                    100000,
+                    1,
+                    pathUniswap
+                ],
+            ),
+        ];
 
         // Transfer money to wallet (similar as IndexPool contract would have done)
         const transactionHash = await owner.sendTransaction({
@@ -125,16 +144,29 @@ describe("Wallet", function () {
         await transactionHash.wait();
 
         // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
+        await wallet.write(
+            _bridgeAddresses,
+            _bridgeEncodedCalls,
+        );
+
+        // Instantiate DAI
+        let dai = (await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])).connect(owner);
+
+        // Records DAI balance
+        let previousDaiBalance = await dai.balanceOf(owner.address);
+
+        // STEP 2: Withdraws DAI
         await wallet.withdraw(
-            {'tokens': [], 'amounts': []},
-            100000,
+            {'tokens': [TOKENS['DAI']], 'amounts': [100000]},
+            0,
             owner.address
         );
 
-        // // Wallet DAI amount should be 0
-        // let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])
-        // let daiBalance = await dai.balanceOf(wallet.address);
-        // expect(daiBalance).to.be.above(0);
+        // Records DAI balance
+        let currentDaiBalance = await dai.balanceOf(owner.address);
+
+        // Balance after withdrawing should be higher than before
+        expect(currentDaiBalance).to.be.above(previousDaiBalance);
     })
 
     it("Rejects write from other user", async function () {
