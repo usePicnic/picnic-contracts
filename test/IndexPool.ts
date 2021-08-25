@@ -148,7 +148,7 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio (just holds ether)
-            let tx = await indexpool.createPortfolio(
+            await indexpool.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
@@ -177,7 +177,7 @@ describe("IndexPool", function () {
             await dai.approve(indexpool.address, daiBalance);
 
             // Deposit in a portfolio
-            tx = await indexpool.depositPortfolio(
+            let tx = await indexpool.depositPortfolio(
                 0, // NFT ID - NFT created just above
                 {'tokens': [TOKENS['DAI']], 'amounts': [daiBalance]},
                 _bridgeAddresses,
@@ -239,10 +239,55 @@ describe("IndexPool", function () {
                 {value: ethers.utils.parseEther("1")} // overrides
             )).to.be.revertedWith("INDEXPOOL: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS");
         })
+
+        it("Rejects ERC20 amounts equal to zero", async function () {
+            // Set bridges addresses and encoded calls
+            var _bridgeAddresses = [];
+            var _bridgeEncodedCalls = [];
+
+            // Create a portfolio (just holds ether)
+            let tx = await indexpool.createPortfolio(
+                {'tokens': [], 'amounts': []},
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+                {value: ethers.utils.parseEther("1")} // overrides
+            );
+
+            // Create a portfolio
+            await expect(indexpool.depositPortfolio(
+                0,
+                {'tokens': [TOKENS['DAI']], 'amounts': [0]},
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+                {value: ethers.utils.parseEther("1")} // overrides
+            )).to.be.revertedWith("INDEXPOOL WALLET: ERC20 TOKENS DEPOSITS NEED TO BE > 0");
+        })
+
+        it("Rejects no ETH amounts along with empty ERC20 amounts", async function () {
+            // Set bridges addresses and encoded calls
+            var _bridgeAddresses = [];
+            var _bridgeEncodedCalls = [];
+
+            // Create a portfolio (just holds ether)
+            let tx = await indexpool.createPortfolio(
+                {'tokens': [], 'amounts': []},
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+                {value: ethers.utils.parseEther("1")} // overrides
+            );
+
+            // Create a portfolio
+            await expect(indexpool.depositPortfolio(
+                0,
+                {'tokens': [], 'amounts': []},
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+            )).to.be.revertedWith("INDEXPOOL: A DEPOSIT IN ETHER OR ERC20 TOKENS IS NEEDED");
+        })
     });
 
     describe("Withdraw from portfolio", function () {
-        it("Withdraw from portfolio", async function () {
+        it("Withdraw from portfolio - in ETH", async function () {
             // Set bridges addresses and encoded calls
             var _bridgeAddresses = [];
             var _bridgeEncodedCalls = [];
@@ -273,6 +318,60 @@ describe("IndexPool", function () {
 
             // Balance after withdrawing should be higher than before
             expect(currentBalance).to.be.above(previousBalance);
+        })
+
+        it("Withdraw from portfolio - in DAI", async function () {
+            // Set bridges addresses
+            var _bridgeAddresses = [
+                uniswapV2SwapBridge.address,
+            ];
+
+            // Set path
+            let pathUniswap = [
+                TOKENS['WMAIN'],
+                TOKENS['DAI'],
+            ];
+
+            // Set encoded calls
+            var _bridgeEncodedCalls = [
+                uniswapV2SwapBridge.interface.encodeFunctionData(
+                    "tradeFromETHToTokens",
+                    [
+                        ADDRESSES['UNISWAP_V2_ROUTER'],
+                        100000,
+                        1,
+                        pathUniswap
+                    ],
+                ),
+            ];
+
+            // Create a portfolio (just holds ether)
+            await indexpool.createPortfolio(
+                {'tokens': [], 'amounts': []},
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+                {value: ethers.utils.parseEther("1")} // overrides
+            );
+            // Code above was tested elsewhere
+
+            // Get ETH balance in owner's wallet before calling withdraw
+            let dai = (await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"]));
+            let previousDaiBalance = await dai.balanceOf(owner.address);
+
+            // Withdraw from portfolio
+            await indexpool.withdrawPortfolio(
+                0, // NFT ID - NFT created just above
+                {'tokens': [TOKENS['DAI']], 'amounts': [100000]},
+                0, // Withdraw percentage
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+            );
+
+            // Get ETH balance in owner's wallet after calling withdraw
+            let currentDaiBalance = await dai.balanceOf(owner.address);
+
+            // Balance after withdrawing should be higher than before
+            expect(currentDaiBalance).to.be.above(previousDaiBalance);
         })
 
         it("Rejects other address withdrawing from NFT", async function () {
