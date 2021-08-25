@@ -354,17 +354,20 @@ describe("IndexPool", function () {
             );
             // Code above was tested elsewhere
 
-            // Get ETH balance in owner's wallet before calling withdraw
+            // Get DAI balance in owner's wallet before calling withdraw
             let dai = (await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"]));
             let previousDaiBalance = await dai.balanceOf(owner.address);
+
+            let walletAddress = await indexpool.walletOf(0);
+            let walletDAI = await dai.balanceOf(walletAddress);
 
             // Withdraw from portfolio
             await indexpool.withdrawPortfolio(
                 0, // NFT ID - NFT created just above
-                {'tokens': [TOKENS['DAI']], 'amounts': [100000]},
+                {'tokens': [TOKENS['DAI']], 'amounts': [100000]}, // outputs
                 0, // Withdraw percentage
-                _bridgeAddresses,
-                _bridgeEncodedCalls,
+                [], // _bridgeAddresses
+                [], // _encodedBridgeCalls
             );
 
             // Get ETH balance in owner's wallet after calling withdraw
