@@ -6,8 +6,8 @@ import constants from "../constants";
 describe("Wallet", function () {
     let owner;
     let other;
-    let UniswapV2SwapBridge;
     let uniswapV2SwapBridge;
+    let aaveV2DepositBridge;
     let wallet;
 
     const ADDRESSES = constants['POLYGON'];
@@ -18,8 +18,12 @@ describe("Wallet", function () {
         [owner, other] = await ethers.getSigners();
 
         // Instantiate Uniswap bridge
-        UniswapV2SwapBridge = await ethers.getContractFactory("UniswapV2SwapBridge");
+        let UniswapV2SwapBridge = await ethers.getContractFactory("UniswapV2SwapBridge");
         uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
+
+        // Instantiate Aave bridge
+        let AaveV2DepositBridge = await ethers.getContractFactory("AaveV2DepositBridge");
+        aaveV2DepositBridge = await AaveV2DepositBridge.deploy();
 
         // Instantiate Wallet
         let Wallet = await ethers.getContractFactory("Wallet");
@@ -174,5 +178,49 @@ describe("Wallet", function () {
             0,
             owner.address
         )).to.be.revertedWith("WALLET: ONLY WALLET OWNER CAN CALL THIS FUNCTION");
+    })
+
+    it("Revert on Aave bridge propagates correctly", async function () {
+        var _bridgeAddresses = [
+            uniswapV2SwapBridge.address,
+            aaveV2DepositBridge.address,
+            aaveV2DepositBridge.address,
+        ];
+        var _bridgeEncodedCalls = [
+            uniswapV2SwapBridge.interface.encodeFunctionData(
+                "tradeFromETHToTokens",
+                [
+                    ADDRESSES['UNISWAP_V2_ROUTER'],
+                    100000,
+                    1,
+                    [
+                        TOKENS['WMAIN'],
+                        TOKENS['DAI'],
+                    ]
+                ],
+            ),
+            aaveV2DepositBridge.interface.encodeFunctionData(
+                "deposit",
+                [
+                    TOKENS['QUICK'],
+                    100000
+                ]
+            ),
+            aaveV2DepositBridge.interface.encodeFunctionData(
+                "withdraw",
+                [
+                    TOKENS['QUICK'],
+                    100000
+                ]
+            )
+        ];
+
+        let overrides = { value: ethers.utils.parseEther("1") };
+
+        await expect(wallet.write(
+            _bridgeAddresses,
+            _bridgeEncodedCalls,
+            overrides
+        )).to.be.revertedWith("revert 1"); // revert 1 means no collateral available
     })
 });
