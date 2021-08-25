@@ -21,7 +21,7 @@ contract Wallet is IWallet {
     address creator;
 
     // Wallet only talks with IndexPool contract
-    modifier _ownerOnly_() {
+    modifier ownerOnly() {
         require(
             creator == msg.sender,
             "WALLET: ONLY WALLET OWNER CAN CALL THIS FUNCTION"
@@ -52,7 +52,7 @@ contract Wallet is IWallet {
     function write(
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) external override _ownerOnly_ {
+    ) external override ownerOnly {
         bool isSuccess;
         bytes memory result;
 
@@ -82,11 +82,10 @@ contract Wallet is IWallet {
     function withdraw(
         IPDataTypes.TokenData calldata outputs,
         uint256 outputEthPercentage,
-        address nftOwner) external override _ownerOnly_ returns (uint256[] memory, uint256){
+        address nftOwner) external override ownerOnly returns (uint256[] memory, uint256){
 
         uint256[] memory outputTokenAmounts = new uint256[](outputs.tokens.length);
         for (uint16 i = 0; i < outputs.tokens.length; i++) {
-            require(outputs.amounts[i] > 0, "INDEXPOOL WALLET: ERC20 TOKENS WITHDRAWS NEED TO BE > 0");
             outputTokenAmounts[i] = IERC20(outputs.tokens[i]).balanceOf(address(this)) * outputs.amounts[i] / 100000;
             IERC20(outputs.tokens[i]).safeTransfer(nftOwner, outputTokenAmounts[i]);
         }

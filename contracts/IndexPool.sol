@@ -49,10 +49,46 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         uint256 ethAmount
     );
 
-    modifier _onlyNFTOwner_(uint256 nftId) {
+    modifier onlyNFTOwner(uint256 nftId) {
         require(
             msg.sender == ownerOf(nftId),
             "INDEXPOOL: ONLY NFT OWNER CAN CALL THIS FUNCTION"
+        );
+        _;
+    }
+
+    modifier checkInputs(IPDataTypes.TokenData tokenData, uint256 ethAmount) {
+        require(
+            tokenData.tokens.length == tokenData.amounts.length,
+            "INDEXPOOL: INPUTS: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS"
+        );
+        for (uint16 i = 0; i < inputs.amounts.length; i++) {
+            require(
+                tokenData.amounts.length == tokenData.amounts.length,
+                "INDEXPOOL WALLET: ERC20 TOKENS DEPOSITS NEED TO BE > 0"
+            );
+        }
+        require(
+            inputs.amounts.length > 0 || ethAmount > 0, // ERC20 Tokens or ETH is needed
+            "INDEXPOOL: A DEPOSIT IN ETHER OR ERC20 TOKENS IS NEEDED"
+        );
+        _;
+    }
+
+    modifier checkOutputs(IPDataTypes.TokenData tokenData, uint256 ethAmount) {
+        require(
+            tokenData.tokens.length == tokenData.amounts.length,
+            "INDEXPOOL: OUTPUTS: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS"
+        );
+        for (uint16 i = 0; i < inputs.amounts.length; i++) {
+            require(
+                tokenData.amounts.length == tokenData.amounts.length,
+                "INDEXPOOL WALLET: ERC20 TOKENS WITHDRAWALS NEED TO BE > 0"
+            );
+        }
+        require(
+            inputs.amounts.length > 0 || ethAmount > 0, // ERC20 Tokens or ETH is needed
+            "INDEXPOOL: A WITHDRAWAL IN ETHER OR ERC20 TOKENS IS NEEDED"
         );
         _;
     }
@@ -80,11 +116,6 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         return _nftIdToWallet[nftId];
     }
 
-    // TODO make requires check length input/output tokens and amounts
-    // TODO Check min amounts
-
-    // TODO what is a bridge?
-    // TODO make diagram
     /**
      * @notice Create a portfolio.
      *
@@ -102,7 +133,9 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         IPDataTypes.TokenData calldata inputs,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) payable external override {
+    ) payable external
+        checkInputs(inputs, msg.value) override
+    {
         uint256 nftId = _mintNFT(msg.sender);
         _depositToWallet(nftId, inputs, msg.value);
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
@@ -126,12 +159,14 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         IPDataTypes.TokenData calldata inputs,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) payable external _onlyNFTOwner_(nftId) override {
+    ) payable external
+        checkInputs(inputs, msg.value)
+        onlyNFTOwner(nftId) override
+    {
         _depositToWallet(nftId, inputs, msg.value);
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
     }
 
-    // TODO is this really necessary?
     /**
      * @notice Deposit more funds into an existing portfolio.
      *
@@ -155,7 +190,11 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         uint256 outputEthPercentage,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) payable external _onlyNFTOwner_(nftId) override {
+    ) payable external
+        checkInputs(inputs, msg.value)
+        checkOutputs(outputs, outputEthPercentage)
+        onlyNFTOwner(nftId) override
+    {
         _depositToWallet(nftId, inputs, msg.value);
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
         _withdrawFromWallet(nftId, outputs, outputEthPercentage);
@@ -181,7 +220,10 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         uint256 outputEthPercentage,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
-    ) external _onlyNFTOwner_(nftId) override {
+    ) external
+        checkOutputs(outputs, outputEthPercentage)
+        onlyNFTOwner(nftId) override
+    {
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
         _withdrawFromWallet(nftId, outputs, outputEthPercentage);
     }
