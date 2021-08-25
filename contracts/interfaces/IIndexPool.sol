@@ -2,7 +2,7 @@ pragma solidity ^0.8.6;
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "../libraries/IPDataTypes.sol";
 
-interface IIndexPool is IERC721 { // TODO should we add interface for ownable?
+interface IIndexPool is IERC721 {
     function createPortfolio(
         IPDataTypes.TokenData calldata inputs,
         address[] calldata _bridgeAddresses,

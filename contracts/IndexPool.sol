@@ -57,14 +57,14 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         _;
     }
 
-    modifier checkInputs(IPDataTypes.TokenData tokenData, uint256 ethAmount) {
+    modifier checkInputs(IPDataTypes.TokenData calldata inputs, uint256 ethAmount) {
         require(
-            tokenData.tokens.length == tokenData.amounts.length,
+            inputs.tokens.length == inputs.amounts.length,
             "INDEXPOOL: INPUTS: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS"
         );
         for (uint16 i = 0; i < inputs.amounts.length; i++) {
             require(
-                tokenData.amounts.length == tokenData.amounts.length,
+                inputs.amounts[i] > 0,
                 "INDEXPOOL WALLET: ERC20 TOKENS DEPOSITS NEED TO BE > 0"
             );
         }
@@ -75,19 +75,19 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         _;
     }
 
-    modifier checkOutputs(IPDataTypes.TokenData tokenData, uint256 ethAmount) {
+    modifier checkOutputs(IPDataTypes.TokenData calldata outputs, uint256 ethAmount) {
         require(
-            tokenData.tokens.length == tokenData.amounts.length,
+            outputs.tokens.length == outputs.amounts.length,
             "INDEXPOOL: OUTPUTS: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS"
         );
-        for (uint16 i = 0; i < inputs.amounts.length; i++) {
+        for (uint16 i = 0; i < outputs.amounts.length; i++) {
             require(
-                tokenData.amounts.length == tokenData.amounts.length,
+                outputs.amounts[i] > 0,
                 "INDEXPOOL WALLET: ERC20 TOKENS WITHDRAWALS NEED TO BE > 0"
             );
         }
         require(
-            inputs.amounts.length > 0 || ethAmount > 0, // ERC20 Tokens or ETH is needed
+            outputs.amounts.length > 0 || ethAmount > 0, // ERC20 Tokens or ETH is needed
             "INDEXPOOL: A WITHDRAWAL IN ETHER OR ERC20 TOKENS IS NEEDED"
         );
         _;
