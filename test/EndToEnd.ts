@@ -268,51 +268,5 @@ describe("IndexPool", function () {
 
         await expect(await indexPool.balanceOf(owner.address)).to.be.above(0);
     })
-
-    it("Rejects other address editing NFT", async function () {
-        var _bridgeAddresses = [
-            uniswapV2SwapBridge.address,
-            aaveV2DepositBridge.address,
-        ];
-        var _bridgeEncodedCalls = [
-            uniswapV2SwapBridge.interface.encodeFunctionData(
-                "tradeFromETHToTokens",
-                [
-                    ADDRESSES['UNISWAP_V2_ROUTER'],
-                    100000,
-                    1,
-                    [
-                        TOKENS['WMAIN'],
-                        TOKENS['DAI'],
-                    ]
-                ],
-            ),
-            aaveV2DepositBridge.interface.encodeFunctionData(
-                "deposit",
-                [
-                    TOKENS['DAI'],
-                    100000
-                ]
-            )
-        ];
-
-        let overrides = {value: ethers.utils.parseEther("1")};
-        await indexPool.createPortfolio(
-            {'tokens': [], 'amounts': []},
-            _bridgeAddresses,
-            _bridgeEncodedCalls,
-            overrides
-        );
-
-        let otherIndexPool = indexPool.connect(other);
-
-        await expect(otherIndexPool.depositPortfolio(
-            0,
-            {'tokens': [], 'amounts': []},
-            _bridgeAddresses,
-            _bridgeEncodedCalls,
-            overrides
-        )).to.be.revertedWith("INDEXPOOL: ONLY NFT OWNER CAN CALL THIS FUNCTION");
-    })
 })
 

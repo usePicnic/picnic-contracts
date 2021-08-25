@@ -1,0 +1,89 @@
+import {expect} from "chai";
+import {ethers} from "hardhat";
+import constants from "../constants";
+
+
+describe("UniswapV2SwapBridge", function () {
+    let owner;
+    let other;
+    let uniswapV2SwapBridge;
+    let aaveV2DepositBridge
+    let wallet;
+
+    const ADDRESSES = constants['POLYGON'];
+    const TOKENS = constants['POLYGON']['TOKENS'];
+
+    beforeEach(async function () {
+        // Get 2 signers to enable to test for permission rights
+        [owner, other] = await ethers.getSigners();
+
+        // Instantiate Uniswap bridge
+        let UniswapV2SwapBridge = await ethers.getContractFactory("UniswapV2SwapBridge");
+        uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
+
+        // Instantiate Aave bridge
+        let AaveV2DepositBridge = await ethers.getContractFactory("AaveV2DepositBridge");
+        aaveV2DepositBridge = await AaveV2DepositBridge.deploy();
+
+        // Instantiate Wallet
+        let Wallet = await ethers.getContractFactory("Wallet");
+        wallet = await Wallet.deploy();
+    });
+
+    it("Deposit - Buys DAI and then deposits on Aave", async function () {
+        // Set bridges addresses
+        var _bridgeAddresses = [
+            uniswapV2SwapBridge.address,
+            aaveV2DepositBridge.address
+        ];
+
+        // Set path
+        let pathUniswap = [
+            TOKENS['WMAIN'],
+            TOKENS['DAI'],
+        ];
+
+        // Set encoded calls
+        var _bridgeEncodedCalls = [
+            uniswapV2SwapBridge.interface.encodeFunctionData(
+                "tradeFromETHToTokens",
+                [
+                    ADDRESSES['UNISWAP_V2_ROUTER'],
+                    100000,
+                    1,
+                    pathUniswap
+                ],
+            ),
+            aaveV2DepositBridge.interface.encodeFunctionData(
+                "deposit",
+                [
+                    TOKENS['DAI'],
+                    100000
+                ]
+            )
+        ];
+
+        // Transfer money to wallet (similar as IndexPool contract would have done)
+        const transactionHash = await owner.sendTransaction({
+            to: wallet.address,
+            value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
+        });
+        await transactionHash.wait();
+
+        // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
+        await wallet.write(
+            _bridgeAddresses,
+            _bridgeEncodedCalls,
+        );
+
+        // Wallet DAI amount should be 0
+        let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])
+        let daiBalance = await dai.balanceOf(wallet.address);
+        expect(daiBalance).to.be.equal(0);
+
+        // Wallet DAI amount should be 0
+        let amDai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["amDAI"])
+        let amDaiBalance = await amDai.balanceOf(wallet.address);
+        expect(amDaiBalance).to.be.above(0);
+    })
+});

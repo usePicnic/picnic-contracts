@@ -6,7 +6,6 @@ import constants from "../constants";
 describe("UniswapV2SwapBridge", function () {
     let owner;
     let other;
-    let UniswapV2SwapBridge;
     let uniswapV2SwapBridge;
     let wallet;
 
@@ -18,7 +17,7 @@ describe("UniswapV2SwapBridge", function () {
         [owner, other] = await ethers.getSigners();
 
         // Instantiate Uniswap bridge
-        UniswapV2SwapBridge = await ethers.getContractFactory("UniswapV2SwapBridge");
+        let UniswapV2SwapBridge = await ethers.getContractFactory("UniswapV2SwapBridge");
         uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
 
         // Instantiate Wallet
