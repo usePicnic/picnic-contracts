@@ -104,6 +104,33 @@ describe("IndexPool", function () {
                 {value: ethers.utils.parseEther("1")} // overrides
             )).to.be.revertedWith("INDEXPOOL: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS");
         })
+
+        it("Rejects ERC20 amounts equal to zero", async function () {
+            // Set bridges addresses and encoded calls
+            var _bridgeAddresses = [];
+            var _bridgeEncodedCalls = [];
+
+            // Create a portfolio
+            await expect(indexpool.createPortfolio(
+                {'tokens': [TOKENS['DAI']], 'amounts': [0]},
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+                {value: ethers.utils.parseEther("1")} // overrides
+            )).to.be.revertedWith("INDEXPOOL WALLET: ERC20 TOKENS AMOUNTS NEED TO BE > 0");
+        })
+
+        it("Rejects no ETH amounts along with empty ERC20 amounts", async function () {
+            // Set bridges addresses and encoded calls
+            var _bridgeAddresses = [];
+            var _bridgeEncodedCalls = [];
+
+            // Create a portfolio
+            await expect(indexpool.createPortfolio(
+                {'tokens': [], 'amounts': []},
+                _bridgeAddresses,
+                _bridgeEncodedCalls
+            )).to.be.revertedWith("INDEXPOOL: A AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED");
+        })
     });
 
     describe("Deposit in a portfolio", function () {
@@ -260,7 +287,7 @@ describe("IndexPool", function () {
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
                 {value: ethers.utils.parseEther("1")} // overrides
-            )).to.be.revertedWith("INDEXPOOL WALLET: ERC20 TOKENS DEPOSITS NEED TO BE > 0");
+            )).to.be.revertedWith("INDEXPOOL WALLET: ERC20 TOKENS AMOUNTS NEED TO BE > 0");
         })
 
         it("Rejects no ETH amounts along with empty ERC20 amounts", async function () {
@@ -282,7 +309,7 @@ describe("IndexPool", function () {
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
-            )).to.be.revertedWith("INDEXPOOL: A DEPOSIT IN ETHER OR ERC20 TOKENS IS NEEDED");
+            )).to.be.revertedWith("INDEXPOOL: A AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED");
         })
     });
 
@@ -357,9 +384,6 @@ describe("IndexPool", function () {
             // Get DAI balance in owner's wallet before calling withdraw
             let dai = (await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"]));
             let previousDaiBalance = await dai.balanceOf(owner.address);
-
-            let walletAddress = await indexpool.walletOf(0);
-            let walletDAI = await dai.balanceOf(walletAddress);
 
             // Withdraw from portfolio
             await indexpool.withdrawPortfolio(
@@ -444,7 +468,7 @@ describe("IndexPool", function () {
                 100000, // Withdraw percentage
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
-            )).to.be.revertedWith("INDEXPOOL WALLET: ERC20 TOKENS DEPOSITS NEED TO BE > 0");
+            )).to.be.revertedWith("INDEXPOOL WALLET: ERC20 TOKENS AMOUNTS NEED TO BE > 0");
         })
 
         it("Rejects no ETH amounts along with empty ERC20 amounts", async function () {
@@ -467,7 +491,7 @@ describe("IndexPool", function () {
                 0, // Withdraw percentage
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
-            )).to.be.revertedWith("INDEXPOOL: A DEPOSIT IN ETHER OR ERC20 TOKENS IS NEEDED");
+            )).to.be.revertedWith("INDEXPOOL: A AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED");
         })
     });
 });

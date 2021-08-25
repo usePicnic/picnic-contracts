@@ -64,12 +64,12 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         for (uint16 i = 0; i < inputs.amounts.length; i++) {
             require(
                 inputs.amounts[i] > 0,
-                "INDEXPOOL WALLET: ERC20 TOKENS DEPOSITS NEED TO BE > 0"
+                "INDEXPOOL WALLET: ERC20 TOKENS AMOUNTS NEED TO BE > 0"
             );
         }
         require(
             inputs.amounts.length > 0 || ethAmount > 0, // ERC20 Tokens or ETH is needed
-            "INDEXPOOL: A DEPOSIT IN ETHER OR ERC20 TOKENS IS NEEDED"
+            "INDEXPOOL: A AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED"
         );
         _;
     }
