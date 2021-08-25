@@ -8,8 +8,6 @@ import constants from "../constants";
 describe("Wallet", function () {
     let owner;
     let other;
-    let AaveV2DepositBridge;
-    let aaveV2DepositBridge;
     let UniswapV2SwapBridge;
     let uniswapV2SwapBridge;
     let wallet;
@@ -25,11 +23,6 @@ describe("Wallet", function () {
         UniswapV2SwapBridge = await ethers.getContractFactory("UniswapV2SwapBridge");
         uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
         await uniswapV2SwapBridge.deployed();
-
-        // Instantiate Aave bridge
-        AaveV2DepositBridge = await ethers.getContractFactory("AaveV2DepositBridge");
-        aaveV2DepositBridge = (await AaveV2DepositBridge.deploy()).connect(owner);
-        await aaveV2DepositBridge.deployed();
 
         // Instantiate Wallet
         let Wallet = await ethers.getContractFactory("Wallet");
