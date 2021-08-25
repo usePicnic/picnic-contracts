@@ -1,7 +1,5 @@
 import {expect} from "chai";
 import {ethers} from "hardhat";
-
-import {getFirstEvent} from "./utils";
 import constants from "../constants";
 
 
@@ -22,12 +20,10 @@ describe("Wallet", function () {
         // Instantiate Uniswap bridge
         UniswapV2SwapBridge = await ethers.getContractFactory("UniswapV2SwapBridge");
         uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
-        await uniswapV2SwapBridge.deployed();
 
         // Instantiate Wallet
         let Wallet = await ethers.getContractFactory("Wallet");
-        wallet = (await Wallet.deploy()).connect(owner);
-        await wallet.deployed();
+        wallet = await Wallet.deploy();
     });
 
     it("Writes (Buys DAI on Uniswap)", async function () {
