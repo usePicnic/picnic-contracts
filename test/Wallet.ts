@@ -215,12 +215,16 @@ describe("Wallet", function () {
             )
         ];
 
-        let overrides = { value: ethers.utils.parseEther("1") };
+        // Transfer money to wallet (similar as IndexPool contract would have done)
+        const transactionHash = await owner.sendTransaction({
+            to: wallet.address,
+            value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
+        });
+        await transactionHash.wait();
 
         await expect(wallet.write(
             _bridgeAddresses,
-            _bridgeEncodedCalls,
-            overrides
+            _bridgeEncodedCalls
         )).to.be.revertedWith("revert 1"); // revert 1 means no collateral available
     })
 });
