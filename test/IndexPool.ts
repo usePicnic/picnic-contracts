@@ -96,7 +96,7 @@ describe("IndexPool", function () {
             var _bridgeAddresses = [];
             var _bridgeEncodedCalls = [];
 
-            // Create a portfolio (just holds ether)
+            // Create a portfolio
             await expect(indexpool.createPortfolio(
                 {'tokens': [TOKENS['DAI'], TOKENS['QUICK']], 'amounts': [100]},
                 _bridgeAddresses,
@@ -177,13 +177,15 @@ describe("IndexPool", function () {
             await dai.approve(indexpool.address, daiBalance);
 
             // Deposit in a portfolio
-            await indexpool.depositPortfolio(
+            tx = await indexpool.depositPortfolio(
                 0, // NFT ID - NFT created just above
-                {'tokens': [], 'amounts': []},
+                {'tokens': [TOKENS['DAI']], 'amounts': [daiBalance]},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
-                {value: ethers.utils.parseEther("1")} // overrides
             );
+
+            // Wait for deposit to happen :)
+            tx.wait();
 
             // Wallet DAI balance should be above 0
             let walletAddress = await indexpool.walletOf(0);
@@ -213,6 +215,29 @@ describe("IndexPool", function () {
                 _bridgeEncodedCalls,
                 {value: ethers.utils.parseEther("1")} // overrides
             )).to.be.revertedWith("INDEXPOOL: ONLY NFT OWNER CAN CALL THIS FUNCTION");
+        })
+
+        it("Rejects mismatch in array size for input tokens and amounts", async function () {
+            // Set bridges addresses and encoded calls
+            var _bridgeAddresses = [];
+            var _bridgeEncodedCalls = [];
+
+            // Create a portfolio (just holds ether)
+            let tx = await indexpool.createPortfolio(
+                {'tokens': [], 'amounts': []},
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+                {value: ethers.utils.parseEther("1")} // overrides
+            );
+
+            // Create a portfolio
+            await expect(indexpool.depositPortfolio(
+                0,
+                {'tokens': [TOKENS['DAI'], TOKENS['QUICK']], 'amounts': [100]},
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+                {value: ethers.utils.parseEther("1")} // overrides
+            )).to.be.revertedWith("INDEXPOOL: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS");
         })
     });
 
@@ -272,6 +297,75 @@ describe("IndexPool", function () {
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             )).to.be.revertedWith("INDEXPOOL: ONLY NFT OWNER CAN CALL THIS FUNCTION");
+        })
+
+        it("Rejects mismatch in array size for output tokens and amounts", async function () {
+            // Set bridges addresses and encoded calls
+            var _bridgeAddresses = [];
+            var _bridgeEncodedCalls = [];
+
+            // Create a portfolio (just holds ether)
+            let tx = await indexpool.createPortfolio(
+                {'tokens': [], 'amounts': []},
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+                {value: ethers.utils.parseEther("1")} // overrides
+            );
+
+            // Create a portfolio
+            await expect(indexpool.withdrawPortfolio(
+                0, // NFT ID - NFT created just above
+                {'tokens': [TOKENS['DAI'], TOKENS['QUICK']], 'amounts': [100]},
+                100000, // Withdraw percentage
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+            )).to.be.revertedWith("INDEXPOOL: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS");
+        })
+
+        it("Rejects ERC20 amounts equal to zero", async function () {
+            // Set bridges addresses and encoded calls
+            var _bridgeAddresses = [];
+            var _bridgeEncodedCalls = [];
+
+            // Create a portfolio (just holds ether)
+            let tx = await indexpool.createPortfolio(
+                {'tokens': [], 'amounts': []},
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+                {value: ethers.utils.parseEther("1")} // overrides
+            );
+
+            // Create a portfolio
+            await expect(indexpool.withdrawPortfolio(
+                0, // NFT ID - NFT created just above
+                {'tokens': [TOKENS['DAI']], 'amounts': [0]},
+                100000, // Withdraw percentage
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+            )).to.be.revertedWith("INDEXPOOL WALLET: ERC20 TOKENS DEPOSITS NEED TO BE > 0");
+        })
+
+        it("Rejects no ETH amounts along with empty ERC20 amounts", async function () {
+            // Set bridges addresses and encoded calls
+            var _bridgeAddresses = [];
+            var _bridgeEncodedCalls = [];
+
+            // Create a portfolio (just holds ether)
+            let tx = await indexpool.createPortfolio(
+                {'tokens': [], 'amounts': []},
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+                {value: ethers.utils.parseEther("1")} // overrides
+            );
+
+            // Create a portfolio
+            await expect(indexpool.withdrawPortfolio(
+                0, // NFT ID - NFT created just above
+                {'tokens': [], 'amounts': []},
+                0, // Withdraw percentage
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+            )).to.be.revertedWith("INDEXPOOL: A DEPOSIT IN ETHER OR ERC20 TOKENS IS NEEDED");
         })
     });
 });
