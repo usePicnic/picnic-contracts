@@ -74,9 +74,6 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         _;
     }
 
-    // Constants
-    uint256 private constant BASE_ASSET = 1000000000000000000;
-
     // NFT properties
     uint256 public tokenCounter = 0;
     mapping(uint256 => address) private _nftIdToWallet;
