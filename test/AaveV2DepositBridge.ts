@@ -3,7 +3,7 @@ import {ethers} from "hardhat";
 import constants from "../constants";
 
 
-describe("UniswapV2SwapBridge", function () {
+describe("AaveV2DepositBridge", function () {
     let owner;
     let other;
     let uniswapV2SwapBridge;
