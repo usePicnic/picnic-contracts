@@ -1,17 +1,14 @@
 import {expect} from "chai";
 import {ethers} from "hardhat";
-
 import constants from "../constants";
-import {BigNumber} from "ethers";
+
 
 describe("IndexPool", function () {
-
     let owner;
     let other;
     let provider;
     let IndexPool;
-    let indexPool;
-    let aaveV2DepositBridge;
+    let indexpool;
     let uniswapV2SwapBridge;
     let uniswapV2Router02;
 
@@ -23,296 +20,102 @@ describe("IndexPool", function () {
         provider = await ethers.getDefaultProvider();
 
         IndexPool = await ethers.getContractFactory("IndexPool");
-        indexPool = (await IndexPool.deploy()).connect(owner);
+        indexpool = await IndexPool.deploy();
 
         let UniswapV2SwapBridge = await ethers.getContractFactory("UniswapV2SwapBridge");
         uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
-        await uniswapV2SwapBridge.deployed();
-
-        let AaveV2DepositBridge = await ethers.getContractFactory("AaveV2DepositBridge");
-        aaveV2DepositBridge = await AaveV2DepositBridge.deploy();
-        await aaveV2DepositBridge.deployed();
 
         uniswapV2Router02 = await ethers.getContractAt("IUniswapV2Router02", ADDRESSES["UNISWAP_V2_ROUTER"]);
-
     });
 
-    it("Mints NFT with empty calls", async function () {
+    it("Create portfolio", async function () {
+        // Set bridges addresses and encoded calls
         var _bridgeAddresses = [];
         var _bridgeEncodedCalls = [];
 
-        let overrides = {value: ethers.utils.parseEther("1")};
-        await indexPool.createPortfolio(
+        // Create a portfolio (just holds ether)
+        let tx = await indexpool.createPortfolio(
             {'tokens': [], 'amounts': []},
             _bridgeAddresses,
             _bridgeEncodedCalls,
-            overrides
+            {value: ethers.utils.parseEther("1")} // overrides
         );
 
-        await expect(await indexPool.balanceOf(owner.address)).to.be.above(0);
+        // Wait transaction to complete
+        tx.wait();
+
+        // Wallet ETH balance should be above 0
+        let walletAddress = await indexpool.walletOf(0);
+        let walletBalance = await ethers.provider.getBalance(walletAddress);
+        expect(walletBalance).to.be.above(0);
     })
 
-    it("Mints NFT -> Buys WMATIC from DAI -> Deposits WMATIC in Aave", async function () {
-        var _bridgeAddresses = [
-            uniswapV2SwapBridge.address,
-            aaveV2DepositBridge.address,
-        ];
-        var _bridgeEncodedCalls = [
-            uniswapV2SwapBridge.interface.encodeFunctionData(
-                "tradeFromETHToTokens",
-                [
-                    ADDRESSES['UNISWAP_V2_ROUTER'],
-                    100000,
-                    1,
-                    [
-                        TOKENS['WMAIN'],
-                        TOKENS['DAI'],
-                    ]
-                ],
-            ),
-            aaveV2DepositBridge.interface.encodeFunctionData(
-                "deposit",
-                [
-                    TOKENS['DAI'],
-                    100000
-                ]
-            )
-        ];
+    it("Deposit in a portfolio", async function () {
+        // Set bridges addresses and encoded calls
+        var _bridgeAddresses = [];
+        var _bridgeEncodedCalls = [];
 
-        let overrides = {value: ethers.utils.parseEther("1")};
-        await indexPool.createPortfolio(
+        // Create a portfolio (just holds ether)
+        let tx = await indexpool.createPortfolio(
             {'tokens': [], 'amounts': []},
             _bridgeAddresses,
             _bridgeEncodedCalls,
-            overrides
+            {value: ethers.utils.parseEther("1")} // overrides
         );
 
-        await expect(await indexPool.balanceOf(owner.address)).to.be.above(0);
+        // Wait transaction to complete
+        tx.wait()
+        // Code above was tested elsewhere
+
+        // Wallet ETH balance should be above 0
+        let walletAddress = await indexpool.walletOf(0);
+        let previousWalletBalance = await ethers.provider.getBalance(walletAddress);
+
+        // Deposit in a portfolio
+        await indexpool.depositPortfolio(
+            0, // NFT ID - NFT created just above
+            {'tokens': [], 'amounts': []},
+            _bridgeAddresses,
+            _bridgeEncodedCalls,
+            {value: ethers.utils.parseEther("1")} // overrides
+        );
+
+        // Wallet ETH balance should be above 0
+        let currentWalletBalance = await ethers.provider.getBalance(walletAddress);
+        expect(currentWalletBalance).to.be.above(previousWalletBalance);
     })
 
-    it("Mints NFT -> Deposit -> Withdraw (Aave and Uniswap)", async function () {
-        var _bridgeAddresses = [
-            uniswapV2SwapBridge.address,
-            aaveV2DepositBridge.address,
-        ];
-        var _bridgeEncodedCalls = [
-            uniswapV2SwapBridge.interface.encodeFunctionData(
-                "tradeFromETHToTokens",
-                [
-                    ADDRESSES['UNISWAP_V2_ROUTER'],
-                    100000,
-                    1,
-                    [
-                        TOKENS['WMAIN'],
-                        TOKENS['DAI'],
-                    ]
-                ],
-            ),
-            aaveV2DepositBridge.interface.encodeFunctionData(
-                "deposit",
-                [
-                    TOKENS['DAI'],
-                    100000
-                ]
-            )
-        ];
+    // TODO deposit DAI in a portfolio
+    it("Withdraw from portfolio", async function () {
+        // Set bridges addresses and encoded calls
+        var _bridgeAddresses = [];
+        var _bridgeEncodedCalls = [];
 
-        let overrides = {value: ethers.utils.parseEther("1")};
-        await indexPool.createPortfolio(
+        // Create a portfolio (just holds ether)
+        await indexpool.createPortfolio(
             {'tokens': [], 'amounts': []},
             _bridgeAddresses,
             _bridgeEncodedCalls,
-            overrides
+            {value: ethers.utils.parseEther("1")} // overrides
         );
+        // Code above was tested elsewhere
 
-        await expect(await indexPool.balanceOf(owner.address)).to.be.above(0);
+        // Get ETH balance in owner's wallet before calling withdraw
+        let previousBalance = await owner.getBalance()
 
-        _bridgeAddresses = [
-            aaveV2DepositBridge.address,
-            uniswapV2SwapBridge.address,
-        ];
-        _bridgeEncodedCalls = [
-            aaveV2DepositBridge.interface.encodeFunctionData(
-                "withdraw",
-                [
-                    TOKENS['DAI'],
-                    100000
-                ]
-            ),
-            uniswapV2SwapBridge.interface.encodeFunctionData(
-                "tradeFromTokensToETH",
-                [
-                    ADDRESSES['UNISWAP_V2_ROUTER'],
-                    100000,
-                    1,
-                    [
-                        TOKENS['DAI'],
-                        TOKENS['WMAIN']
-                    ]
-                ],
-            ),
-        ];
-
-        const balanceBegin = await owner.getBalance();
-
-        await indexPool.withdrawPortfolio(
-            0,
+        // Withdraw from portfolio
+        await indexpool.withdrawPortfolio(
+            0, // NFT ID - NFT created just above
             {'tokens': [], 'amounts': []},
-            100000,
+            100000, // Withdraw percentage
             _bridgeAddresses,
-            _bridgeEncodedCalls
+            _bridgeEncodedCalls,
         );
 
-        const balanceEnd = await owner.getBalance();
-        await expect(balanceEnd).to.be.above(balanceBegin);
+        // Get ETH balance in owner's wallet after calling withdraw
+        let currentBalance = await owner.getBalance()
+
+        // Balance after withdrawing should be higher than before
+        expect(currentBalance).to.be.above(previousBalance);
     })
-
-    it("Mints NFT with 2 calls and deposit in DAI", async function () {
-        var overrides = {value: ethers.utils.parseEther("11")};
-        let blockNumber = await provider.getBlockNumber();
-        let block = await provider.getBlock(blockNumber);
-
-        await uniswapV2Router02.swapExactETHForTokens(
-            1,
-            [
-                TOKENS['WMAIN'],
-                TOKENS['DAI'],
-            ],
-            owner.address,
-            block.timestamp + 100000,
-            overrides
-        )
-
-        let dai = (await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])).connect(owner);
-        let daiBalance = await dai.balanceOf(owner.address);
-        await dai.approve(indexPool.address, daiBalance);
-
-        var _bridgeAddresses = [
-            uniswapV2SwapBridge.address,
-            aaveV2DepositBridge.address,
-        ];
-        var _bridgeEncodedCalls = [
-            uniswapV2SwapBridge.interface.encodeFunctionData(
-                "tradeFromTokensToTokens",
-                [
-                    ADDRESSES['UNISWAP_V2_ROUTER'],
-                    100000, // arbitrary amount
-                    1,
-                    [
-                        TOKENS['DAI'],
-                        TOKENS['WMAIN'],
-                    ]
-                ],
-            ),
-            aaveV2DepositBridge.interface.encodeFunctionData(
-                "deposit",
-                [
-                    TOKENS['WMAIN'],
-                    100000
-                ]
-            )
-        ];
-
-        await indexPool.createPortfolio(
-            {'tokens': [TOKENS["DAI"]], 'amounts': [daiBalance]},
-            _bridgeAddresses,
-            _bridgeEncodedCalls,
-            overrides
-        );
-
-        await expect(await indexPool.balanceOf(owner.address)).to.be.above(0);
-    })
-
-    it("Mints NFT and then Edits NFT", async function () {
-        var _bridgeAddresses = [
-            uniswapV2SwapBridge.address,
-            aaveV2DepositBridge.address,
-        ];
-        var _bridgeEncodedCalls = [
-            uniswapV2SwapBridge.interface.encodeFunctionData(
-                "tradeFromETHToTokens",
-                [
-                    ADDRESSES['UNISWAP_V2_ROUTER'],
-                    100000,
-                    1,
-                    [
-                        TOKENS['WMAIN'],
-                        TOKENS['DAI'],
-                    ]
-                ],
-            ),
-            aaveV2DepositBridge.interface.encodeFunctionData(
-                "deposit",
-                [
-                    TOKENS['DAI'],
-                    100000
-                ]
-            )
-        ];
-
-        let overrides = {value: ethers.utils.parseEther("1")};
-        await indexPool.createPortfolio(
-            {'tokens': [], 'amounts': []},
-            _bridgeAddresses,
-            _bridgeEncodedCalls,
-            overrides
-        );
-
-        await indexPool.depositPortfolio(
-            0,
-            {'tokens': [], 'amounts': []},
-            _bridgeAddresses,
-            _bridgeEncodedCalls,
-            overrides
-        );
-
-        await expect(await indexPool.balanceOf(owner.address)).to.be.above(0);
-    })
-
-    it("Rejects other address editing NFT", async function () {
-        var _bridgeAddresses = [
-            uniswapV2SwapBridge.address,
-            aaveV2DepositBridge.address,
-        ];
-        var _bridgeEncodedCalls = [
-            uniswapV2SwapBridge.interface.encodeFunctionData(
-                "tradeFromETHToTokens",
-                [
-                    ADDRESSES['UNISWAP_V2_ROUTER'],
-                    100000,
-                    1,
-                    [
-                        TOKENS['WMAIN'],
-                        TOKENS['DAI'],
-                    ]
-                ],
-            ),
-            aaveV2DepositBridge.interface.encodeFunctionData(
-                "deposit",
-                [
-                    TOKENS['DAI'],
-                    100000
-                ]
-            )
-        ];
-
-        let overrides = {value: ethers.utils.parseEther("1")};
-        await indexPool.createPortfolio(
-            {'tokens': [], 'amounts': []},
-            _bridgeAddresses,
-            _bridgeEncodedCalls,
-            overrides
-        );
-
-        let otherIndexPool = indexPool.connect(other);
-
-        await expect(otherIndexPool.depositPortfolio(
-            0,
-            {'tokens': [], 'amounts': []},
-            _bridgeAddresses,
-            _bridgeEncodedCalls,
-            overrides
-        )).to.be.revertedWith("INDEXPOOL: ONLY NFT OWNER CAN CALL THIS FUNCTION");
-    })
-})
-
+});
