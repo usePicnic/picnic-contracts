@@ -1,8 +1,8 @@
 pragma solidity ^0.8.6;
 
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IWallet.sol";
 import "./libraries/IPDataTypes.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /**
  * @title Wallet
@@ -13,6 +13,7 @@ import "./libraries/IPDataTypes.sol";
  * @dev Wallet holds the funds and is quite extensible as we decided to go with an architecture of delegate calls and
  * bridges, which are contracts that shapes the interfaces we interact with other protocols.
  */
+
 contract Wallet is IWallet {
     using SafeERC20 for IERC20;
 
@@ -43,8 +44,9 @@ contract Wallet is IWallet {
       *
       * @dev This gives the bridges control over the Wallet funds, so they can make all the transactions necessary to
       * build a portfolio. We need to ensure that all the bridges we support on the UI are as safe as they can be.
+      * Example of bridges are UniswapV2SwapBridge and AaveV2DepositBridge.
       *
-      * @param _bridgeAddresses Addresses of deployed bridges that will be called
+      * @param _bridgeAddresses Addresses of deployed bridge contracts
       * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
       */
     function write(
@@ -56,6 +58,7 @@ contract Wallet is IWallet {
 
         for (uint16 i = 0; i < _bridgeAddresses.length; i++) {
             (isSuccess, result) = _bridgeAddresses[i].delegatecall(_bridgeEncodedCalls[i]);
+
             // Assembly code was the only way we found to display clean revert error messages from delegate calls
             if (isSuccess == false) {
                 assembly {
@@ -80,13 +83,17 @@ contract Wallet is IWallet {
     function withdraw(
         IPDataTypes.TokenData calldata outputs,
         uint256 outputEthPercentage,
-        address nftOwner) external override ownerOnly returns (uint256[] memory, uint256){
-
+        address nftOwner
+    ) external ownerOnly override returns (uint256[] memory, uint256)
+    {
+        // Withdraws ERC20 tokens
         uint256[] memory outputTokenAmounts = new uint256[](outputs.tokens.length);
         for (uint16 i = 0; i < outputs.tokens.length; i++) {
             outputTokenAmounts[i] = IERC20(outputs.tokens[i]).balanceOf(address(this)) * outputs.amounts[i] / 100000;
             IERC20(outputs.tokens[i]).safeTransfer(nftOwner, outputTokenAmounts[i]);
         }
+
+        // Withdraws ETH
         uint256 outputEthAmount;
         if (outputEthPercentage > 0) {
             outputEthAmount = address(this).balance * outputEthPercentage / 100000;

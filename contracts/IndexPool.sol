@@ -48,6 +48,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         uint256 ethAmount
     );
 
+    // Modifiers
     modifier onlyNFTOwner(uint256 nftId) {
         require(
             msg.sender == ownerOf(nftId),
@@ -104,7 +105,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
      * 3. Process bridge calls (interact with Uniswap/Aave...).
      *
      * @param inputs ERC20 token addresses and amounts that will enter the contract
-     * @param _bridgeAddresses Addresses of deployed bridges that will be called
+     * @param _bridgeAddresses Addresses of deployed bridge contracts
      * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
      */
     function createPortfolio(
@@ -129,7 +130,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
      *
      * @param nftId NFT Id
      * @param inputs ERC20 token addresses and amounts that will enter the contract
-     * @param _bridgeAddresses Addresses of deployed bridges that will be called
+     * @param _bridgeAddresses Addresses of deployed bridge contracts
      * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
      */
     function depositPortfolio(
@@ -145,20 +146,20 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
     }
 
-     /**
-     * @notice Deposit more funds into an existing portfolio.
-     *
-     * @dev The withdraw function is composed of 3 steps:
-     *
-     * 1. Process bridge calls (interact with Uniswap/Aave...).
-     * 2. Transfer resources (ETH and ERC20 tokens) to NFT owner.
-     *
-     * @param nftId NFT Id
-     * @param outputs ERC20 token addresses and percentages that will exit the contract
-     * @param outputEthPercentage percentage of ETH in wallet that will exit the contract
-     * @param _bridgeAddresses Addresses of deployed bridges that will be called
-     * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
-     */
+    /**
+    * @notice Deposit more funds into an existing portfolio.
+    *
+    * @dev The withdraw function is composed of 3 steps:
+    *
+    * 1. Process bridge calls (interact with Uniswap/Aave...).
+    * 2. Transfer resources (ETH and ERC20 tokens) to NFT owner.
+    *
+    * @param nftId NFT Id
+    * @param outputs ERC20 token addresses and percentages that will exit the contract
+    * @param outputEthPercentage percentage of ETH in wallet that will exit the contract
+    * @param _bridgeAddresses Addresses of deployed bridge contracts
+    * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
+    */
     function withdrawPortfolio(
         uint256 nftId,
         IPDataTypes.TokenData calldata outputs,
@@ -220,22 +221,22 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         IPDataTypes.TokenData calldata inputs,
         uint256 ethAmount
     ) internal {
-        // Pay fee to IndexPool
-        uint256 indexpoolFee = ethAmount / 1000;
-        // 0.1% fee on deposits
-        address walletAddress = walletOf(nftId);
+        // Pay 0.1% fee on ETH deposit to IndexPool
         address indexpoolAddress = owner();
-        // owner() = contract owner = IndexPool (Ownable)
-
+        uint256 indexpoolFee = ethAmount / 1000;
         payable(indexpoolAddress).transfer(indexpoolFee);
+
+        // Transfer 99.9% of ETH deposit to Wallet
+        address walletAddress = walletOf(nftId);
         payable(walletAddress).transfer(ethAmount - indexpoolFee);
 
+        // For each ERC20: Charge 0.1% IndexPool fee and transfer tokens to Wallet
         for (uint16 i = 0; i < inputs.tokens.length; i++) {
-            // IndexPool Fee
+            // Pay 0.1% fee on ERC20 deposit to IndexPool
             indexpoolFee = inputs.amounts[i] / 1000;
-            // 0.1% fee on deposits
-
             IERC20(inputs.tokens[i]).safeTransferFrom(ownerOf(nftId), indexpoolAddress, indexpoolFee);
+
+            // Transfer 99.9% of ERC20 token to Wallet
             IERC20(inputs.tokens[i]).safeTransferFrom(ownerOf(nftId), walletAddress, inputs.amounts[i] - indexpoolFee);
         }
         emit INDEXPOOL_DEPOSIT(nftId, inputs.tokens, inputs.amounts, ethAmount);
