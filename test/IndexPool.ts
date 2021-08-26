@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import {ethers} from "hardhat";
+import { getFirstEvent } from "./utils";
 import constants from "../constants";
-
 
 describe("IndexPool", function () {
     let owner;
@@ -494,4 +494,136 @@ describe("IndexPool", function () {
             )).to.be.revertedWith("INDEXPOOL: A AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED");
         })
     });
+    describe("Events", function () {
+        it("Emits INDEXPOOL_MINT_NFT", async function () {
+            // Set bridges addresses and encoded calls
+            var _bridgeAddresses = [];
+            var _bridgeEncodedCalls = [];
+
+            // Create a portfolio (just holds ether)
+            await indexpool.createPortfolio(
+                {'tokens': [], 'amounts': []},
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+                {value: ethers.utils.parseEther("1")} // overrides
+            );
+
+            var event = await getFirstEvent({ address: indexpool.address }, IndexPool, 'INDEXPOOL_MINT_NFT');
+
+            // First NFT created has ID 0
+            expect(event.args.nftId).to.be.equal(0);
+            expect(event.args.wallet).to.equal(await indexpool.walletOf(0));
+            expect(event.args.nftOwner).to.eql(await indexpool.ownerOf(0));
+        })
+
+        it("Emits INDEXPOOL_DEPOSIT", async function () {
+            // Buy DAI on Uniswap
+            var overrides = {value: ethers.utils.parseEther("1")};
+            let blockNumber = await provider.getBlockNumber();
+            let block = await provider.getBlock(blockNumber);
+
+            await uniswapV2Router02.swapExactETHForTokens(
+                1,
+                [
+                    TOKENS['WMAIN'],
+                    TOKENS['DAI'],
+                ],
+                owner.address,
+                block.timestamp + 100000,
+                overrides
+            )
+
+            // Get DAI balance
+            let dai = (await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"]));
+            let daiBalance = await dai.balanceOf(owner.address);
+            await dai.approve(indexpool.address, daiBalance);
+
+            // Set bridges addresses and encoded calls
+            var _bridgeAddresses = [];
+            var _bridgeEncodedCalls = [];
+
+            // Create a portfolio (just holds ether)
+            await indexpool.createPortfolio(
+                {'tokens': [TOKENS['DAI']], 'amounts': [daiBalance]},
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+                {value: ethers.utils.parseEther("1")} // overrides
+            );
+
+            var event = await getFirstEvent({ address: indexpool.address }, IndexPool, 'INDEXPOOL_DEPOSIT');
+
+            // First NFT created has ID 0
+            expect(event.args.nftId).to.be.equal(0);
+
+            // Checking ERC20 inputs
+            expect(event.args.inputTokens[0]).to.equal(TOKENS['DAI']);
+            expect(event.args.inputTokens.length).to.equal(1);
+            expect(event.args.inputAmounts[0]).to.eql(daiBalance);
+            expect(event.args.inputAmounts.length).to.eql(1);
+
+            // Checking ETH inputs
+            expect(event.args.ethAmount).to.be.equal(ethers.utils.parseEther("1"));
+        })
+
+        it("Emits INDEXPOOL_WITHDRAW", async function () {
+
+            // Set bridges addresses
+            var _bridgeAddresses = [
+                uniswapV2SwapBridge.address,
+            ];
+
+            // Set path
+            let pathUniswap = [
+                TOKENS['WMAIN'],
+                TOKENS['DAI'],
+            ];
+
+            // Set encoded calls
+            var _bridgeEncodedCalls = [
+                uniswapV2SwapBridge.interface.encodeFunctionData(
+                    "tradeFromETHToTokens",
+                    [
+                        ADDRESSES['UNISWAP_V2_ROUTER'],
+                        50000,
+                        1,
+                        pathUniswap
+                    ],
+                ),
+            ];
+
+            // Create a portfolio (just holds ether)
+            await indexpool.createPortfolio(
+                {'tokens': [], 'amounts': []},
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+                {value: ethers.utils.parseEther("1")} // overrides
+            );
+
+            let dai = (await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"]));
+            let daiBalance = await dai.balanceOf(indexpool.walletOf(0));
+
+            // Withdraw from portfolio
+            await indexpool.withdrawPortfolio(
+                0, // NFT ID - NFT created just above
+                {'tokens': [TOKENS['DAI']], 'amounts': [100000]}, // outputs
+                100000, // Withdraw ETH percentage
+                [], // _bridgeAddresses
+                [], // _encodedBridgeCalls
+            );
+
+            var event = await getFirstEvent({ address: indexpool.address }, IndexPool, 'INDEXPOOL_WITHDRAW');
+
+            // First NFT created has ID 0
+            expect(event.args.nftId).to.be.equal(0);
+
+            // Checking ERC20 inputs
+            expect(event.args.outputTokens[0]).to.equal(TOKENS['DAI']);
+            expect(event.args.outputTokens.length).to.be.equal(1);
+            expect(event.args.outputAmounts[0]).to.eql(daiBalance);
+            expect(event.args.outputAmounts.length).to.equal(1);
+
+            // Checking ETH inputs
+            expect(event.args.ethAmount).to.be.above(ethers.utils.parseEther("0.49"));
+        })
+    })
 });
