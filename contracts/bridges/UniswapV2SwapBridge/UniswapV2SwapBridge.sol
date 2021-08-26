@@ -56,6 +56,7 @@ contract UniswapV2SwapBridge {
         // TODO can't go over 100%
 
         uint256 amountIn = IERC20(path[0]).balanceOf(address(this)) * amountInPercentage / 100000;
+        IERC20(path[0]).approve(uniswapRouter, 0);
         IERC20(path[0]).approve(uniswapRouter, amountIn);
 
         uint[] memory amounts = _uniswapRouter.swapExactTokensForETH(
@@ -82,8 +83,9 @@ contract UniswapV2SwapBridge {
         IUniswapV2Router02 _uniswapRouter = IUniswapV2Router02(uniswapRouter);
 
         uint256 amountIn = IERC20(path[0]).balanceOf(address(this)) * amountInPercentage / 100000;
-        IERC20(path[0]).approve(uniswapRouter, amountIn);
         // TODO what happens if approve value > balance? (what tokens can break this? should use safeerc20?)
+
+        IERC20(path[0]).approve(uniswapRouter, 0);        
         IERC20(path[0]).approve(uniswapRouter, amountIn);
         uint[] memory amounts = _uniswapRouter.swapExactTokensForTokens(
             amountIn,

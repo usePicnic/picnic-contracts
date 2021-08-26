@@ -31,6 +31,7 @@ contract AaveV2DepositBridge {
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
 
         uint256 amountIn = IERC20(assetIn).balanceOf(address(this)) * percentage / 100000;
+        IERC20(assetIn).approve(aaveLendingPoolAddress, 0);
         IERC20(assetIn).approve(aaveLendingPoolAddress, amountIn);
         _aaveLendingPool.deposit(assetIn, amountIn, address(this), 0);
 
