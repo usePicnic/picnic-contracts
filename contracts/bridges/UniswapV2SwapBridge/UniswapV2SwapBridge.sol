@@ -30,7 +30,6 @@ contract UniswapV2SwapBridge {
 
         uint256 amountIn = address(this).balance * amountInPercentage / 100000;
 
-        // TODO what happens if approve amountIn > balance?
         uint[] memory amounts = _uniswapRouter.swapExactETHForTokens{value: amountIn}(
             amountOutMin,
             path,
@@ -83,8 +82,8 @@ contract UniswapV2SwapBridge {
         IUniswapV2Router02 _uniswapRouter = IUniswapV2Router02(uniswapRouter);
 
         uint256 amountIn = IERC20(path[0]).balanceOf(address(this)) * amountInPercentage / 100000;
-        // TODO what happens if approve value > balance? (what tokens can break this? should use safeerc20?)
 
+        // TODO what happens if approve value > balance? (what tokens can break this? should use safeerc20?)
         IERC20(path[0]).approve(uniswapRouter, 0);        
         IERC20(path[0]).approve(uniswapRouter, amountIn);
         uint[] memory amounts = _uniswapRouter.swapExactTokensForTokens(
