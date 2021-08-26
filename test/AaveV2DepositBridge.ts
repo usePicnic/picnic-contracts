@@ -306,7 +306,7 @@ describe("AaveV2DepositBridge", function () {
             expect(event.args.amountOut).to.be.equal(amDaiBalance);
         })
 
-        it("Withdraw - Buys DAI and deposits on Aave, then withdraws from Aave", async function () {
+        it("Emits Withdraw Event", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
                 uniswapV2SwapBridge.address,
@@ -387,7 +387,7 @@ describe("AaveV2DepositBridge", function () {
             expect(event.args.amountOut).to.be.equal(daiBalance);
         })
 
-        it("Harvests - Buys DAI and deposits on Aave, then harvest WMATIC from Aave", async function () {
+        it("Emits Harvest Event", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
                 uniswapV2SwapBridge.address,
