@@ -94,7 +94,7 @@ contract Wallet is IWallet {
         }
 
         // Withdraws ETH
-        uint256 outputEthAmount;
+        uint256 outputEthAmount = 0;
         if (outputEthPercentage > 0) {
             outputEthAmount = address(this).balance * outputEthPercentage / 100000;
             payable(nftOwner).transfer(outputEthAmount);
