@@ -301,9 +301,8 @@ describe("AaveV2DepositBridge", function () {
             var event = await getFirstEvent({address: wallet.address}, AaveV2DepositBridge, 'Deposit');
 
             expect(event.args.assetIn).to.be.equal(TOKENS['DAI']);
-            expect(event.args.amountIn).to.be.equal(amDaiBalance);
+            expect(event.args.amount).to.be.equal(amDaiBalance);
             expect(event.args.assetOut).to.be.equal(TOKENS['amDAI']);
-            expect(event.args.amountOut).to.be.equal(amDaiBalance);
         })
 
         it("Emits Withdraw Event", async function () {
@@ -381,10 +380,9 @@ describe("AaveV2DepositBridge", function () {
             var event = await getFirstEvent({address: wallet.address}, AaveV2DepositBridge, 'Withdraw');
 
             expect(event.args.assetIn).to.be.equal(TOKENS['amDAI']);
-            expect(event.args.amountIn).to.be.equal(daiBalance);
+            expect(event.args.amount).to.be.equal(daiBalance);
             expect(event.args.percentageOut).to.be.equal(100000);
             expect(event.args.assetOut).to.be.equal(TOKENS['DAI']);
-            expect(event.args.amountOut).to.be.equal(daiBalance);
         })
 
         it("Emits Harvest Event", async function () {

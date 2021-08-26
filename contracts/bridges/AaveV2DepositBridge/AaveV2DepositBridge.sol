@@ -1,27 +1,22 @@
 pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
-import {ILendingPool} from "./interfaces/ILendingPool.sol";
-import {IAaveIncentivesController} from "./interfaces/IAaveIncentivesController.sol";
-import "hardhat/console.sol";
+import "./interfaces/ILendingPool.sol";
+import "./interfaces/IAaveIncentivesController.sol";
 
 contract AaveV2DepositBridge {
     event Deposit (
         address assetIn,
-        uint256 amountIn,
-        address assetOut,
-        uint256 amountOut
+        uint256 amount,
+        address assetOut
     );
     event Withdraw (
         address assetIn,
-        uint256 amountIn,
+        uint256 amount,
         uint256 percentageOut,
-        address assetOut,
-        uint256 amountOut
+        address assetOut
     );
 
-    // TODO is it necessary to have a harvest event? harvest might just be a different kind of withdraw
     event Harvest (
         address claimedAsset,
         uint256 claimedReward
@@ -40,14 +35,11 @@ contract AaveV2DepositBridge {
         _aaveLendingPool.deposit(assetIn, amountIn, address(this), 0);
 
         address assetOut = _aaveLendingPool.getReserveData(assetIn).aTokenAddress;
-        uint256 amountOut = IERC20(assetOut).balanceOf(address(this));
-        // TODO do final balance - initial balance
 
         emit Deposit(
             assetIn,
             amountIn,
-            assetOut,
-            amountOut
+            assetOut
         );
     }
 
@@ -86,15 +78,11 @@ contract AaveV2DepositBridge {
 
         _aaveLendingPool.withdraw(assetOut, amountIn, address(this));
 
-        // TODO do final balance - initial balance
-        uint256 amountOut = IERC20(assetOut).balanceOf(address(this));
-
         emit Withdraw(
             assetIn,
             amountIn,
             percentageOut,
-            assetOut,
-            amountOut
+            assetOut
         );
     }
 
