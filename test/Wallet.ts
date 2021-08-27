@@ -10,7 +10,6 @@ describe("Wallet", function () {
     let aaveV2DepositBridge;
     let wallet;
 
-    const ADDRESSES = constants['POLYGON'];
     const TOKENS = constants['POLYGON']['TOKENS'];
 
     beforeEach(async function () {
