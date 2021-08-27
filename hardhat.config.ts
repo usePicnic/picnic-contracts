@@ -23,11 +23,7 @@ const gwei = 1000000000;
 
 module.exports = {
   solidity: {
-    compilers: [
-      {
-        version: "0.8.6",
-      }
-    ],
+    version: "0.8.6",
     settings: {
       optimizer: { enabled: true, runs: 200 },
     },
