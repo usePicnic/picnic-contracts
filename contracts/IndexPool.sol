@@ -279,7 +279,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
     ) internal {
         address walletAddress = walletOf(nftId);
         Wallet wallet = Wallet(payable(walletAddress));
-        wallet.write(_bridgeAddresses, _bridgeEncodedCalls);
+        wallet.useBridges(_bridgeAddresses, _bridgeEncodedCalls);
     }
 
     /**

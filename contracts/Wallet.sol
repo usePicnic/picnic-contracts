@@ -49,7 +49,7 @@ contract Wallet is IWallet {
       * @param _bridgeAddresses Addresses of deployed bridge contracts
       * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
       */
-    function write(
+    function useBridges(
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) external override ownerOnly {
