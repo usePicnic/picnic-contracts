@@ -1,6 +1,6 @@
 pragma solidity ^0.8.6;
 
-import "./WalletFactory.sol";
+import "./interfaces/IWalletFactory.sol";
 import "./interfaces/IIndexPool.sol";
 import "./interfaces/IWallet.sol";
 import "./libraries/IPDataTypes.sol";
@@ -80,11 +80,11 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
     uint256 public tokenCounter = 0;
     mapping(uint256 => address) private _nftIdToWallet;
 
-    WalletFactory walletFactory;
+    IWalletFactory _walletFactory;
 
     // Constructor
-    constructor(address _walletFactory) ERC721("INDEXPOOL", "IPNFT") Ownable() {
-        walletFactory = WalletFactory(_walletFactory);
+    constructor(address walletFactoryAddress) ERC721("INDEXPOOL", "IPNFT") Ownable() {
+        _walletFactory = IWalletFactory(walletFactoryAddress);
     }
 
     // External functions
@@ -210,7 +210,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
      */
     function _mintNFT(address nftOwner) internal returns (uint256){
         // Create new wallet
-        IWallet wallet = IWallet(walletFactory.createWallet());
+        IWallet wallet = IWallet(_walletFactory.createWallet());
 
         // Save NFT data
         uint256 nftId = tokenCounter;
@@ -282,7 +282,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         bytes[] calldata _bridgeEncodedCalls
     ) internal {
         address walletAddress = walletOf(nftId);
-        Wallet wallet = Wallet(payable(walletAddress));
+        IWallet wallet = IWallet(payable(walletAddress));
         wallet.write(_bridgeAddresses, _bridgeEncodedCalls);
     }
 
@@ -301,7 +301,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         uint256[] memory outputAmounts;
         uint256 outputEth;
 
-        Wallet wallet = Wallet(payable(walletOf(nftId)));
+        IWallet wallet = IWallet(payable(walletOf(nftId)));
         (outputAmounts, outputEth) = wallet.withdraw(outputs, outputEthPercentage, ownerOf(nftId));
 
         emit INDEXPOOL_WITHDRAW(nftId, outputs.tokens, outputAmounts, outputEth);
