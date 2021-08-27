@@ -45,7 +45,6 @@ describe("UniswapV2SwapBridge", function () {
                 uniswapV2SwapBridge.interface.encodeFunctionData(
                     "tradeFromETHToTokens",
                     [
-                        ADDRESSES['UNISWAP_V2_ROUTER'],
                         100000,
                         1,
                         pathUniswap
@@ -89,7 +88,6 @@ describe("UniswapV2SwapBridge", function () {
                 uniswapV2SwapBridge.interface.encodeFunctionData(
                     "tradeFromETHToTokens",
                     [
-                        ADDRESSES['UNISWAP_V2_ROUTER'],
                         100000,
                         1,
                         pathUniswap
@@ -126,7 +124,6 @@ describe("UniswapV2SwapBridge", function () {
                 uniswapV2SwapBridge.interface.encodeFunctionData(
                     "tradeFromTokensToETH",
                     [
-                        ADDRESSES['UNISWAP_V2_ROUTER'],
                         100000,
                         1,
                         pathUniswap
@@ -169,7 +166,6 @@ describe("UniswapV2SwapBridge", function () {
                 uniswapV2SwapBridge.interface.encodeFunctionData(
                     "tradeFromETHToTokens",
                     [
-                        ADDRESSES['UNISWAP_V2_ROUTER'],
                         100000,
                         1,
                         pathUniswap
@@ -210,7 +206,6 @@ describe("UniswapV2SwapBridge", function () {
                 uniswapV2SwapBridge.interface.encodeFunctionData(
                     "tradeFromTokensToTokens",
                     [
-                        ADDRESSES['UNISWAP_V2_ROUTER'],
                         100000,
                         1,
                         pathUniswap
@@ -251,7 +246,6 @@ describe("UniswapV2SwapBridge", function () {
                 uniswapV2SwapBridge.interface.encodeFunctionData(
                     "tradeFromETHToTokens",
                     [
-                        ADDRESSES['UNISWAP_V2_ROUTER'],
                         100000,
                         1,
                         pathUniswap
@@ -303,7 +297,6 @@ describe("UniswapV2SwapBridge", function () {
                 uniswapV2SwapBridge.interface.encodeFunctionData(
                     "tradeFromETHToTokens",
                     [
-                        ADDRESSES['UNISWAP_V2_ROUTER'],
                         100000,
                         1,
                         pathUniswap
@@ -339,7 +332,6 @@ describe("UniswapV2SwapBridge", function () {
                 uniswapV2SwapBridge.interface.encodeFunctionData(
                     "tradeFromTokensToETH",
                     [
-                        ADDRESSES['UNISWAP_V2_ROUTER'],
                         100000,
                         1,
                         pathUniswap
@@ -386,7 +378,6 @@ describe("UniswapV2SwapBridge", function () {
                 uniswapV2SwapBridge.interface.encodeFunctionData(
                     "tradeFromETHToTokens",
                     [
-                        ADDRESSES['UNISWAP_V2_ROUTER'],
                         100000,
                         1,
                         pathUniswap
@@ -427,7 +418,6 @@ describe("UniswapV2SwapBridge", function () {
                 uniswapV2SwapBridge.interface.encodeFunctionData(
                     "tradeFromTokensToTokens",
                     [
-                        ADDRESSES['UNISWAP_V2_ROUTER'],
                         100000,
                         1,
                         pathUniswap

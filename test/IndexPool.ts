@@ -349,7 +349,6 @@ describe("IndexPool", function () {
                 uniswapV2SwapBridge.interface.encodeFunctionData(
                     "tradeFromETHToTokens",
                     [
-                        ADDRESSES['UNISWAP_V2_ROUTER'],
                         100000,
                         1,
                         pathUniswap
@@ -446,7 +445,6 @@ describe("IndexPool", function () {
                 uniswapV2SwapBridge.interface.encodeFunctionData(
                     "tradeFromETHToTokens",
                     [
-                        ADDRESSES['UNISWAP_V2_ROUTER'],
                         100000,
                         1,
                         pathUniswap
@@ -665,7 +663,6 @@ describe("IndexPool", function () {
                 uniswapV2SwapBridge.interface.encodeFunctionData(
                     "tradeFromETHToTokens",
                     [
-                        ADDRESSES['UNISWAP_V2_ROUTER'],
                         50000,
                         1,
                         pathUniswap

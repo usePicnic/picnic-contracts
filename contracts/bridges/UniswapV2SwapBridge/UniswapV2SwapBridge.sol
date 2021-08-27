@@ -21,11 +21,11 @@ contract UniswapV2SwapBridge {
     );
 
     function tradeFromETHToTokens(
-        address uniswapRouter,
         uint256 amountInPercentage,
         uint256 amountOutMin,
         address[] calldata path
     ) public {
+        address uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
         IUniswapV2Router02 _uniswapRouter = IUniswapV2Router02(uniswapRouter);
 
         uint256 amountIn = address(this).balance * amountInPercentage / 100000;
@@ -44,11 +44,11 @@ contract UniswapV2SwapBridge {
     }
 
     function tradeFromTokensToETH(
-        address uniswapRouter,
         uint256 amountInPercentage,
         uint256 amountOutMin,
         address[] calldata path
     ) public {
+        address uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
         IUniswapV2Router02 _uniswapRouter = IUniswapV2Router02(uniswapRouter);
 
         // TODO what happens if approve value > balance? (what tokens can break this? should use safeerc20?)
@@ -74,11 +74,11 @@ contract UniswapV2SwapBridge {
     }
 
     function tradeFromTokensToTokens(
-        address uniswapRouter,
         uint256 amountInPercentage,
         uint256 amountOutMin,
         address[] calldata path
     ) public {
+        address uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
         IUniswapV2Router02 _uniswapRouter = IUniswapV2Router02(uniswapRouter);
 
         uint256 amountIn = IERC20(path[0]).balanceOf(address(this)) * amountInPercentage / 100000;

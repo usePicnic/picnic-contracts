@@ -47,7 +47,6 @@ describe("Wallet", function () {
             uniswapV2SwapBridge.interface.encodeFunctionData(
                 "tradeFromETHToTokens",
                 [
-                    ADDRESSES['UNISWAP_V2_ROUTER'],
                     100000,
                     1,
                     pathUniswap
@@ -121,7 +120,6 @@ describe("Wallet", function () {
             uniswapV2SwapBridge.interface.encodeFunctionData(
                 "tradeFromETHToTokens",
                 [
-                    ADDRESSES['UNISWAP_V2_ROUTER'],
                     100000,
                     1,
                     pathUniswap
@@ -190,7 +188,6 @@ describe("Wallet", function () {
             uniswapV2SwapBridge.interface.encodeFunctionData(
                 "tradeFromETHToTokens",
                 [
-                    ADDRESSES['UNISWAP_V2_ROUTER'],
                     100000,
                     1,
                     [
