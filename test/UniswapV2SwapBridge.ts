@@ -24,7 +24,7 @@ describe("UniswapV2SwapBridge", function () {
 
         // Instantiate Wallet
         let Wallet = await ethers.getContractFactory("Wallet");
-        wallet = await Wallet.deploy(owner.address);
+        wallet = await Wallet.deploy();
     });
 
     describe("Actions", function () {
