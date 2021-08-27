@@ -151,6 +151,15 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
     }
 
+    /**
+     * @notice Edit positions of an existing portfolio. No deposits or withdraws allowed.
+     *
+     * @dev This functions only processes bridge calls, no deposit or withdraw on the wallet.
+     *
+     * @param nftId NFT Id
+     * @param _bridgeAddresses Addresses of deployed bridge contracts
+     * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
+     */
     function editPortfolio(
         uint256 nftId,
         address[] calldata _bridgeAddresses,

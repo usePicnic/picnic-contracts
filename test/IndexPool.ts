@@ -316,6 +316,85 @@ describe("IndexPool", function () {
         })
     });
 
+    describe("Edits portfolio", function () {
+        it("Edits portfolio - swaps ETH for DAI", async function () {
+            // Set bridges addresses and encoded calls
+            var _bridgeAddresses = [];
+            var _bridgeEncodedCalls = [];
+
+            // Create a portfolio (just holds ether)
+            let tx = await indexpool.createPortfolio(
+                {'tokens': [], 'amounts': []},
+                [_bridgeAddresses],
+                _bridgeEncodedCalls,
+                {value: ethers.utils.parseEther("1")} // overrides
+            );
+
+            // Wait transaction to complete
+            tx.wait()
+            // Code above was tested elsewhere
+
+            _bridgeAddresses = [
+                uniswapV2SwapBridge.address,
+            ];
+
+            // Set path
+            let pathUniswap = [
+                TOKENS['WMAIN'],
+                TOKENS['DAI'],
+            ];
+
+            // Set encoded calls
+            _bridgeEncodedCalls = [
+                uniswapV2SwapBridge.interface.encodeFunctionData(
+                    "tradeFromETHToTokens",
+                    [
+                        ADDRESSES['UNISWAP_V2_ROUTER'],
+                        100000,
+                        1,
+                        pathUniswap
+                    ],
+                ),
+            ];
+
+            // Deposit in a portfolio
+            await indexpool.editPortfolio(
+                0, // NFT ID - NFT created just above
+                _bridgeAddresses,
+                _bridgeEncodedCalls
+            );
+
+            let walletAddress = await indexpool.walletOf(0);
+
+            // Wallet DAI amount should be 0
+            let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])
+            let daiBalance = await dai.balanceOf(walletAddress);
+            expect(daiBalance).to.be.above(0);
+        })
+
+        it("Rejects other address editing NFT", async function () {
+            // Set bridges addresses and encoded calls
+            var _bridgeAddresses = [];
+            var _bridgeEncodedCalls = [];
+
+            // Create a portfolio (just holds ether)
+            let tx = await indexpool.createPortfolio(
+                {'tokens': [], 'amounts': []},
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+                {value: ethers.utils.parseEther("1")} // overrides
+            );
+
+            let otherIndexPool = indexpool.connect(other);
+
+            await expect(otherIndexPool.editPortfolio(
+                0,
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+            )).to.be.revertedWith("INDEXPOOL: ONLY NFT OWNER CAN CALL THIS FUNCTION");
+        })
+    });
+
     describe("Withdraw from portfolio", function () {
         it("Withdraw from portfolio - in ETH", async function () {
             // Set bridges addresses and encoded calls
