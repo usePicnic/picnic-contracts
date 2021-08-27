@@ -1,7 +1,8 @@
 pragma solidity ^0.8.6;
 
-import "./Wallet.sol";
+import "./WalletFactory.sol";
 import "./interfaces/IIndexPool.sol";
+import "./interfaces/IWallet.sol";
 import "./libraries/IPDataTypes.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -79,8 +80,12 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
     uint256 public tokenCounter = 0;
     mapping(uint256 => address) private _nftIdToWallet;
 
+    WalletFactory walletFactory;
+
     // Constructor
-    constructor() ERC721("INDEXPOOL", "IPNFT") Ownable() {}
+    constructor(address _walletFactory) ERC721("INDEXPOOL", "IPNFT") Ownable() {
+        walletFactory = WalletFactory(_walletFactory);
+    }
 
     // External functions
 
@@ -146,6 +151,16 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
     }
 
+    function editPortfolio(
+        uint256 nftId,
+        address[] calldata _bridgeAddresses,
+        bytes[] calldata _bridgeEncodedCalls
+    ) external
+    onlyNFTOwner(nftId) override
+    {
+        _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
+    }
+
     /**
     * @notice Deposit more funds into an existing portfolio.
     *
@@ -186,7 +201,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
      */
     function _mintNFT(address nftOwner) internal returns (uint256){
         // Create new wallet
-        Wallet wallet = new Wallet();
+        IWallet wallet = IWallet(walletFactory.createWallet());
 
         // Save NFT data
         uint256 nftId = tokenCounter;

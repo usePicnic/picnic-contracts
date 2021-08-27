@@ -16,6 +16,12 @@ interface IIndexPool is IERC721 {
         bytes[] calldata _bridgeEncodedCalls
     ) payable external;
 
+    function editPortfolio(
+        uint256 nftId,
+        address[] calldata _bridgeAddresses,
+        bytes[] calldata _bridgeEncodedCalls
+    ) external;
+
     function withdrawPortfolio(
         uint256 nftId,
         IPDataTypes.TokenData calldata outputs,

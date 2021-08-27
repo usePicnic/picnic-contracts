@@ -17,12 +17,12 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 contract Wallet is IWallet {
     using SafeERC20 for IERC20;
 
-    address creator;
+    address _owner;
 
     // Wallet only talks with IndexPool contract
     modifier ownerOnly() {
         require(
-            creator == msg.sender,
+            _owner == msg.sender,
             "WALLET: ONLY WALLET OWNER CAN CALL THIS FUNCTION"
         );
         _;
@@ -35,8 +35,8 @@ contract Wallet is IWallet {
         emit Received(msg.sender, msg.value);
     }
 
-    constructor() {
-        creator = msg.sender;
+    constructor(address owner) {
+        _owner = owner;
     }
 
     /**
@@ -102,11 +102,4 @@ contract Wallet is IWallet {
 
         return (outputTokenAmounts, outputEthAmount);
     }
-
-    // TODO should we have a read function? or should we read all data we need from events?
-    //    function read(
-    //        address[] calldata _bridgeAddresses,
-    //        bytes[] calldata _bridgeEncodedCalls
-    //    ) external view override _ownerOnly_ {
-    //    }
 }
