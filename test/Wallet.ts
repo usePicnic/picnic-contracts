@@ -27,7 +27,7 @@ describe("Wallet", function () {
 
         // Instantiate Wallet
         let Wallet = await ethers.getContractFactory("Wallet");
-        wallet = await Wallet.deploy();
+        wallet = await Wallet.deploy(owner.address);
     });
 
     it("Writes (Buys DAI on Uniswap)", async function () {

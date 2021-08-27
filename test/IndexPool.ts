@@ -19,8 +19,11 @@ describe("IndexPool", function () {
         [owner, other] = await ethers.getSigners();
         provider = await ethers.getDefaultProvider();
 
+        let WalletFactory = await ethers.getContractFactory("WalletFactory");
+        let walletFactory = await WalletFactory.deploy();
+
         IndexPool = await ethers.getContractFactory("IndexPool");
-        indexpool = await IndexPool.deploy();
+        indexpool = await IndexPool.deploy(walletFactory.address);
 
         let UniswapV2SwapBridge = await ethers.getContractFactory("UniswapV2SwapBridge");
         uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();

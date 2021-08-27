@@ -29,7 +29,7 @@ describe("AaveV2DepositBridge", function () {
 
         // Instantiate Wallet
         let Wallet = await ethers.getContractFactory("Wallet");
-        wallet = await Wallet.deploy();
+        wallet = await Wallet.deploy(owner.address);
     });
 
     describe("Actions", function () {
