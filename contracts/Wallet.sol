@@ -35,8 +35,8 @@ contract Wallet is IWallet {
         emit Received(msg.sender, msg.value);
     }
 
-    constructor(address owner) {
-        _owner = owner;
+    constructor() {
+        _owner = msg.sender;
     }
 
     /**
