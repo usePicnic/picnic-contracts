@@ -325,7 +325,7 @@ describe("IndexPool", function () {
             // Create a portfolio (just holds ether)
             let tx = await indexpool.createPortfolio(
                 {'tokens': [], 'amounts': []},
-                [_bridgeAddresses],
+                _bridgeAddresses,
                 _bridgeEncodedCalls,
                 {value: ethers.utils.parseEther("1")} // overrides
             );
