@@ -4,6 +4,7 @@ import "solidity-coverage";
 import "hardhat-gas-reporter";
 
 require('dotenv').config()
+require('hardhat-contract-sizer');
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -24,18 +25,6 @@ module.exports = {
   solidity: {
     compilers: [
       {
-        version: "0.4.21"
-      },
-      {
-        version: "0.4.24"
-      },
-      {
-        version: "0.6.6"
-      },
-      {
-        version: "0.6.12"
-      },
-      {
         version: "0.8.6",
       }
     ],
@@ -55,7 +44,7 @@ module.exports = {
       accounts: {
         mnemonic: process.env.POLYGON_TEST_MNEMONIC
       },
-      gasPrice: 3*gwei
+      gasPrice: 5*gwei
     }
   },
   mocha: { timeout: '180000'},
