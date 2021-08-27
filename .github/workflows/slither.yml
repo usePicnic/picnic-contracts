@@ -1,0 +1,23 @@
+# Uses Slither static analyzer
+
+name: slither-static-analysis
+
+on: [push]
+
+jobs:
+  main_job:
+    runs-on: ubuntu-latest
+    name: Solidity Security 
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Slither Static Analysis
+        uses: luisfontes19/slither-static-analysis-action@v0.3.2
+        with:
+          run-npm-install: true
+          high-threshold: 1
+          medium-threshold: 1
+          low-threshold: 1
+          optimization-threshold: 1
+          informative-threshold: 20
+          projectPath: "."
