@@ -77,6 +77,7 @@ contract AaveV2DepositBridge {
         address assetIn = _aaveLendingPool.getReserveData(assetOut).aTokenAddress;
         uint256 amountIn = IERC20(assetIn).balanceOf(address(this)) * percentageOut / 100000;
 
+        // TODO check if withdraw is needed to log in event
         _aaveLendingPool.withdraw(assetOut, amountIn, address(this));
 
         emit Withdraw(
