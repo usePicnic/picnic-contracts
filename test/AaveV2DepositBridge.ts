@@ -73,7 +73,7 @@ describe("AaveV2DepositBridge", function () {
             await transactionHash.wait();
 
             // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
-            await wallet.write(
+            await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );
@@ -129,7 +129,7 @@ describe("AaveV2DepositBridge", function () {
             await transactionHash.wait();
 
             // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
-            await wallet.write(
+            await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );
@@ -150,7 +150,7 @@ describe("AaveV2DepositBridge", function () {
                 )
             ];
 
-            await wallet.write(
+            await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );
@@ -206,7 +206,7 @@ describe("AaveV2DepositBridge", function () {
             await transactionHash.wait();
 
             // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
-            await wallet.write(
+            await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );
@@ -232,7 +232,7 @@ describe("AaveV2DepositBridge", function () {
                 )
             ];
 
-            await wallet.write(
+            await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );
@@ -284,7 +284,7 @@ describe("AaveV2DepositBridge", function () {
             await transactionHash.wait();
 
             // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
-            await wallet.write(
+            await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );
@@ -341,7 +341,7 @@ describe("AaveV2DepositBridge", function () {
             await transactionHash.wait();
 
             // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
-            await wallet.write(
+            await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );
@@ -362,7 +362,7 @@ describe("AaveV2DepositBridge", function () {
                 )
             ];
 
-            await wallet.write(
+            await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );
@@ -420,7 +420,7 @@ describe("AaveV2DepositBridge", function () {
             await transactionHash.wait();
 
             // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
-            await wallet.write(
+            await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );
@@ -446,7 +446,7 @@ describe("AaveV2DepositBridge", function () {
                 )
             ];
 
-            await wallet.write(
+            await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );

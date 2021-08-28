@@ -60,7 +60,7 @@ describe("UniswapV2SwapBridge", function () {
             await transactionHash.wait();
 
             // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
-            await wallet.write(
+            await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );
@@ -103,7 +103,7 @@ describe("UniswapV2SwapBridge", function () {
             await transactionHash.wait();
 
             // Execute bridge calls (buys DAI on Uniswap)
-            await wallet.write(
+            await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );
@@ -135,7 +135,7 @@ describe("UniswapV2SwapBridge", function () {
             let previousETHBalance = await ethers.provider.getBalance(wallet.address);
 
             // Execute bridge calls (sells DAI for ETH)
-            await wallet.write(
+            await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );
@@ -181,7 +181,7 @@ describe("UniswapV2SwapBridge", function () {
             await transactionHash.wait();
 
             // Execute bridge calls (buys DAI on Uniswap)
-            await wallet.write(
+            await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );
@@ -214,7 +214,7 @@ describe("UniswapV2SwapBridge", function () {
             ];
 
             // Execute bridge calls (sells DAI for ETH)
-            await wallet.write(
+            await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );
@@ -261,7 +261,7 @@ describe("UniswapV2SwapBridge", function () {
             await transactionHash.wait();
 
             // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
-            await wallet.write(
+            await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );
@@ -312,7 +312,7 @@ describe("UniswapV2SwapBridge", function () {
             await transactionHash.wait();
 
             // Execute bridge calls (buys DAI on Uniswap)
-            await wallet.write(
+            await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );
@@ -343,7 +343,7 @@ describe("UniswapV2SwapBridge", function () {
             let previousETHBalance = await ethers.provider.getBalance(wallet.address);
 
             // Execute bridge calls (sells DAI for ETH)
-            await wallet.write(
+            await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );
@@ -393,7 +393,7 @@ describe("UniswapV2SwapBridge", function () {
             await transactionHash.wait();
 
             // Execute bridge calls (buys DAI on Uniswap)
-            await wallet.write(
+            await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );
@@ -426,7 +426,7 @@ describe("UniswapV2SwapBridge", function () {
             ];
 
             // Execute bridge calls (sells DAI for ETH)
-            await wallet.write(
+            await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );

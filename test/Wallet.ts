@@ -29,7 +29,7 @@ describe("Wallet", function () {
         wallet = await Wallet.deploy();
     });
 
-    it("Writes (Buys DAI on Uniswap)", async function () {
+    it("UseBridges (Buys DAI on Uniswap)", async function () {
         // Set bridges addresses
         var _bridgeAddresses = [
             uniswapV2SwapBridge.address,
@@ -61,7 +61,7 @@ describe("Wallet", function () {
         await transactionHash.wait();
 
         // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
-        await wallet.write(
+        await wallet.useBridges(
             _bridgeAddresses,
             _bridgeEncodedCalls,
         );
@@ -134,7 +134,7 @@ describe("Wallet", function () {
         await transactionHash.wait();
 
         // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
-        await wallet.write(
+        await wallet.useBridges(
             _bridgeAddresses,
             _bridgeEncodedCalls,
         );
@@ -159,11 +159,11 @@ describe("Wallet", function () {
         expect(currentDaiBalance).to.be.above(previousDaiBalance);
     })
 
-    it("Rejects write from other user", async function () {
+    it("Rejects useBridges from other user", async function () {
         var _bridgeAddresses = [];
         var _bridgeEncodedCalls = [];
 
-        await expect(wallet.connect(other).write(
+        await expect(wallet.connect(other).useBridges(
             _bridgeAddresses,
             _bridgeEncodedCalls,
         )).to.be.revertedWith("WALLET: ONLY WALLET OWNER CAN CALL THIS FUNCTION");
@@ -218,7 +218,7 @@ describe("Wallet", function () {
         });
         await transactionHash.wait();
 
-        await expect(wallet.write(
+        await expect(wallet.useBridges(
             _bridgeAddresses,
             _bridgeEncodedCalls
         )).to.be.revertedWith("revert 1"); // revert 1 means no collateral available
