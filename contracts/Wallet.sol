@@ -17,7 +17,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 contract Wallet is IWallet {
     using SafeERC20 for IERC20;
 
-    address _owner;
+    address immutable _owner;
 
     // Wallet only talks with IndexPool contract
     modifier ownerOnly() {
