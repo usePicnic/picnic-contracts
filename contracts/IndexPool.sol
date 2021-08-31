@@ -106,19 +106,19 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
      * 3. Process bridge calls (interact with Uniswap/Aave...).
      *
      * @param inputs ERC20 token addresses and amounts that will enter the contract
-     * @param _bridgeAddresses Addresses of deployed bridge contracts
-     * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
+     * @param bridgeAddresses Addresses of deployed bridge contracts
+     * @param bridgeEncodedCalls Encoded calls to be passed on to delegate calls
      */
     function createPortfolio(
         IPDataTypes.TokenData calldata inputs,
-        address[] calldata _bridgeAddresses,
-        bytes[] calldata _bridgeEncodedCalls
+        address[] calldata bridgeAddresses,
+        bytes[] calldata bridgeEncodedCalls
     ) payable external
         checkIO(inputs, msg.value) override
     {
         uint256 nftId = _mintNFT(msg.sender);
         _depositToWallet(nftId, inputs, msg.value);
-        _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
+        _writeToWallet(nftId, bridgeAddresses, bridgeEncodedCalls);
     }
 
     /**
@@ -131,20 +131,20 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
      *
      * @param nftId NFT Id
      * @param inputs ERC20 token addresses and amounts that will enter the contract
-     * @param _bridgeAddresses Addresses of deployed bridge contracts
-     * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
+     * @param bridgeAddresses Addresses of deployed bridge contracts
+     * @param bridgeEncodedCalls Encoded calls to be passed on to delegate calls
      */
     function depositPortfolio(
         uint256 nftId,
         IPDataTypes.TokenData calldata inputs,
-        address[] calldata _bridgeAddresses,
-        bytes[] calldata _bridgeEncodedCalls
+        address[] calldata bridgeAddresses,
+        bytes[] calldata bridgeEncodedCalls
     ) payable external
         checkIO(inputs, msg.value)
         onlyNFTOwner(nftId) override
     {
         _depositToWallet(nftId, inputs, msg.value);
-        _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
+        _writeToWallet(nftId, bridgeAddresses, bridgeEncodedCalls);
     }
 
     /**
@@ -153,17 +153,17 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
      * @dev This functions only processes bridge calls, no deposit or withdraw on the wallet.
      *
      * @param nftId NFT Id
-     * @param _bridgeAddresses Addresses of deployed bridge contracts
-     * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
+     * @param bridgeAddresses Addresses of deployed bridge contracts
+     * @param bridgeEncodedCalls Encoded calls to be passed on to delegate calls
      */
     function editPortfolio(
         uint256 nftId,
-        address[] calldata _bridgeAddresses,
-        bytes[] calldata _bridgeEncodedCalls
+        address[] calldata bridgeAddresses,
+        bytes[] calldata bridgeEncodedCalls
     ) external
     onlyNFTOwner(nftId) override
     {
-        _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
+        _writeToWallet(nftId, bridgeAddresses, bridgeEncodedCalls);
     }
 
     /**
@@ -176,21 +176,21 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
     *
     * @param nftId NFT Id
     * @param outputs ERC20 token addresses and percentages that will exit the contract
-    * @param outputEthPercentage percentage of ETH in wallet that will exit the contract
-    * @param _bridgeAddresses Addresses of deployed bridge contracts
-    * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
+    * @param outputEthPercentage percentage of ETH in portfolio that will exit the contract
+    * @param bridgeAddresses Addresses of deployed bridge contracts
+    * @param bridgeEncodedCalls Encoded calls to be passed on to delegate calls
     */
     function withdrawPortfolio(
         uint256 nftId,
         IPDataTypes.TokenData calldata outputs,
         uint256 outputEthPercentage,
-        address[] calldata _bridgeAddresses,
-        bytes[] calldata _bridgeEncodedCalls
+        address[] calldata bridgeAddresses,
+        bytes[] calldata bridgeEncodedCalls
     ) external
         checkIO(outputs, outputEthPercentage)
         onlyNFTOwner(nftId) override
     {
-        _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
+        _writeToWallet(nftId, bridgeAddresses, bridgeEncodedCalls);
         _withdrawFromWallet(nftId, outputs, outputEthPercentage);
     }
 
