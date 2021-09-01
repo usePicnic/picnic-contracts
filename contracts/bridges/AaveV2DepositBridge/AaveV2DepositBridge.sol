@@ -4,6 +4,23 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/ILendingPool.sol";
 import "./interfaces/IAaveIncentivesController.sol";
 
+/**
+ * @title AaveV2DepositBridge
+ * @author IndexPool
+ *
+ * @notice Deposits, withdraws and harvest rewards from Aave's LendingPool contract in Polygon.
+ *
+ * @dev This contract has 3 main functions:
+ *
+ * 1. Deposit in Aave's LendingPool (example: DAI -> amDAI)
+ * 2. Withdraw from Aave's LendingPool (example: amDAI -> DAI)
+ * 3. Harvest rewards from deposits (as of September 2021 being paid in WMATIC, but we can support changes)
+ *
+ * Notice that we haven't implemented any kind of borrowing mechanisms, mostly because that would require control
+ * mechanics to go along with it.
+ *
+ */
+
 contract AaveV2DepositBridge {
     event Deposit (
         address assetIn,
@@ -22,53 +39,72 @@ contract AaveV2DepositBridge {
         uint256 claimedReward
     );
 
+    /**
+      * @notice Deposits into the Aave protocol.
+      *
+      * @dev Wraps the Aave deposit and generate the necessary events to communicate with IndexPool's UI and back-end.
+      *
+      * @param assetIn Address of the asset to be deposited into the Aave protocol
+      * @param percentage Percentage of the balance of the asset that will be deposited
+      */
     function deposit(address assetIn, uint256 percentage)
-    public    
+    public
     {
-        // Hardcoded to make call easier to understand for the user (UI will help explain/debug it)
+        // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
         address aaveLendingPoolAddress = 0x8dFf5E27EA6b7AC08EbFdf9eB090F32ee9a30fcf;
-
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
 
         uint256 amountIn = IERC20(assetIn).balanceOf(address(this)) * percentage / 100000;
+
+        // Approve 0 first as a few ERC20 tokens are requiring this pattern.
         IERC20(assetIn).approve(aaveLendingPoolAddress, 0);
         IERC20(assetIn).approve(aaveLendingPoolAddress, amountIn);
+
         _aaveLendingPool.deposit(assetIn, amountIn, address(this), 0);
 
         address assetOut = _aaveLendingPool.getReserveData(assetIn).aTokenAddress;
 
-        emit Deposit(
-            assetIn,
-            amountIn,
-            assetOut
-        );
+        emit Deposit(assetIn, amountIn, assetOut);
     }
 
+    /**
+      * @notice Claim rewards from the Aave protocol.
+      *
+      * @dev Wraps the Aave claim rewards and generate the necessary events to communicate with IndexPool's UI and
+      * back-end. Rewards for Polygon are currently in WMATIC, but this might change.
+      *
+      * @param asset Address of the asset to be deposited into the Aave protocol
+      */
     function harvest(address asset) public
     {
+        // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
         address incentivesControllerAddress = 0x357D51124f59836DeD84c8a1730D72B749d8BC23;
-        IAaveIncentivesController distributor = IAaveIncentivesController(
-            incentivesControllerAddress
-        );
+        IAaveIncentivesController distributor = IAaveIncentivesController(incentivesControllerAddress);
 
         address aaveLendingPoolAddress = 0x8dFf5E27EA6b7AC08EbFdf9eB090F32ee9a30fcf;
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
-        address aToken = _aaveLendingPool.getReserveData(asset).aTokenAddress;
 
+        // Get aToken address from asset address
+        address aToken = _aaveLendingPool.getReserveData(asset).aTokenAddress;
         address[] memory assets = new address[](1);
         assets[0] = aToken;
 
-        uint256 amountToClaim = distributor.getRewardsBalance(
-            assets,
-            address(this)
-        );
+        // Claim rewards
+        uint256 amountToClaim = distributor.getRewardsBalance(assets, address(this));
         uint256 claimedReward = distributor.claimRewards(assets, amountToClaim, address(this));
-
         address claimedAsset = distributor.REWARD_TOKEN();
 
         emit Harvest(claimedAsset, claimedReward);
     }
 
+    /**
+      * @notice Withdraws from the Aave protocol.
+      *
+      * @dev Wraps the Aave withdraw and generate the necessary events to communicate with IndexPool's UI and back-end.
+      *
+      * @param assetOut Address of the asset to be withdrawn from the Aave protocol
+      * @param percentageOut Percentage of the balance of the asset that will be withdrawn
+      */
     function withdraw(address assetOut, uint256 percentageOut) public {
         // Hardcoded to make call easier to understand for the user (UI will help explain/debug it)
         address aaveLendingPoolAddress = 0x8dFf5E27EA6b7AC08EbFdf9eB090F32ee9a30fcf;
@@ -76,24 +112,8 @@ contract AaveV2DepositBridge {
 
         address assetIn = _aaveLendingPool.getReserveData(assetOut).aTokenAddress;
         uint256 amountIn = IERC20(assetIn).balanceOf(address(this)) * percentageOut / 100000;
-
-        // TODO check if withdraw is needed to log in event
         _aaveLendingPool.withdraw(assetOut, amountIn, address(this));
 
-        emit Withdraw(
-            assetIn,
-            amountIn,
-            percentageOut,
-            assetOut
-        );
+        emit Withdraw(assetIn, amountIn, percentageOut, assetOut);
     }
-
-    // TODO write view functions
-    // function viewHoldings() external view returns (uint256[] memory) {
-    //     return [0];
-    // }
-
-    // function viewEthHoldings() external view returns (uint256[] memory) {
-    //     return [0];
-    // }
 }
