@@ -242,9 +242,9 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         uint256 ethAmount
     ) internal {
         // Pay 0.1% fee on ETH deposit to IndexPool
-        address indexpoolAddress = owner();
+        address indexpoolContractOwner = owner();
         uint256 indexpoolFee = ethAmount / 1000;
-        payable(indexpoolAddress).transfer(indexpoolFee);
+        payable(indexpoolContractOwner).transfer(indexpoolFee);
 
         // Transfer 99.9% of ETH deposit to Wallet
         address walletAddress = walletOf(nftId);
@@ -254,7 +254,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         for (uint16 i = 0; i < inputs.tokens.length; i++) {
             // Pay 0.1% fee on ERC20 deposit to IndexPool
             indexpoolFee = inputs.amounts[i] / 1000;
-            IERC20(inputs.tokens[i]).safeTransferFrom(ownerOf(nftId), indexpoolAddress, indexpoolFee);
+            IERC20(inputs.tokens[i]).safeTransferFrom(ownerOf(nftId), indexpoolContractOwner, indexpoolFee);
 
             // Transfer 99.9% of ERC20 token to Wallet
             IERC20(inputs.tokens[i]).safeTransferFrom(ownerOf(nftId), walletAddress, inputs.amounts[i] - indexpoolFee);
