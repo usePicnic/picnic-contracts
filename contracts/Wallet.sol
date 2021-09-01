@@ -17,13 +17,13 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 contract Wallet is IWallet {
     using SafeERC20 for IERC20;
 
-    address immutable _indexPoolAddress;
+    address immutable _indexpoolAddress;
 
     // Wallet only talks with IndexPool contract
-    modifier indexPoolOnly() {
+    modifier indexpoolOnly() {
         require(
-            _indexPoolAddress == msg.sender,
-            "WALLET: ONLY WALLET OWNER CAN CALL THIS FUNCTION"
+            _indexpoolAddress == msg.sender,
+            "WALLET: ONLY THE INDEXPOOL CONTRACT CAN CALL THIS FUNCTION"
         );
         _;
     }
@@ -36,7 +36,7 @@ contract Wallet is IWallet {
     }
 
     constructor() {
-        _indexPoolAddress = msg.sender;
+        _indexpoolAddress = msg.sender;
     }
 
     /**
@@ -52,7 +52,7 @@ contract Wallet is IWallet {
     function useBridges(
         address[] calldata bridgeAddresses,
         bytes[] calldata bridgeEncodedCalls
-    ) external override indexPoolOnly {
+    ) external override indexpoolOnly {
         bool isSuccess;
         bytes memory result;
 
@@ -84,7 +84,7 @@ contract Wallet is IWallet {
         IPDataTypes.TokenData calldata outputs,
         uint256 outputEthPercentage,
         address nftOwner
-    ) external indexPoolOnly override returns (uint256[] memory, uint256)
+    ) external indexpoolOnly override returns (uint256[] memory, uint256)
     {
         // Withdraws ERC20 tokens
         uint256[] memory outputTokenAmounts = new uint256[](outputs.tokens.length);

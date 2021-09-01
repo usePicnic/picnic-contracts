@@ -5,7 +5,7 @@ import "../Wallet.sol";
 contract TestWallet is Wallet {
 
     function getIndexPool() public view returns (address) {
-        return _indexPoolAddress;
+        return _indexpoolAddress;
     }
 
     // TODO: Echidna fuzzing tests
