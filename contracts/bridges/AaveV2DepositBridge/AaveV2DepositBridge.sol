@@ -45,16 +45,14 @@ contract AaveV2DepositBridge {
       * @dev Wraps the Aave deposit and generate the necessary events to communicate with IndexPool's UI and back-end.
       *
       * @param assetIn Address of the asset to be deposited into the Aave protocol
-      * @param percentage Percentage of the balance of the asset that will be deposited
+      * @param percentageIn Percentage of the balance of the asset that will be deposited
       */
-    function deposit(address assetIn, uint256 percentage)
-    public
-    {
+    function deposit(address assetIn, uint256 percentageIn) external {
         // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
         address aaveLendingPoolAddress = 0x8dFf5E27EA6b7AC08EbFdf9eB090F32ee9a30fcf;
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
 
-        uint256 amountIn = IERC20(assetIn).balanceOf(address(this)) * percentage / 100000;
+        uint256 amountIn = IERC20(assetIn).balanceOf(address(this)) * percentageIn / 100000;
 
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
         IERC20(assetIn).approve(aaveLendingPoolAddress, 0);
@@ -73,10 +71,9 @@ contract AaveV2DepositBridge {
       * @dev Wraps the Aave claim rewards and generate the necessary events to communicate with IndexPool's UI and
       * back-end. Rewards for Polygon are currently in WMATIC, but this might change.
       *
-      * @param asset Address of the asset to be deposited into the Aave protocol
+      * @param asset Address of the asset that will be harvested
       */
-    function harvest(address asset) public
-    {
+    function harvest(address asset) external {
         // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
         address incentivesControllerAddress = 0x357D51124f59836DeD84c8a1730D72B749d8BC23;
         IAaveIncentivesController distributor = IAaveIncentivesController(incentivesControllerAddress);
@@ -105,7 +102,7 @@ contract AaveV2DepositBridge {
       * @param assetOut Address of the asset to be withdrawn from the Aave protocol
       * @param percentageOut Percentage of the balance of the asset that will be withdrawn
       */
-    function withdraw(address assetOut, uint256 percentageOut) public {
+    function withdraw(address assetOut, uint256 percentageOut) external {
         // Hardcoded to make call easier to understand for the user (UI will help explain/debug it)
         address aaveLendingPoolAddress = 0x8dFf5E27EA6b7AC08EbFdf9eB090F32ee9a30fcf;
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);

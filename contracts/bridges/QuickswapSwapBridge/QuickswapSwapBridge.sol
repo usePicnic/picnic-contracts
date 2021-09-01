@@ -48,11 +48,11 @@ contract QuickswapSwapBridge {
       * the output token, and any intermediate elements represent intermediate pairs to trade through (if, for example,
       * a direct pair does not exist).
       */
-    function tradeFromETHToTokens(
+    function tradeFromETHToToken(
         uint256 amountInPercentage,
         uint256 amountOutMin,
         address[] calldata path
-    ) public {
+    ) external {
         address uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
         IUniswapV2Router02 _uniswapRouter = IUniswapV2Router02(uniswapRouter);
 
@@ -79,11 +79,11 @@ contract QuickswapSwapBridge {
       * the output token, and any intermediate elements represent intermediate pairs to trade through (if, for example,
       * a direct pair does not exist).
       */
-    function tradeFromTokensToETH(
+    function tradeFromTokenToETH(
         uint256 amountInPercentage,
         uint256 amountOutMin,
         address[] calldata path
-    ) public {
+    ) external {
         address uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
         IUniswapV2Router02 _uniswapRouter = IUniswapV2Router02(uniswapRouter);
 
@@ -115,11 +115,11 @@ contract QuickswapSwapBridge {
       * the output token, and any intermediate elements represent intermediate pairs to trade through (if, for example,
       * a direct pair does not exist).
       */
-    function tradeFromTokensToTokens(
+    function tradeFromTokenToToken(
         uint256 amountInPercentage,
         uint256 amountOutMin,
         address[] calldata path
-    ) public {
+    ) external {
         address uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
         IUniswapV2Router02 _uniswapRouter = IUniswapV2Router02(uniswapRouter);
 
