@@ -344,7 +344,7 @@ describe("IndexPool", function () {
             // Set encoded calls
             _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToTokens",
+                    "tradeFromETHToToken",
                     [
                         100000,
                         1,
@@ -440,7 +440,7 @@ describe("IndexPool", function () {
             // Set encoded calls
             var _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToTokens",
+                    "tradeFromETHToToken",
                     [
                         100000,
                         1,
@@ -658,7 +658,7 @@ describe("IndexPool", function () {
             // Set encoded calls
             var _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToTokens",
+                    "tradeFromETHToToken",
                     [
                         50000,
                         1,

@@ -28,7 +28,7 @@ describe("QuickswapSwapBridge", function () {
     });
 
     describe("Actions", function () {
-        it("tradeFromTokensToETH - Buys DAI", async function () {
+        it("tradeFromTokenToETH - Buys DAI", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
                 uniswapV2SwapBridge.address,
@@ -43,7 +43,7 @@ describe("QuickswapSwapBridge", function () {
             // Set encoded calls
             var _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToTokens",
+                    "tradeFromETHToToken",
                     [
                         100000,
                         1,
@@ -71,7 +71,7 @@ describe("QuickswapSwapBridge", function () {
             expect(daiBalance).to.be.above(0);
         })
 
-        it("tradeFromTokensToETH - Buys DAI and then sells DAI", async function () {
+        it("tradeFromTokenToETH - Buys DAI and then sells DAI", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
                 uniswapV2SwapBridge.address,
@@ -86,7 +86,7 @@ describe("QuickswapSwapBridge", function () {
             // Set encoded calls
             var _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToTokens",
+                    "tradeFromETHToToken",
                     [
                         100000,
                         1,
@@ -122,7 +122,7 @@ describe("QuickswapSwapBridge", function () {
             // Set encoded calls
             _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromTokensToETH",
+                    "tradeFromTokenToETH",
                     [
                         100000,
                         1,
@@ -149,7 +149,7 @@ describe("QuickswapSwapBridge", function () {
             expect(currentETHBalance).to.be.above(previousETHBalance);
         })
 
-        it("tradeFromTokensToTokens - Buys DAI and then swaps to WMAIN", async function () {
+        it("tradeFromTokenToToken - Buys DAI and then swaps to WMAIN", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
                 uniswapV2SwapBridge.address,
@@ -164,7 +164,7 @@ describe("QuickswapSwapBridge", function () {
             // Set encoded calls
             var _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToTokens",
+                    "tradeFromETHToToken",
                     [
                         100000,
                         1,
@@ -204,7 +204,7 @@ describe("QuickswapSwapBridge", function () {
             // Set encoded calls
             _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromTokensToTokens",
+                    "tradeFromTokenToToken",
                     [
                         100000,
                         1,
@@ -244,7 +244,7 @@ describe("QuickswapSwapBridge", function () {
             // Set encoded calls
             var _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToTokens",
+                    "tradeFromETHToToken",
                     [
                         100000,
                         1,
@@ -295,7 +295,7 @@ describe("QuickswapSwapBridge", function () {
             // Set encoded calls
             var _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToTokens",
+                    "tradeFromETHToToken",
                     [
                         100000,
                         1,
@@ -330,7 +330,7 @@ describe("QuickswapSwapBridge", function () {
             // Set encoded calls
             _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromTokensToETH",
+                    "tradeFromTokenToETH",
                     [
                         100000,
                         1,
@@ -376,7 +376,7 @@ describe("QuickswapSwapBridge", function () {
             // Set encoded calls
             var _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToTokens",
+                    "tradeFromETHToToken",
                     [
                         100000,
                         1,
@@ -416,7 +416,7 @@ describe("QuickswapSwapBridge", function () {
             // Set encoded calls
             _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromTokensToTokens",
+                    "tradeFromTokenToToken",
                     [
                         100000,
                         1,

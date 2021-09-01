@@ -44,7 +44,7 @@ describe("Wallet", function () {
         // Set encoded calls
         var _bridgeEncodedCalls = [
             uniswapV2SwapBridge.interface.encodeFunctionData(
-                "tradeFromETHToTokens",
+                "tradeFromETHToToken",
                 [
                     100000,
                     1,
@@ -117,7 +117,7 @@ describe("Wallet", function () {
         // Set encoded calls
         var _bridgeEncodedCalls = [
             uniswapV2SwapBridge.interface.encodeFunctionData(
-                "tradeFromETHToTokens",
+                "tradeFromETHToToken",
                 [
                     100000,
                     1,
@@ -185,7 +185,7 @@ describe("Wallet", function () {
         ];
         var _bridgeEncodedCalls = [
             uniswapV2SwapBridge.interface.encodeFunctionData(
-                "tradeFromETHToTokens",
+                "tradeFromETHToToken",
                 [
                     100000,
                     1,

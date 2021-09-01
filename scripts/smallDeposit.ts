@@ -49,7 +49,7 @@ async function main() {
     ];
     var _bridgeEncodedCalls = [
         uniswapV2SwapBridge.interface.encodeFunctionData(
-            "tradeFromETHToTokens",
+            "tradeFromETHToToken",
             [
                 ADDRESSES['UNISWAP_V2_ROUTER'],
                 100000,

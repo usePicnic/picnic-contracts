@@ -49,7 +49,7 @@ describe("AaveV2DepositBridge", function () {
             // Set encoded calls
             var _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToTokens",
+                    "tradeFromETHToToken",
                     [
                         100000,
                         1,
@@ -105,7 +105,7 @@ describe("AaveV2DepositBridge", function () {
             // Set encoded calls
             var _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToTokens",
+                    "tradeFromETHToToken",
                     [
                         100000,
                         1,
@@ -182,7 +182,7 @@ describe("AaveV2DepositBridge", function () {
             // Set encoded calls
             var _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToTokens",
+                    "tradeFromETHToToken",
                     [
                         100000,
                         1,
@@ -260,7 +260,7 @@ describe("AaveV2DepositBridge", function () {
             // Set encoded calls
             var _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToTokens",
+                    "tradeFromETHToToken",
                     [
                         100000,
                         1,
@@ -317,7 +317,7 @@ describe("AaveV2DepositBridge", function () {
             // Set encoded calls
             var _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToTokens",
+                    "tradeFromETHToToken",
                     [
                         100000,
                         1,
@@ -396,7 +396,7 @@ describe("AaveV2DepositBridge", function () {
             // Set encoded calls
             var _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToTokens",
+                    "tradeFromETHToToken",
                     [
                         100000,
                         1,

@@ -59,7 +59,7 @@
 //         ];
 //         var _bridgeEncodedCalls = [
 //             uniswapV2SwapBridge.interface.encodeFunctionData(
-//                 "tradeFromETHToTokens",
+//                 "tradeFromETHToToken",
 //                 [
 //                     ADDRESSES['UNISWAP_V2_ROUTER'],
 //                     100000,
@@ -97,7 +97,7 @@
 //         ];
 //         var _bridgeEncodedCalls = [
 //             uniswapV2SwapBridge.interface.encodeFunctionData(
-//                 "tradeFromETHToTokens",
+//                 "tradeFromETHToToken",
 //                 [
 //                     ADDRESSES['UNISWAP_V2_ROUTER'],
 //                     100000,
@@ -140,7 +140,7 @@
 //                 ]
 //             ),
 //             uniswapV2SwapBridge.interface.encodeFunctionData(
-//                 "tradeFromTokensToETH",
+//                 "tradeFromTokenToETH",
 //                 [
 //                     ADDRESSES['UNISWAP_V2_ROUTER'],
 //                     100000,
@@ -193,7 +193,7 @@
 //         ];
 //         var _bridgeEncodedCalls = [
 //             uniswapV2SwapBridge.interface.encodeFunctionData(
-//                 "tradeFromTokensToTokens",
+//                 "tradeFromTokenToToken",
 //                 [
 //                     ADDRESSES['UNISWAP_V2_ROUTER'],
 //                     100000, // arbitrary amount
@@ -230,7 +230,7 @@
 //         ];
 //         var _bridgeEncodedCalls = [
 //             uniswapV2SwapBridge.interface.encodeFunctionData(
-//                 "tradeFromETHToTokens",
+//                 "tradeFromETHToToken",
 //                 [
 //                     ADDRESSES['UNISWAP_V2_ROUTER'],
 //                     100000,
