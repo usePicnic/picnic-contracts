@@ -166,7 +166,7 @@ describe("Wallet", function () {
         await expect(wallet.connect(other).useBridges(
             _bridgeAddresses,
             _bridgeEncodedCalls,
-        )).to.be.revertedWith("WALLET: ONLY WALLET OWNER CAN CALL THIS FUNCTION");
+        )).to.be.revertedWith("WALLET: ONLY THE INDEXPOOL CONTRACT CAN CALL THIS FUNCTION");
     })
 
     it("Rejects withdrawal from other user", async function () {
@@ -174,7 +174,7 @@ describe("Wallet", function () {
             {'tokens': [], 'amounts': []},
             0,
             owner.address
-        )).to.be.revertedWith("WALLET: ONLY WALLET OWNER CAN CALL THIS FUNCTION");
+        )).to.be.revertedWith("WALLET: ONLY THE INDEXPOOL CONTRACT CAN CALL THIS FUNCTION");
     })
 
     it("Revert on Aave bridge propagates correctly", async function () {
