@@ -32,8 +32,8 @@ async function main() {
     let indexPool = await ethers.getContractAt("IndexPool",
         await getDeployedAddress("IndexPool", client));
 
-    let uniswapV2SwapBridge = await ethers.getContractAt("UniswapV2SwapBridge",
-        await getDeployedAddress("UniswapV2SwapBridge", client));
+    let uniswapV2SwapBridge = await ethers.getContractAt("QuickswapSwapBridge",
+        await getDeployedAddress("QuickswapSwapBridge", client));
 
     let aaveV2DepositBridge = await ethers.getContractAt("AaveV2DepositBridge",
         await getDeployedAddress("AaveV2DepositBridge", client));
@@ -70,11 +70,12 @@ async function main() {
     ];
 
     await indexPool.withdrawPortfolio(
-        0,
+        3,
         {'tokens': [], 'amounts': []},
         100000,
         _bridgeAddresses,
-        _bridgeEncodedCalls
+        _bridgeEncodedCalls,
+        {gasLimit: 600000}
     );
 
     console.log("Withdraw succeeded:", weiToString(balanceBegin));

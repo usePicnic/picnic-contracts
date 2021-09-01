@@ -44,7 +44,7 @@ contract Wallet is IWallet {
       *
       * @dev This gives the bridges control over the Wallet funds, so they can make all the transactions necessary to
       * build a portfolio. We need to ensure that all the bridges we support on the UI are as safe as they can be.
-      * Example of bridges are UniswapV2SwapBridge and AaveV2DepositBridge.
+      * Example of bridges are QuickswapSwapBridge and AaveV2DepositBridge.
       *
       * @param bridgeAddresses Addresses of deployed bridge contracts
       * @param bridgeEncodedCalls Encoded calls to be passed on to delegate calls

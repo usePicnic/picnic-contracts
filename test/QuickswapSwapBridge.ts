@@ -4,7 +4,7 @@ import constants from "../constants";
 import {getFirstEvent} from "./utils";
 
 
-describe("UniswapV2SwapBridge", function () {
+describe("QuickswapSwapBridge", function () {
     let owner;
     let other;
     let UniswapV2SwapBridge;
@@ -19,7 +19,7 @@ describe("UniswapV2SwapBridge", function () {
         [owner, other] = await ethers.getSigners();
 
         // Instantiate Uniswap bridge
-        UniswapV2SwapBridge = await ethers.getContractFactory("UniswapV2SwapBridge");
+        UniswapV2SwapBridge = await ethers.getContractFactory("QuickswapSwapBridge");
         uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
 
         // Instantiate Wallet
@@ -271,7 +271,7 @@ describe("UniswapV2SwapBridge", function () {
             let daiBalance = await dai.balanceOf(wallet.address);
 
             // Get Deposit event
-            var event = await getFirstEvent({address: wallet.address}, UniswapV2SwapBridge, 'TradedFromETHToTokens');
+            var event = await getFirstEvent({address: wallet.address}, UniswapV2SwapBridge, 'TradedFromETHToToken');
 
             expect(event.args.path).to.be.eql(pathUniswap);
             expect(event.args.path.length).to.be.equal(2);
@@ -352,7 +352,7 @@ describe("UniswapV2SwapBridge", function () {
             let currentETHBalance = await ethers.provider.getBalance(wallet.address);
 
             // Get Deposit event
-            var event = await getFirstEvent({address: wallet.address}, UniswapV2SwapBridge, 'TradedFromTokensToETH');
+            var event = await getFirstEvent({address: wallet.address}, UniswapV2SwapBridge, 'TradedFromTokenToETH');
 
             expect(event.args.path).to.be.eql(pathUniswap);
             expect(event.args.path.length).to.be.equal(2);
@@ -440,7 +440,7 @@ describe("UniswapV2SwapBridge", function () {
             expect(currentWMAINBalance).to.be.above(previousWMAINBalance);
 
             // Get Deposit event
-            var event = await getFirstEvent({address: wallet.address}, UniswapV2SwapBridge, 'TradedFromTokensToTokens');
+            var event = await getFirstEvent({address: wallet.address}, UniswapV2SwapBridge, 'TradedFromTokenToToken');
 
             expect(event.args.path).to.be.eql(pathUniswap);
             expect(event.args.path.length).to.be.equal(2);

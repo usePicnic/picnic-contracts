@@ -22,7 +22,7 @@ describe("IndexPool", function () {
         IndexPool = await ethers.getContractFactory("IndexPool");
         indexpool = await IndexPool.deploy();
 
-        let UniswapV2SwapBridge = await ethers.getContractFactory("UniswapV2SwapBridge");
+        let UniswapV2SwapBridge = await ethers.getContractFactory("QuickswapSwapBridge");
         uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
 
         uniswapV2Router02 = await ethers.getContractAt("IUniswapV2Router02", ADDRESSES["UNISWAP_V2_ROUTER"]);

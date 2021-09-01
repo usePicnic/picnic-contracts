@@ -25,8 +25,8 @@
 //         IndexPool = await ethers.getContractFactory("IndexPool");
 //         indexPool = (await IndexPool.deploy()).connect(owner);
 //
-//         let UniswapV2SwapBridge = await ethers.getContractFactory("UniswapV2SwapBridge");
-//         uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
+//         let QuickswapSwapBridge = await ethers.getContractFactory("QuickswapSwapBridge");
+//         uniswapV2SwapBridge = await QuickswapSwapBridge.deploy();
 //         await uniswapV2SwapBridge.deployed();
 //
 //         let AaveV2DepositBridge = await ethers.getContractFactory("AaveV2DepositBridge");

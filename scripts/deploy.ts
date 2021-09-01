@@ -21,8 +21,8 @@ const contractsToDeploy = [
         filePath: "./artifacts/contracts/bridges/AaveV2DepositBridge/AaveV2DepositBridge.sol/AaveV2DepositBridge.json"
     },
     {
-        contractName: "UniswapV2SwapBridge",
-        filePath: "./artifacts/contracts/bridges/UniswapV2SwapBridge/UniswapV2SwapBridge.sol/UniswapV2SwapBridge.json"
+        contractName: "QuickswapSwapBridge",
+        filePath: "./artifacts/contracts/bridges/QuickswapSwapBridge/QuickswapSwapBridge.sol/QuickswapSwapBridge.json"
     },
 ]
 

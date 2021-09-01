@@ -20,7 +20,7 @@ describe("AaveV2DepositBridge", function () {
         [owner, other] = await ethers.getSigners();
 
         // Instantiate Uniswap bridge
-        let UniswapV2SwapBridge = await ethers.getContractFactory("UniswapV2SwapBridge");
+        let UniswapV2SwapBridge = await ethers.getContractFactory("QuickswapSwapBridge");
         uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
 
         // Instantiate Aave bridge

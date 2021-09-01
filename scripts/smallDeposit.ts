@@ -32,8 +32,8 @@ async function main() {
     let indexPool = await ethers.getContractAt("IndexPool",
         await getDeployedAddress("IndexPool", client));
 
-    let uniswapV2SwapBridge = await ethers.getContractAt("UniswapV2SwapBridge",
-        await getDeployedAddress("UniswapV2SwapBridge", client));
+    let uniswapV2SwapBridge = await ethers.getContractAt("QuickswapSwapBridge",
+        await getDeployedAddress("QuickswapSwapBridge", client));
 
     let aaveV2DepositBridge = await ethers.getContractAt("AaveV2DepositBridge",
         await getDeployedAddress("AaveV2DepositBridge", client));
@@ -69,7 +69,7 @@ async function main() {
         )
     ];
 
-    let overrides = {value: ethers.utils.parseEther("0.0001"), gasLimit:2000000};
+    let overrides = {value: ethers.utils.parseEther("0.000001"), gasLimit:2000000};
     await indexPool.createPortfolio(
         {'tokens': [], 'amounts': []},
         _bridgeAddresses,
