@@ -58,17 +58,14 @@ contract QuickswapSwapBridge {
 
         uint256 amountIn = address(this).balance * amountInPercentage / 100000;
 
-        uint[] memory amounts = _uniswapRouter.swapExactETHForTokens{value: amountIn}(
+        uint[] memory amounts = _uniswapRouter.swapExactETHForTokens{value : amountIn}(
             amountOutMin,
             path,
             address(this),
             block.timestamp + 100000
         );
 
-        emit TradedFromETHToToken(
-            path,
-            amounts
-        );
+        emit TradedFromETHToToken(path, amounts);
     }
 
     /**
@@ -90,10 +87,9 @@ contract QuickswapSwapBridge {
         address uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
         IUniswapV2Router02 _uniswapRouter = IUniswapV2Router02(uniswapRouter);
 
-        // TODO what happens if approve value > balance? (what tokens can break this? should use safeerc20?)
-        // TODO can't go over 100%
-
         uint256 amountIn = IERC20(path[0]).balanceOf(address(this)) * amountInPercentage / 100000;
+
+        // Approve 0 first as a few ERC20 tokens are requiring this pattern.
         IERC20(path[0]).approve(uniswapRouter, 0);
         IERC20(path[0]).approve(uniswapRouter, amountIn);
 
@@ -105,11 +101,7 @@ contract QuickswapSwapBridge {
             block.timestamp + 100000
         );
 
-        emit TradedFromTokenToETH(
-            path,
-            amounts
-        );
-
+        emit TradedFromTokenToETH(path, amounts);
     }
 
     /**
@@ -133,8 +125,10 @@ contract QuickswapSwapBridge {
 
         uint256 amountIn = IERC20(path[0]).balanceOf(address(this)) * amountInPercentage / 100000;
 
+        // Approve 0 first as a few ERC20 tokens are requiring this pattern.
         IERC20(path[0]).approve(uniswapRouter, 0);
         IERC20(path[0]).approve(uniswapRouter, amountIn);
+
         uint[] memory amounts = _uniswapRouter.swapExactTokensForTokens(
             amountIn,
             amountOutMin,
@@ -143,10 +137,6 @@ contract QuickswapSwapBridge {
             block.timestamp + 100000
         );
 
-        emit TradedFromTokenToToken(
-            path,
-            amounts
-        );
-
+        emit TradedFromTokenToToken(path, amounts);
     }
 }
