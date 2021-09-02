@@ -1,11 +1,13 @@
 pragma solidity ^0.8.6;
 
 interface IStake {
+
     event Deposit (
         address assetIn,
         uint256 amount,
         address assetOut
     );
+
     event Withdraw (
         address assetIn,
         uint256 amount,
