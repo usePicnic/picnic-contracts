@@ -3,6 +3,7 @@ pragma solidity ^0.8.6;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/ILendingPool.sol";
 import "./interfaces/IAaveIncentivesController.sol";
+import "../../interfaces/IStake.sol";
 
 /**
  * @title AaveV2DepositBridge
@@ -21,24 +22,7 @@ import "./interfaces/IAaveIncentivesController.sol";
  *
  */
 
-contract AaveV2DepositBridge {
-    event Deposit (
-        address assetIn,
-        uint256 amount,
-        address assetOut
-    );
-    event Withdraw (
-        address assetIn,
-        uint256 amount,
-        uint256 percentageOut,
-        address assetOut
-    );
-
-    event Harvest (
-        address claimedAsset,
-        uint256 claimedReward
-    );
-
+contract AaveV2DepositBridge is IStake {
     /**
       * @notice Deposits into the Aave protocol.
       *
@@ -47,7 +31,7 @@ contract AaveV2DepositBridge {
       * @param assetIn Address of the asset to be deposited into the Aave protocol
       * @param percentageIn Percentage of the balance of the asset that will be deposited
       */
-    function deposit(address assetIn, uint256 percentageIn) external {
+    function deposit(address assetIn, uint256 percentageIn) external override {
         // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
         address aaveLendingPoolAddress = 0x8dFf5E27EA6b7AC08EbFdf9eB090F32ee9a30fcf;
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
@@ -73,7 +57,7 @@ contract AaveV2DepositBridge {
       *
       * @param asset Address of the asset that will be harvested
       */
-    function harvest(address asset) external {
+    function harvest(address asset) external override {
         // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
         address incentivesControllerAddress = 0x357D51124f59836DeD84c8a1730D72B749d8BC23;
         IAaveIncentivesController distributor = IAaveIncentivesController(incentivesControllerAddress);
@@ -102,7 +86,7 @@ contract AaveV2DepositBridge {
       * @param assetOut Address of the asset to be withdrawn from the Aave protocol
       * @param percentageOut Percentage of the balance of the asset that will be withdrawn
       */
-    function withdraw(address assetOut, uint256 percentageOut) external {
+    function withdraw(address assetOut, uint256 percentageOut) external override {
         // Hardcoded to make call easier to understand for the user (UI will help explain/debug it)
         address aaveLendingPoolAddress = 0x8dFf5E27EA6b7AC08EbFdf9eB090F32ee9a30fcf;
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
