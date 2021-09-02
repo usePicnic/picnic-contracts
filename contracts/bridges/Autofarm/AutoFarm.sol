@@ -36,17 +36,13 @@ contract Autofarm {
         autofarm.deposit(poolId, amountIn);
     }
 
-    function withdraw(uint256 poolId, address assetOut, uint256 percentageOut) external {
+    function withdraw(uint256 poolId, uint256 percentageOut) external {
         // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
         address autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;
         IAutofarm autofarm = IAutofarm(autofarmAddress);
 
-        uint256 amountIn = IERC20(assetOut).balanceOf(address(this)) * percentageOut / 100000;
+        uint256 amountOut = autofarm.stakedWantTokens(poolId, address(this)) * percentageOut / 100000;
 
-        // Approve 0 first as a few ERC20 tokens are requiring this pattern.
-        IERC20(assetOut).approve(autofarmAddress, 0);
-        IERC20(assetOut).approve(autofarmAddress, amountIn);
-
-        autofarm.withdraw(poolId, amountIn);
+        autofarm.withdraw(poolId, amountOut);
     }
 }

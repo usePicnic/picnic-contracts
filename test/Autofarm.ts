@@ -105,5 +105,82 @@ describe("Autofarm", function () {
             let lpTokenBalance = await lpToken.balanceOf(wallet.address);
             expect(lpTokenBalance).to.be.equal(0);
         });
+
+        it("Withdraw - WETH/QUICK LP Token", async function () {
+            // Set bridges addresses
+            var _bridgeAddresses = [
+                uniswapV2SwapBridge.address,
+                uniswapV2SwapBridge.address,
+                quickswapLiquidityBridge.address,
+                autofarm.address,
+                autofarm.address,
+            ];
+
+            // Set encoded calls
+            var _bridgeEncodedCalls = [
+                uniswapV2SwapBridge.interface.encodeFunctionData(
+                    "tradeFromETHToToken",
+                    [
+                        50000,
+                        1,
+                        [TOKENS['WMAIN'], TOKENS['WETH']]
+                    ],
+                ),
+                uniswapV2SwapBridge.interface.encodeFunctionData(
+                    "tradeFromETHToToken",
+                    [
+                        100000,
+                        1,
+                        [TOKENS['WMAIN'], TOKENS['QUICK']]
+                    ],
+                ),
+                quickswapLiquidityBridge.interface.encodeFunctionData(
+                    "addLiquidity",
+                    [
+                        TOKENS['WETH'], // address tokenA,
+                        TOKENS['QUICK'], // address tokenB,
+                        100000, // uint256 tokenAPercentage,
+                        100000, // uint256 tokenBPercentage,
+                        1, // uint256 minAmountA,
+                        1, // uint256 minAmountB,
+                    ],
+                ),
+                autofarm.interface.encodeFunctionData(
+                    "deposit",
+                    [
+                        8, // uint256 poolId,
+                        "0x1Bd06B96dd42AdA85fDd0795f3B4A79DB914ADD5", // address assetIn,
+                        100000 // uint256 percentageIn
+                    ],
+                ),
+                autofarm.interface.encodeFunctionData(
+                    "withdraw",
+                    [
+                        8, // uint256 poolId,
+                        100000 // uint256 percentageOut
+                    ],
+                ),
+            ];
+
+            // Transfer money to wallet (similar as IndexPool contract would have done)
+            const transactionHash = await owner.sendTransaction({
+                to: wallet.address,
+                value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
+            });
+            await transactionHash.wait();
+
+            // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
+            await wallet.useBridges(
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+            );
+
+            // Wallet DAI amount should be 0
+            let lpToken = await ethers.getContractAt(
+                "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+                "0x1Bd06B96dd42AdA85fDd0795f3B4A79DB914ADD5")
+            let lpTokenBalance = await lpToken.balanceOf(wallet.address);
+            expect(lpTokenBalance).to.be.above(0);
+        });
     });
 });
