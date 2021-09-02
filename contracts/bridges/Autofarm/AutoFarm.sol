@@ -1,6 +1,7 @@
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.6;
 
-import "./interfaces/AutoFarmV2_CrossChain.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./interfaces/IAutofarm.sol";
 
 /**
  * @title AaveV2DepositBridge
@@ -24,7 +25,7 @@ contract Autofarm {
     function deposit(uint256 poolId, address assetIn, uint256 percentageIn) external {
         // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
         address autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;
-        AutoFarmV2_CrossChain autofarm = AutoFarmV2_CrossChain(autofarmAddress);
+        IAutofarm autofarm = IAutofarm(autofarmAddress);
 
         uint256 amountIn = IERC20(assetIn).balanceOf(address(this)) * percentageIn / 100000;
 
@@ -38,7 +39,7 @@ contract Autofarm {
     function withdraw(uint256 poolId, address assetOut, uint256 percentageOut) external {
         // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
         address autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;
-        AutoFarmV2_CrossChain autofarm = AutoFarmV2_CrossChain(autofarmAddress);
+        IAutofarm autofarm = IAutofarm(autofarmAddress);
 
         uint256 amountIn = IERC20(assetOut).balanceOf(address(this)) * percentageOut / 100000;
 
