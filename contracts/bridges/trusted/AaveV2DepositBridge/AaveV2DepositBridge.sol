@@ -23,6 +23,10 @@ import "../../interfaces/IStake.sol";
  */
 
 contract AaveV2DepositBridge is IStake {
+
+    address constant aaveLendingPoolAddress = 0x8dFf5E27EA6b7AC08EbFdf9eB090F32ee9a30fcf;
+    address constant incentivesControllerAddress = 0x357D51124f59836DeD84c8a1730D72B749d8BC23;
+
     /**
       * @notice Deposits into the Aave protocol.
       *
@@ -32,8 +36,6 @@ contract AaveV2DepositBridge is IStake {
       * @param percentageIn Percentage of the balance of the asset that will be deposited
       */
     function deposit(address assetIn, uint256 percentageIn) external override {
-        // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
-        address aaveLendingPoolAddress = 0x8dFf5E27EA6b7AC08EbFdf9eB090F32ee9a30fcf;
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
 
         uint256 amountIn = IERC20(assetIn).balanceOf(address(this)) * percentageIn / 100000;
@@ -57,12 +59,9 @@ contract AaveV2DepositBridge is IStake {
       *
       * @param asset Address of the asset that will be harvested
       */
-    function harvest(address asset) external override {
-        // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
-        address incentivesControllerAddress = 0x357D51124f59836DeD84c8a1730D72B749d8BC23;
+    function harvest(address asset) external override {    
         IAaveIncentivesController distributor = IAaveIncentivesController(incentivesControllerAddress);
 
-        address aaveLendingPoolAddress = 0x8dFf5E27EA6b7AC08EbFdf9eB090F32ee9a30fcf;
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
 
         // Get aToken address from asset address
@@ -87,8 +86,6 @@ contract AaveV2DepositBridge is IStake {
       * @param percentageOut Percentage of the balance of the asset that will be withdrawn
       */
     function withdraw(address assetOut, uint256 percentageOut) external override {
-        // Hardcoded to make call easier to understand for the user (UI will help explain/debug it)
-        address aaveLendingPoolAddress = 0x8dFf5E27EA6b7AC08EbFdf9eB090F32ee9a30fcf;
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
 
         address assetIn = _aaveLendingPool.getReserveData(assetOut).aTokenAddress;

@@ -7,6 +7,9 @@ import "hardhat/console.sol";
 // TODO this bridge is work in progress
 
 contract QuickswapLiquidityBridge {
+
+    address constant uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
+
     function addLiquidityETH(
         address token,
         uint256 tokenPercentage,
@@ -14,9 +17,8 @@ contract QuickswapLiquidityBridge {
         uint256 minAmountToken,
         uint256 minAmountEth
     ) external {
-        address uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
-        IUniswapV2Router02 _uniswapRouter = IUniswapV2Router02(uniswapRouter);
 
+        IUniswapV2Router02 _uniswapRouter = IUniswapV2Router02(uniswapRouter);
         uint256 amountToken = IERC20(token).balanceOf(address(this)) * tokenPercentage / 100000;
 
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
@@ -42,7 +44,7 @@ contract QuickswapLiquidityBridge {
         uint256 minAmountA,
         uint256 minAmountB
     ) external {
-        address uniswapRouter = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
+
         IUniswapV2Router02 _uniswapRouter = IUniswapV2Router02(uniswapRouter);
 
         uint256 amountA = IERC20(tokenA).balanceOf(address(this)) * tokenAPercentage / 100000;

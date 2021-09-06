@@ -22,6 +22,9 @@ import "hardhat/console.sol";
  */
 
 contract QuickswapSwapBridge {
+
+    address constant routerAddress = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
+
     event TradedFromETHToToken(
         address[] path,
         uint256[] amounts
@@ -53,7 +56,6 @@ contract QuickswapSwapBridge {
         uint256 amountOutMin,
         address[] calldata path
     ) external {
-        address routerAddress = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
         IUniswapV2Router02 router = IUniswapV2Router02(routerAddress);
 
         uint256 amountIn = address(this).balance * amountInPercentage / 100000;
@@ -84,7 +86,6 @@ contract QuickswapSwapBridge {
         uint256 amountOutMin,
         address[] calldata path
     ) external {
-        address routerAddress = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
         IUniswapV2Router02 router = IUniswapV2Router02(routerAddress);
 
         uint256 amountIn = IERC20(path[0]).balanceOf(address(this)) * amountInPercentage / 100000;
@@ -120,7 +121,6 @@ contract QuickswapSwapBridge {
         uint256 amountOutMin,
         address[] calldata path
     ) external {
-        address routerAddress = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
         IUniswapV2Router02 router = IUniswapV2Router02(routerAddress);
 
         uint256 amountIn = IERC20(path[0]).balanceOf(address(this)) * amountInPercentage / 100000;
