@@ -65,12 +65,9 @@ describe("QuickswapLiquidityBridge", function () {
                 quickswapLiquidityBridge.interface.encodeFunctionData(
                     "addLiquidity",
                     [
-                        TOKENS['WETH'], // address tokenA,
-                        TOKENS['QUICK'], // address tokenB,
-                        100000, // uint256 tokenAPercentage,
-                        100000, // uint256 tokenBPercentage,
-                        1, // uint256 minAmountA,
-                        1, // uint256 minAmountB,
+                        [TOKENS['WETH'], TOKENS['QUICK'],], // address[] tokens,
+                        [100000, 100000,], // uint256[] percentages,
+                        [1, 1,], // uint256[] minAmounts
                     ],
                 ),
             ];
@@ -119,11 +116,11 @@ describe("QuickswapLiquidityBridge", function () {
                 quickswapLiquidityBridge.interface.encodeFunctionData(
                     "addLiquidityETH",
                     [
-                        TOKENS['WETH'], // address tokenA,
-                        100000, // uint256 tokenAPercentage,
-                        100000, // uint256 tokenBPercentage,
-                        1, // uint256 minAmountA,
-                        1, // uint256 minAmountB,
+                        100000, // uint256 ethPercentage,
+                        1, // uint256 minAmountEth,
+                        [TOKENS['WETH']], // address[] tokenA,
+                        [100000], // uint256[] tokenAPercentage,
+                        [1], // uint256[] minAmountA,
                     ],
                 ),
             ];
