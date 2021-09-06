@@ -19,7 +19,7 @@ import "./interfaces/IAutoFarmAddressToPoolId.sol";
  *
  */
 
-contract AutofarmDepositBridge is IStake{
+contract AutofarmDepositBridge is IStake {
     // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
     address constant autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;
     address constant farmToPoolAddress = 0x6E9c667DEA1f9751Aef98ADcCf4721578D7c3a31;
@@ -49,34 +49,7 @@ contract AutofarmDepositBridge is IStake{
 
         autofarm.deposit(poolId, amountIn);
 
-        emit Deposit(assetIn, amountIn);
-    }
-
-    /**
-      * @notice Claim rewards from the Autofarm protocol.
-      *
-      * @dev Wraps the Autofarm withdraw but sets value to 0, so we can just harbest rewards.
-      *
-      * @param asset Address of the asset that will be harvested
-      */
-    function harvest(address asset) external override {
-        IAutofarmV2_CrossChain autofarm = IAutofarmV2_CrossChain(autofarmAddress);
-
-        uint256 wMaticBalance = IERC20(wMaticAddress).balanceOf(address(this));
-        uint256 pAutoBalance = IERC20(pAutoAddress).balanceOf(address(this));
-
-        IAutoFarmAddressToPoolId addressToPool = IAutoFarmAddressToPoolId(farmToPoolAddress);
-        uint256 poolId = addressToPool.getPoolId(asset);
-
-        autofarm.withdraw(poolId, 0);
-
-        // WMatic
-        uint256 wMaticReward = IERC20(pAutoAddress).balanceOf(address(this)) - wMaticBalance;
-        emit Harvest(wMaticAddress,wMaticReward);
-
-        // PAuto
-        uint256 pAutoReward = IERC20(pAutoAddress).balanceOf(address(this)) - pAutoBalance;
-        emit Harvest(wMaticAddress, pAutoReward);
+        emit IndexPool_Stake_Deposit(assetIn, amountIn);
     }
 
     /**
@@ -100,14 +73,41 @@ contract AutofarmDepositBridge is IStake{
         uint256 amountOut = autofarm.stakedWantTokens(poolId, address(this)) * percentageOut / 100000;
         autofarm.withdraw(poolId, amountOut);
 
-        emit Withdraw(assetOut, amountOut);
+        emit IndexPool_Stake_Withdraw(assetOut, amountOut);
 
         // WMatic
         uint256 wMaticReward = IERC20(pAutoAddress).balanceOf(address(this)) - wMaticBalance;
-        emit Harvest(wMaticAddress,wMaticReward);
+        emit IndexPool_Stake_Harvest(wMaticAddress, wMaticReward);
 
         // PAuto
         uint256 pAutoReward = IERC20(pAutoAddress).balanceOf(address(this)) - pAutoBalance;
-        emit Harvest(wMaticAddress, pAutoReward);
+        emit IndexPool_Stake_Harvest(wMaticAddress, pAutoReward);
+    }
+
+    /**
+      * @notice Claim rewards from the Autofarm protocol.
+      *
+      * @dev Wraps the Autofarm withdraw but sets value to 0, so we can just harbest rewards.
+      *
+      * @param asset Address of the asset that will be harvested
+      */
+    function harvest(address asset) external override {
+        IAutofarmV2_CrossChain autofarm = IAutofarmV2_CrossChain(autofarmAddress);
+
+        uint256 wMaticBalance = IERC20(wMaticAddress).balanceOf(address(this));
+        uint256 pAutoBalance = IERC20(pAutoAddress).balanceOf(address(this));
+
+        IAutoFarmAddressToPoolId addressToPool = IAutoFarmAddressToPoolId(farmToPoolAddress);
+        uint256 poolId = addressToPool.getPoolId(asset);
+
+        autofarm.withdraw(poolId, 0);
+
+        // WMatic
+        uint256 wMaticReward = IERC20(pAutoAddress).balanceOf(address(this)) - wMaticBalance;
+        emit IndexPool_Stake_Harvest(wMaticAddress, wMaticReward);
+
+        // PAuto
+        uint256 pAutoReward = IERC20(pAutoAddress).balanceOf(address(this)) - pAutoBalance;
+        emit IndexPool_Stake_Harvest(wMaticAddress, pAutoReward);
     }
 }

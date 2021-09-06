@@ -294,7 +294,7 @@ describe("AaveV2DepositBridge", function () {
             let amDaiBalance = await amDai.balanceOf(wallet.address);
 
             // Get Deposit event
-            var event = await getFirstEvent({address: wallet.address}, AaveV2DepositBridge, 'Deposit');
+            var event = await getFirstEvent({address: wallet.address}, AaveV2DepositBridge, 'IndexPool_Stake_Deposit');
 
             expect(event.args.assetIn).to.be.equal(TOKENS['DAI']);
             expect(event.args.amountIn).to.be.equal(amDaiBalance);
@@ -371,7 +371,7 @@ describe("AaveV2DepositBridge", function () {
             let daiBalance = await dai.balanceOf(wallet.address);
 
             // Get Deposit event
-            var event = await getFirstEvent({address: wallet.address}, AaveV2DepositBridge, 'Withdraw');
+            var event = await getFirstEvent({address: wallet.address}, AaveV2DepositBridge, 'IndexPool_Stake_Withdraw');
 
             expect(event.args.amountOut).to.be.equal(daiBalance);
             expect(event.args.assetOut).to.be.equal(TOKENS['DAI']);
@@ -452,7 +452,7 @@ describe("AaveV2DepositBridge", function () {
             wmaticBalance = await wmatic.balanceOf(wallet.address);
 
             // Get Deposit event
-            var event = await getFirstEvent({address: wallet.address}, AaveV2DepositBridge, 'Harvest');
+            var event = await getFirstEvent({address: wallet.address}, AaveV2DepositBridge, 'IndexPool_Stake_Harvest');
 
             expect(event.args.claimedAsset).to.be.equal(TOKENS['WMAIN']);
             expect(event.args.claimedReward).to.be.equal(wmaticBalance);

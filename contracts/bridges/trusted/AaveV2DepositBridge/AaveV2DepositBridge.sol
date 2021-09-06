@@ -48,34 +48,8 @@ contract AaveV2DepositBridge is IStake {
 
         address assetOut = _aaveLendingPool.getReserveData(assetIn).aTokenAddress;
 
-        emit Deposit(assetIn, amount);
-        emit Withdraw(assetOut, amount);
-    }
-
-    /**
-      * @notice Claim rewards from the Aave protocol.
-      *
-      * @dev Wraps the Aave claim rewards and generate the necessary events to communicate with IndexPool's UI and
-      * back-end. Rewards for Polygon are currently in WMATIC, but this might change.
-      *
-      * @param asset Address of the asset that will be harvested
-      */
-    function harvest(address asset) external override {    
-        IAaveIncentivesController distributor = IAaveIncentivesController(incentivesControllerAddress);
-
-        ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
-
-        // Get aToken address from asset address
-        address aToken = _aaveLendingPool.getReserveData(asset).aTokenAddress;
-        address[] memory assets = new address[](1);
-        assets[0] = aToken;
-
-        // Claim rewards
-        uint256 amountToClaim = distributor.getRewardsBalance(assets, address(this));
-        uint256 claimedReward = distributor.claimRewards(assets, amountToClaim, address(this));
-        address claimedAsset = distributor.REWARD_TOKEN();
-
-        emit Harvest(claimedAsset, claimedReward);
+        emit IndexPool_Stake_Deposit(assetIn, amount);
+        emit IndexPool_Stake_Withdraw(assetOut, amount);
     }
 
     /**
@@ -93,7 +67,33 @@ contract AaveV2DepositBridge is IStake {
         uint256 amount = IERC20(assetIn).balanceOf(address(this)) * percentageOut / 100000;
         _aaveLendingPool.withdraw(assetOut, amount, address(this));
 
-        emit Deposit(assetIn, amount);
-        emit Withdraw(assetOut, amount);
+        emit IndexPool_Stake_Deposit(assetIn, amount);
+        emit IndexPool_Stake_Withdraw(assetOut, amount);
+    }
+
+    /**
+      * @notice Claim rewards from the Aave protocol.
+      *
+      * @dev Wraps the Aave claim rewards and generate the necessary events to communicate with IndexPool's UI and
+      * back-end. Rewards for Polygon are currently in WMATIC, but this might change.
+      *
+      * @param asset Address of the asset that will be harvested
+      */
+    function harvest(address asset) external override {
+        IAaveIncentivesController distributor = IAaveIncentivesController(incentivesControllerAddress);
+
+        ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
+
+        // Get aToken address from asset address
+        address aToken = _aaveLendingPool.getReserveData(asset).aTokenAddress;
+        address[] memory assets = new address[](1);
+        assets[0] = aToken;
+
+        // Claim rewards
+        uint256 amountToClaim = distributor.getRewardsBalance(assets, address(this));
+        uint256 claimedReward = distributor.claimRewards(assets, amountToClaim, address(this));
+        address claimedAsset = distributor.REWARD_TOKEN();
+
+        emit IndexPool_Stake_Harvest(claimedAsset, claimedReward);
     }
 }
