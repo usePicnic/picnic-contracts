@@ -22,7 +22,7 @@ import "./interfaces/IAutoFarmAddressToPoolId.sol";
 contract AutofarmDepositBridge is IStake{
     // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
     address constant autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;
-    address constant farmToPoolAddress = 0xd977422c9eE9B646f64A4C4389a6C98ad356d8C4;
+    address constant farmToPoolAddress = 0x6E9c667DEA1f9751Aef98ADcCf4721578D7c3a31;
 
     function deposit(address assetIn, uint256 percentageIn) external override {
         IAutofarmV2_CrossChain autofarm = IAutofarmV2_CrossChain(autofarmAddress);
