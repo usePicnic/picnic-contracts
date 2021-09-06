@@ -5,7 +5,7 @@ import {getFirstEvent} from "./utils";
 
 // TODO this bridge is work in progress
 
-describe("Autofarm", function () {
+describe("AutofarmDepositBridge", function () {
     let owner;
     let other;
     let UniswapV2SwapBridge;
@@ -14,7 +14,6 @@ describe("Autofarm", function () {
     let autofarm;
     let wallet;
 
-    const ADDRESSES = constants['POLYGON'];
     const TOKENS = constants['POLYGON']['TOKENS'];
 
     beforeEach(async function () {
@@ -28,12 +27,15 @@ describe("Autofarm", function () {
         let QuickswapLiquidityBridge = await ethers.getContractFactory("QuickswapLiquidityBridge");
         quickswapLiquidityBridge = await QuickswapLiquidityBridge.deploy();
 
-        let Autofarm = await ethers.getContractFactory("Autofarm");
+        let Autofarm = await ethers.getContractFactory("AutofarmDepositBridge");
         autofarm = await Autofarm.deploy();
 
         // Instantiate Wallet
         let Wallet = await ethers.getContractFactory("Wallet");
         wallet = await Wallet.deploy();
+
+        let AutoFarmAddressToPoolId = await ethers.getContractFactory("AutoFarmAddressToPoolId");
+        await AutoFarmAddressToPoolId.deploy();
     });
 
     describe("Actions", function () {
@@ -78,7 +80,6 @@ describe("Autofarm", function () {
                 autofarm.interface.encodeFunctionData(
                     "deposit",
                     [
-                       8, // uint256 poolId,
                        "0x1Bd06B96dd42AdA85fDd0795f3B4A79DB914ADD5", // address assetIn,
                        100000 // uint256 percentageIn
                     ],
@@ -148,7 +149,6 @@ describe("Autofarm", function () {
                 autofarm.interface.encodeFunctionData(
                     "deposit",
                     [
-                        8, // uint256 poolId,
                         "0x1Bd06B96dd42AdA85fDd0795f3B4A79DB914ADD5", // address assetIn,
                         100000 // uint256 percentageIn
                     ],
@@ -156,7 +156,7 @@ describe("Autofarm", function () {
                 autofarm.interface.encodeFunctionData(
                     "withdraw",
                     [
-                        8, // uint256 poolId,
+                        "0x1Bd06B96dd42AdA85fDd0795f3B4A79DB914ADD5", // address assetOut,
                         100000 // uint256 percentageOut
                     ],
                 ),

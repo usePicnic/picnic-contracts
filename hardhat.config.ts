@@ -47,7 +47,7 @@ module.exports = {
       gasPrice: 5*gwei
     }
   },
-  mocha: { timeout: '180000'},
+  mocha: { timeout: '1800000'},
   gasReporter: {
     currency: 'USD',
     gasPrice: 1,
