@@ -38,17 +38,18 @@ contract AaveV2DepositBridge is IStake {
     function deposit(address assetIn, uint256 percentageIn) external override {
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
 
-        uint256 amountIn = IERC20(assetIn).balanceOf(address(this)) * percentageIn / 100000;
+        uint256 amount = IERC20(assetIn).balanceOf(address(this)) * percentageIn / 100000;
 
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
         IERC20(assetIn).approve(aaveLendingPoolAddress, 0);
-        IERC20(assetIn).approve(aaveLendingPoolAddress, amountIn);
+        IERC20(assetIn).approve(aaveLendingPoolAddress, amount);
 
-        _aaveLendingPool.deposit(assetIn, amountIn, address(this), 0);
+        _aaveLendingPool.deposit(assetIn, amount, address(this), 0);
 
         address assetOut = _aaveLendingPool.getReserveData(assetIn).aTokenAddress;
 
-        emit Deposit(assetIn, amountIn, assetOut);
+        emit Deposit(assetIn, amount);
+        emit Withdraw(assetOut, amount);
     }
 
     /**
@@ -89,9 +90,10 @@ contract AaveV2DepositBridge is IStake {
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
 
         address assetIn = _aaveLendingPool.getReserveData(assetOut).aTokenAddress;
-        uint256 amountIn = IERC20(assetIn).balanceOf(address(this)) * percentageOut / 100000;
-        _aaveLendingPool.withdraw(assetOut, amountIn, address(this));
+        uint256 amount = IERC20(assetIn).balanceOf(address(this)) * percentageOut / 100000;
+        _aaveLendingPool.withdraw(assetOut, amount, address(this));
 
-        emit Withdraw(assetIn, amountIn, percentageOut, assetOut);
+        emit Deposit(assetIn, amount);
+        emit Withdraw(assetOut, amount);
     }
 }
