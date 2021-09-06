@@ -1,15 +1,15 @@
-pragma solidity ^0.8.6;
+pragma solidity ^0.6.6;
 
 interface ILiquidity {
 
-    event AddLiquidity (
+    event IndexPool_Liquidity_Add (
         address[] assetIn,
         uint256[] amountIn,
         address assetOut,
         uint256 amountOut
     );
 
-    event AddLiquidityFromETH (
+    event IndexPool_Liquidity_AddETH (
         uint256 ethAmount,
         address[] assetIn,
         uint256[] amountIn,
