@@ -7,9 +7,9 @@ import "hardhat/console.sol";
 contract AutoFarmAddressToPoolId {
     mapping(address=>uint256) poolMapper;
     uint256 updatedLen = 0;
+    address constant autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;
 
     function getPoolId(address asset) external returns (uint256) {
-        address autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;
         IAutofarmV2_CrossChain autofarm = IAutofarmV2_CrossChain(autofarmAddress);
 
         updatePools();
@@ -21,7 +21,6 @@ contract AutoFarmAddressToPoolId {
     }
 
     function updatePools() internal {
-        address autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;
         IAutofarmV2_CrossChain autofarm = IAutofarmV2_CrossChain(autofarmAddress);
 
         uint256 len = autofarm.poolLength();

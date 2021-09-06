@@ -20,10 +20,11 @@ import "./interfaces/IAutoFarmAddressToPoolId.sol";
  */
 
 contract AutofarmDepositBridge is IStake{
+    // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
+    address constant autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;
+    address constant farmToPoolAddress = 0xd977422c9eE9B646f64A4C4389a6C98ad356d8C4;
 
     function deposit(address assetIn, uint256 percentageIn) external override {
-        // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
-        address autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;
         IAutofarmV2_CrossChain autofarm = IAutofarmV2_CrossChain(autofarmAddress);
 
         uint256 amountIn = IERC20(assetIn).balanceOf(address(this)) * percentageIn / 100000;
@@ -33,29 +34,25 @@ contract AutofarmDepositBridge is IStake{
         IERC20(assetIn).approve(autofarmAddress, amountIn);
 
         // TODO how to get proper address before compile time?
-        IAutoFarmAddressToPoolId addressToPool = IAutoFarmAddressToPoolId(0xd977422c9eE9B646f64A4C4389a6C98ad356d8C4);
+        IAutoFarmAddressToPoolId addressToPool = IAutoFarmAddressToPoolId(farmToPoolAddress);
         uint256 poolId = addressToPool.getPoolId(assetIn);
 
         autofarm.deposit(poolId, amountIn);
     }
 
     function harvest(address asset) external override {
-        // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
-        address autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;
         IAutofarmV2_CrossChain autofarm = IAutofarmV2_CrossChain(autofarmAddress);
 
-        IAutoFarmAddressToPoolId addressToPool = IAutoFarmAddressToPoolId(0xd977422c9eE9B646f64A4C4389a6C98ad356d8C4);
+        IAutoFarmAddressToPoolId addressToPool = IAutoFarmAddressToPoolId(farmToPoolAddress);
         uint256 poolId = addressToPool.getPoolId(asset);
 
         autofarm.withdraw(poolId, 0);
     }
 
     function withdraw(address assetOut, uint256 percentageOut) external override {
-        // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
-        address autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;
         IAutofarmV2_CrossChain autofarm = IAutofarmV2_CrossChain(autofarmAddress);
 
-        IAutoFarmAddressToPoolId addressToPool = IAutoFarmAddressToPoolId(0xd977422c9eE9B646f64A4C4389a6C98ad356d8C4);
+        IAutoFarmAddressToPoolId addressToPool = IAutoFarmAddressToPoolId(farmToPoolAddress);
         uint256 poolId = addressToPool.getPoolId(assetOut);
 
         uint256 amountOut = autofarm.stakedWantTokens(poolId, address(this)) * percentageOut / 100000;
