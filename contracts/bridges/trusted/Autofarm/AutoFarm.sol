@@ -22,9 +22,9 @@ import "./interfaces/IAutofarm.sol";
 
 contract Autofarm {
 
+    address constant autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;
+
     function deposit(uint256 poolId, address assetIn, uint256 percentageIn) external {
-        // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
-        address autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;
         IAutofarm autofarm = IAutofarm(autofarmAddress);
 
         uint256 amountIn = IERC20(assetIn).balanceOf(address(this)) * percentageIn / 100000;
@@ -37,8 +37,6 @@ contract Autofarm {
     }
 
     function withdraw(uint256 poolId, uint256 percentageOut) external {
-        // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
-        address autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;
         IAutofarm autofarm = IAutofarm(autofarmAddress);
 
         uint256 amountOut = autofarm.stakedWantTokens(poolId, address(this)) * percentageOut / 100000;
