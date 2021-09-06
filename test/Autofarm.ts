@@ -33,9 +33,6 @@ describe("AutofarmDepositBridge", function () {
         // Instantiate Wallet
         let Wallet = await ethers.getContractFactory("Wallet");
         wallet = await Wallet.deploy();
-
-        let AutoFarmAddressToPoolId = await ethers.getContractFactory("AutoFarmAddressToPoolId");
-        await AutoFarmAddressToPoolId.deploy();
     });
 
     describe("Actions", function () {
