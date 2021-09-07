@@ -85,23 +85,32 @@ contract QuickswapLiquidityBridge is ILiquidity {
         uint256[] calldata minAmounts
     ) external override {
 
-        uint256 amountToken = IERC20(tokens[0]).balanceOf(address(this)) * percentages[0] / 100000;
+        uint256 amountTokenDesired = IERC20(tokens[0]).balanceOf(address(this)) * percentages[0] / 100000;
 
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
         IERC20(tokens[0]).approve(routerAddress, 0);
-        IERC20(tokens[0]).approve(routerAddress, amountToken);
+        IERC20(tokens[0]).approve(routerAddress, amountTokenDesired);
 
-        _uniswapRouter.addLiquidityETH{
+        ( , uint amountETH, uint liquidity) = _uniswapRouter.addLiquidityETH{
         value : address(this).balance * ethPercentage / 100000}(
-            tokens[0], //       address token,
-            amountToken, //       uint amountTokenDesired,
-            minAmounts[0], //        uint amountTokenMin,
-            minAmountEth, //        uint amountETHMin,
-            address(this), //  address to,
-            block.timestamp + 100000  //   uint deadline
+            tokens[0],          // address token,
+            amountTokenDesired,  // uint amountTokenDesired,
+            minAmounts[0],      // uint amountTokenMin,
+            minAmountEth,       // uint amountETHMin,
+            address(this),       // address to,
+            block.timestamp + 100000  // uint deadline
         );
 
-        // TODO emit event and fix stack too deep error
-        //emit AddLiquidityFromETH (ethAmount, assetIn, amountIn, assetOut, amountOut);
+        address assetOut = _uniswapFactory.getPair(tokens[0], tokens[1]);
+
+        // TODO review if events arguments are OK
+        emit IndexPool_Liquidity_AddETH (
+           amountETH,   //uint256 ethAmount
+           tokens,  //address[] assetIn
+           percentages, //uint256[] amountIn
+           assetOut, //address assetOut
+           liquidity //uint256 amountOut
+        );
+        
     }
 }

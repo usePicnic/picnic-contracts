@@ -100,8 +100,9 @@ describe("QuickswapLiquidityBridge", function () {
                 quickswapLiquidityBridge.address,
             ];
 
-            // Set path
-
+            // Set minimum amounts
+            var minAmountEth = 1;
+            var minAmountA = 1;
 
             // Set encoded calls
             var _bridgeEncodedCalls = [
@@ -109,7 +110,7 @@ describe("QuickswapLiquidityBridge", function () {
                     "tradeFromETHToToken",
                     [
                         50000,
-                        1,
+                        minAmountEth,
                         [TOKENS['WMAIN'], TOKENS['WETH']]
                     ],
                 ),
@@ -117,10 +118,10 @@ describe("QuickswapLiquidityBridge", function () {
                     "addLiquidityETH",
                     [
                         100000, // uint256 ethPercentage,
-                        1, // uint256 minAmountEth,
+                        minAmountEth, // uint256 minAmountEth,
                         [TOKENS['WETH']], // address[] tokenA,
                         [100000], // uint256[] tokenAPercentage,
-                        [1], // uint256[] minAmountA,
+                        [minAmountA], // uint256[] minAmountA,
                     ],
                 ),
             ];
@@ -138,7 +139,7 @@ describe("QuickswapLiquidityBridge", function () {
                 _bridgeEncodedCalls,
             );
 
-            // Wallet DAI amount should be 0
+            // Wallet liquidity token amount should be above 0
             let lpToken = await ethers.getContractAt(
                 "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
                 "0xadbF1854e5883eB8aa7BAf50705338739e558E5b")
