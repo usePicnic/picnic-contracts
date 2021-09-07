@@ -302,4 +302,14 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
 
         emit INDEXPOOL_WITHDRAW(nftId, outputs.tokens, outputAmounts, outputEth);
     }
+
+    /**
+     * @notice Returns the base URI for the NFT metadata
+     *
+     * @dev The URI of a specific token will be the base URI concatened with the token id, e.g. for token 0
+     * the URI will be http://placeholder.com/0.
+     */
+    function _baseURI() internal pure override returns (string memory) {
+        return "http://placeholder.com";
+    }    
 }
