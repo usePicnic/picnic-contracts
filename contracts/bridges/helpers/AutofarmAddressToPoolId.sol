@@ -1,10 +1,10 @@
 pragma solidity ^0.8.6;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "../interfaces/IAutofarmV2_CrossChain.sol";
+import "../trusted/AutofarmDepositBridge/interfaces/IAutofarmV2_CrossChain.sol";
 import "hardhat/console.sol";
 
-contract AutoFarmAddressToPoolId {
+contract AutofarmAddressToPoolId {
     mapping(address=>uint256) poolMapper;
     uint256 updatedLen = 0;
     address constant autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;
