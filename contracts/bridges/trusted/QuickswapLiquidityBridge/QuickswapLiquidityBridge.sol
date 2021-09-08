@@ -84,14 +84,16 @@ contract QuickswapLiquidityBridge is ILiquidity {
         uint256[] calldata percentages,
         uint256[] calldata minAmounts
     ) external override {
-
+        
         uint256 amountTokenDesired = IERC20(tokens[0]).balanceOf(address(this)) * percentages[0] / 100000;
 
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
         IERC20(tokens[0]).approve(routerAddress, 0);
         IERC20(tokens[0]).approve(routerAddress, amountTokenDesired);
 
-        ( , uint amountETH, uint liquidity) = _uniswapRouter.addLiquidityETH{
+        // Receive addLiquidityETH output in a array to avoid stack too deep error 
+        uint256[3] memory routerOutputs; // [amountToken, amountETH, liquidity] 
+        (routerOutputs[0], routerOutputs[1], routerOutputs[2]) = _uniswapRouter.addLiquidityETH{
         value : address(this).balance * ethPercentage / 100000}(
             tokens[0],          // address token,
             amountTokenDesired,  // uint amountTokenDesired,
@@ -99,18 +101,20 @@ contract QuickswapLiquidityBridge is ILiquidity {
             minAmountEth,       // uint amountETHMin,
             address(this),       // address to,
             block.timestamp + 100000  // uint deadline
-        );
-
+        );        
+        
+        // Prepare arguments for emitting event 
+        uint[] memory amountTokensArray = new uint[](1);
+        amountTokensArray[0] = routerOutputs[0];        
         address assetOut = _uniswapFactory.getPair(tokens[0], tokens[1]);
 
-        // TODO review if events arguments are OK
         emit IndexPool_Liquidity_AddETH (
-           amountETH,   //uint256 ethAmount
-           tokens,  //address[] assetIn
-           percentages, //uint256[] amountIn
-           assetOut, //address assetOut
-           liquidity //uint256 amountOut
-        );
-        
+            routerOutputs[1],   //uint256 ethAmount
+            tokens,            //address[] assetIn
+            amountTokensArray,  //uint256[] amountIn
+            assetOut,           //address assetOut
+            routerOutputs[2]    //uint256 amountOut
+        );          
     }
 }
+
