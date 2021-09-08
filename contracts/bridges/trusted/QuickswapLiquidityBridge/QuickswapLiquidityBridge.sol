@@ -4,6 +4,7 @@ import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
 import "../../interfaces/ILiquidity.sol";
+import "hardhat/console.sol";
 
 /**
  * @title QuickswapLiquidityBridge
@@ -84,7 +85,7 @@ contract QuickswapLiquidityBridge is ILiquidity {
         uint256[] calldata percentages,
         uint256[] calldata minAmounts
     ) external override {
-        
+
         uint256 amountTokenDesired = IERC20(tokens[0]).balanceOf(address(this)) * percentages[0] / 100000;
 
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
@@ -92,29 +93,32 @@ contract QuickswapLiquidityBridge is ILiquidity {
         IERC20(tokens[0]).approve(routerAddress, amountTokenDesired);
 
         // Receive addLiquidityETH output in a array to avoid stack too deep error 
-        uint256[3] memory routerOutputs; // [amountToken, amountETH, liquidity] 
+        uint256[3] memory routerOutputs;
+        // [amountToken, amountETH, liquidity]
         (routerOutputs[0], routerOutputs[1], routerOutputs[2]) = _uniswapRouter.addLiquidityETH{
         value : address(this).balance * ethPercentage / 100000}(
-            tokens[0],          // address token,
-            amountTokenDesired,  // uint amountTokenDesired,
-            minAmounts[0],      // uint amountTokenMin,
-            minAmountEth,       // uint amountETHMin,
-            address(this),       // address to,
+            tokens[0], // address token,
+            amountTokenDesired, // uint amountTokenDesired,
+            minAmounts[0], // uint amountTokenMin,
+            minAmountEth, // uint amountETHMin,
+            address(this), // address to,
             block.timestamp + 100000  // uint deadline
-        );        
-        
+        );
+
         // Prepare arguments for emitting event 
         uint[] memory amountTokensArray = new uint[](1);
-        amountTokensArray[0] = routerOutputs[0];        
-        address assetOut = _uniswapFactory.getPair(tokens[0], tokens[1]);
+        amountTokensArray[0] = routerOutputs[0];
 
-        emit IndexPool_Liquidity_AddETH (
-            routerOutputs[1],   //uint256 ethAmount
-            tokens,            //address[] assetIn
-            amountTokensArray,  //uint256[] amountIn
-            assetOut,           //address assetOut
+        // Address is for WMATIC
+        address assetOut = _uniswapFactory.getPair(tokens[0], 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270);
+
+        emit IndexPool_Liquidity_AddETH(
+            routerOutputs[1], //uint256 ethAmount
+            tokens, //address[] assetIn
+            amountTokensArray, //uint256[] amountIn
+            assetOut, //address assetOut
             routerOutputs[2]    //uint256 amountOut
-        );          
+        );
     }
 }
 
