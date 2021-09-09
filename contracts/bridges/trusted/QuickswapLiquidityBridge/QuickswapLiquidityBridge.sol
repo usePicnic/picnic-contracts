@@ -120,5 +120,33 @@ contract QuickswapLiquidityBridge is ILiquidity {
             routerOutputs[2]    //uint256 amountOut
         );
     }
-}
+
+    function removeLiquidity(
+        address[] calldata tokens,
+        uint256[] calldata minAmounts,
+        address lpToken,
+        uint256 percentage
+    ) external { // todo override
+        uint256 liquidity = IERC20(lpToken).balanceOf(address(this)) * percentage / 100000;
+
+        // Approve 0 first as a few ERC20 tokens are requiring this pattern.
+        IERC20(lpToken).approve(routerAddress, 0);
+        IERC20(lpToken).approve(routerAddress, liquidity);
+
+        _uniswapRouter.removeLiquidity(
+                tokens[0], // tokenA
+                tokens[1], // tokenB
+                liquidity, // liquidity,
+                minAmounts[0], // amountAMin
+                minAmounts[1], // amountBMin
+                address(this), // address to,
+                block.timestamp + 100000  // uint deadline
+                );
+        }
+        //emit IndexPool_Liquidity_Remove(tokens, percentages, assetOut, liquidity);
+    }
+
+
+
+
 
