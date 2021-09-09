@@ -14,15 +14,27 @@ const weiToString = (wei) => {
         .toNumber() / Math.pow(10, 4);
 }
 
+function bridgeNameToFilePath(bridgeName : string) : string{
+    return `./artifacts/contracts/bridges/trusted/${bridgeName}/${bridgeName}.sol/${bridgeName}.json`;
+}
+
 const contractsToDeploy = [
     {contractName: "IndexPool", filePath: "./artifacts/contracts/IndexPool.sol/IndexPool.json"},
     {
         contractName: "AaveV2DepositBridge",
-        filePath: "./artifacts/contracts/bridges/AaveV2DepositBridge/AaveV2DepositBridge.sol/AaveV2DepositBridge.json"
+        filePath: bridgeNameToFilePath("AaveV2DepositBridge")
     },
     {
         contractName: "QuickswapSwapBridge",
-        filePath: "./artifacts/contracts/bridges/QuickswapSwapBridge/QuickswapSwapBridge.sol/QuickswapSwapBridge.json"
+        filePath: bridgeNameToFilePath("QuickswapSwapBridge")
+    },
+    {
+        contractName: "QuickswapLiquidityBridge",
+        filePath: bridgeNameToFilePath("QuickswapLiquidityBridge")
+    },
+    {
+        contractName: "AutofarmDepositBridge",
+        filePath: bridgeNameToFilePath("AutofarmDepositBridge")
     },
 ]
 
