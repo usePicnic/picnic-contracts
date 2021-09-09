@@ -36,8 +36,8 @@ describe("Wallet", function () {
     it("UseBridges (Buys DAI on Uniswap)", async function () {
         // Set bridges addresses
         var _bridgeAddresses = [
-            uniswapV2SwapBridge.address,
             wmaticBridge.address,
+            uniswapV2SwapBridge.address,
         ];
 
         // Set path

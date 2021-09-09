@@ -679,13 +679,13 @@ describe("IndexPool", function () {
                 wmaticBridge.interface.encodeFunctionData(
                     "wrap",
                     [
-                        100000
+                        50000
                     ],
                 ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
                     "swapTokenToToken",
                     [
-                        50000,
+                        100000,
                         1,
                         pathUniswap
                     ],
