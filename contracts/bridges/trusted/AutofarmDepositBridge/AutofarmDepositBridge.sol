@@ -22,7 +22,7 @@ import "./interfaces/IAutoFarmAddressToPoolId.sol";
 contract AutofarmDepositBridge is IStake {
     // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
     address constant autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;
-    address constant farmToPoolAddress = 0x6E9c667DEA1f9751Aef98ADcCf4721578D7c3a31;
+    address constant helperAddress = 0x44C3d2965a369b32ebB2EECa29b2E99E15feC3aE; // address -> poolId
     address constant pAutoAddress = 0x7f426F6Dc648e50464a0392E60E1BB465a67E9cf;
     address constant wMaticAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270;
 
@@ -43,8 +43,7 @@ contract AutofarmDepositBridge is IStake {
         IERC20(assetIn).approve(autofarmAddress, 0);
         IERC20(assetIn).approve(autofarmAddress, amountIn);
 
-        // TODO how to get proper address before compile time?
-        IAutoFarmAddressToPoolId addressToPool = IAutoFarmAddressToPoolId(farmToPoolAddress);
+        IAutoFarmAddressToPoolId addressToPool = IAutoFarmAddressToPoolId(helperAddress);
         uint256 poolId = addressToPool.getPoolId(assetIn);
 
         autofarm.deposit(poolId, amountIn);
@@ -67,7 +66,7 @@ contract AutofarmDepositBridge is IStake {
         uint256 wMaticBalance = IERC20(wMaticAddress).balanceOf(address(this));
         uint256 pAutoBalance = IERC20(pAutoAddress).balanceOf(address(this));
 
-        IAutoFarmAddressToPoolId addressToPool = IAutoFarmAddressToPoolId(farmToPoolAddress);
+        IAutoFarmAddressToPoolId addressToPool = IAutoFarmAddressToPoolId(helperAddress);
         uint256 poolId = addressToPool.getPoolId(assetOut);
 
         uint256 amountOut = autofarm.stakedWantTokens(poolId, address(this)) * percentageOut / 100000;
@@ -97,7 +96,7 @@ contract AutofarmDepositBridge is IStake {
         uint256 wMaticBalance = IERC20(wMaticAddress).balanceOf(address(this));
         uint256 pAutoBalance = IERC20(pAutoAddress).balanceOf(address(this));
 
-        IAutoFarmAddressToPoolId addressToPool = IAutoFarmAddressToPoolId(farmToPoolAddress);
+        IAutoFarmAddressToPoolId addressToPool = IAutoFarmAddressToPoolId(helperAddress);
         uint256 poolId = addressToPool.getPoolId(asset);
 
         autofarm.withdraw(poolId, 0);

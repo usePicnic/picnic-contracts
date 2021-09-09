@@ -28,16 +28,15 @@ async function main() {
     console.log("Deploying from:", deployer.address);
     console.log("Account balance:", weiToString(balanceBegin));
 
-    let contractInterface = await ethers.getContractFactory('AutoFarmAddressToPoolId');
+    let contractInterface = await ethers.getContractFactory('AutofarmAddressToPoolId');
     const autoFarmAddressToPoolId = await contractInterface.deploy();
 
     console.log('autofarmAddressToPoolId address:', autoFarmAddressToPoolId.address);
 
-    await autoFarmAddressToPoolId.getPoolId('0x1Bd06B96dd42AdA85fDd0795f3B4A79DB914ADD5', {gasLimit: 10000000});
+    await autoFarmAddressToPoolId.getPoolId('0x1Bd06B96dd42AdA85fDd0795f3B4A79DB914ADD5', {gasLimit: 6000000});
 
     console.log("Mint succeeded:", weiToString(balanceBegin));
     console.log("Account balance:", weiToString(balanceBegin));
-
 }
 
 main()
