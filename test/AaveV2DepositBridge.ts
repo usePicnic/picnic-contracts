@@ -83,7 +83,7 @@ describe("AaveV2DepositBridge", function () {
             let daiBalance = await dai.balanceOf(wallet.address);
             expect(daiBalance).to.be.equal(0);
 
-            // Wallet DAI amount should be 0
+            // Wallet amDAI amount should be 0
             let amDai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["amDAI"])
             let amDaiBalance = await amDai.balanceOf(wallet.address);
             expect(amDaiBalance).to.be.above(0);
