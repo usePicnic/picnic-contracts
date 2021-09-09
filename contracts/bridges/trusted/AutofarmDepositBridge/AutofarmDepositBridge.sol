@@ -48,7 +48,7 @@ contract AutofarmDepositBridge is IStake {
 
         autofarm.deposit(poolId, amountIn);
 
-        emit INDEXPOOL_STAKE_DEPOSIT(assetIn, amountIn);
+        emit INDEXPOOL_STAKE_IN(assetIn, amountIn);
     }
 
     /**
@@ -72,41 +72,14 @@ contract AutofarmDepositBridge is IStake {
         uint256 amountOut = autofarm.stakedWantTokens(poolId, address(this)) * percentageOut / 100000;
         autofarm.withdraw(poolId, amountOut);
 
-        emit INDEXPOOL_STAKE_WITHDRAW(assetOut, amountOut);
+        emit INDEXPOOL_STAKE_OUT(assetOut, amountOut);
 
         // WMatic
         uint256 wMaticReward = IERC20(pAutoAddress).balanceOf(address(this)) - wMaticBalance;
-        emit INDEXPOOL_STAKE_HARVEST(wMaticAddress, wMaticReward);
+        emit INDEXPOOL_STAKE_OUT(wMaticAddress, wMaticReward);
 
         // PAuto
         uint256 pAutoReward = IERC20(pAutoAddress).balanceOf(address(this)) - pAutoBalance;
-        emit INDEXPOOL_STAKE_HARVEST(wMaticAddress, pAutoReward);
-    }
-
-    /**
-      * @notice Claim rewards from the Autofarm protocol.
-      *
-      * @dev Wraps the Autofarm withdraw but sets value to 0, so we can just harbest rewards.
-      *
-      * @param asset Address of the asset that will be harvested
-      */
-    function harvest(address asset) external override {
-        IAutofarmV2_CrossChain autofarm = IAutofarmV2_CrossChain(autofarmAddress);
-
-        uint256 wMaticBalance = IERC20(wMaticAddress).balanceOf(address(this));
-        uint256 pAutoBalance = IERC20(pAutoAddress).balanceOf(address(this));
-
-        IAutoFarmAddressToPoolId addressToPool = IAutoFarmAddressToPoolId(helperAddress);
-        uint256 poolId = addressToPool.getPoolId(asset);
-
-        autofarm.withdraw(poolId, 0);
-
-        // WMatic
-        uint256 wMaticReward = IERC20(pAutoAddress).balanceOf(address(this)) - wMaticBalance;
-        emit INDEXPOOL_STAKE_HARVEST(wMaticAddress, wMaticReward);
-
-        // PAuto
-        uint256 pAutoReward = IERC20(pAutoAddress).balanceOf(address(this)) - pAutoBalance;
-        emit INDEXPOOL_STAKE_HARVEST(wMaticAddress, pAutoReward);
+        emit INDEXPOOL_STAKE_OUT(wMaticAddress, pAutoReward);
     }
 }
