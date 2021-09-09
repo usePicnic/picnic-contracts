@@ -7,23 +7,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-/**
- * @title IndexPool
- * @author IndexPool
- *
- * @notice Coordinates portfolio creation, deposits/withdrawals, and fee payments.
- *
- * @dev This contract has 3 main functions:
- *
- * 1. Mint and manage NFTs
- * 1.1 Track ownership of NFTs
- * 1.2 Track NFT and Wallet relationship
- * 2. Create and manage wallets
- * 2.1 Control deposits / withdrawals to wallets
- * 2.2 Control the permissions for delegate calls to bridges
- * 3. Collect fees for the IndexPool protocol
- */
-
+// This contract is used only for unit and Echidna tests 
 contract TestIndexPool is IIndexPool, ERC721, Ownable {
     using SafeERC20 for IERC20;
 
