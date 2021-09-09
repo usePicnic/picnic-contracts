@@ -78,10 +78,10 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
     // NFT properties
     uint256 public tokenCounter = 0;
     mapping(uint256 => address) private _nftIdToWallet;
+    string _nftImageURI = "http://art.indexpool.org";
 
     // Constructor
-    constructor() ERC721("INDEXPOOL", "IPNFT") Ownable() {
-    }
+    constructor() ERC721("INDEXPOOL", "IPNFT") Ownable() {}
 
     // External functions
 
@@ -303,13 +303,23 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         emit INDEXPOOL_WITHDRAW(nftId, outputs.tokens, outputAmounts, outputEth);
     }
 
+    // Art related
+    /**
+     * @dev Internal function to set the base URI for all token IDs. It is
+     * automatically added as a prefix to the value returned in {tokenURI},
+     * or to the token ID if {tokenURI} is empty.
+     */
+    function setBaseURI(string memory nftImageURI) external onlyOwner {
+        _nftImageURI = nftImageURI;
+    }
+
     /**
      * @notice Returns the base URI for the NFT metadata
      *
-     * @dev The URI of a specific token will be the base URI concatened with the token id, e.g. for token 0
+     * @dev The URI of a specific token will be the base URI concatenated with the token id, e.g. for token 0
      * the URI will be http://placeholder.com/0.
      */
-    function _baseURI() internal pure override returns (string memory) {
-        return "http://placeholder.com";
+    function _baseURI() internal view override returns (string memory) {
+        return _nftImageURI;
     }    
 }
