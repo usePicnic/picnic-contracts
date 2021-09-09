@@ -1,7 +1,7 @@
 pragma solidity ^0.8.6;
 
 interface ISwap {
-    event TradedFromTokenToToken(
+    event INDEXPOOL_SWAP_TOKEN(
         address[] path,
         uint256[] amounts
     );
@@ -12,5 +12,3 @@ interface ISwap {
         address[] calldata path
     ) external;
 }
-
-

@@ -73,7 +73,7 @@ contract QuickswapLiquidityBridge is ILiquidity {
 
         address assetOut = _uniswapFactory.getPair(tokens[0], tokens[1]);
 
-        emit IndexPool_Liquidity_Add(tokens, amountTokensArray, assetOut, routerOutputs[2]);
+        emit INDEXPOOL_LIQUIDITY_ADD(tokens, amountTokensArray, assetOut, routerOutputs[2]);
     }
 
     function removeLiquidity(
@@ -100,7 +100,7 @@ contract QuickswapLiquidityBridge is ILiquidity {
             block.timestamp + 100000  // uint deadline
         );
 
-        emit IndexPool_Liquidity_Remove(tokens, amountTokensArray, lpToken, liquidity);
+        emit INDEXPOOL_LIQUIDITY_REMOVE(tokens, amountTokensArray, lpToken, liquidity);
     }
 }
 

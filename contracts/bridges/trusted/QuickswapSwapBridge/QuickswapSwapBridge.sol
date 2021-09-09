@@ -49,6 +49,6 @@ contract QuickswapSwapBridge is ISwap {
             block.timestamp + 100000
         );
 
-        emit TradedFromTokenToToken(path, amounts);
+        emit INDEXPOOL_SWAP_TOKEN(path, amounts);
     }
 }

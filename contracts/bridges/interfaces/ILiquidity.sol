@@ -2,14 +2,14 @@ pragma solidity ^0.8.6;
 
 interface ILiquidity {
 
-    event IndexPool_Liquidity_Add (
+    event INDEXPOOL_LIQUIDITY_ADD(
         address[] assetIn,
         uint256[] amountIn,
         address assetOut,
         uint256 amountOut
     );
 
-    event IndexPool_Liquidity_Remove(
+    event INDEXPOOL_LIQUIDITY_REMOVE(
         address[] tokens,
         uint256[] amountTokensArray,
         address assetOut,
