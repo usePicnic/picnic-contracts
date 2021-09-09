@@ -11,6 +11,7 @@ describe("IndexPool", function () {
     let indexpool;
     let uniswapV2SwapBridge;
     let uniswapV2Router02;
+    let wmaticBridge;
 
     const ADDRESSES = constants['POLYGON'];
     const TOKENS = constants['POLYGON']['TOKENS'];
@@ -24,6 +25,9 @@ describe("IndexPool", function () {
 
         let UniswapV2SwapBridge = await ethers.getContractFactory("QuickswapSwapBridge");
         uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
+
+        let WMaticBridge = await ethers.getContractFactory("WMaticBridge");
+        wmaticBridge = await WMaticBridge.deploy();
 
         uniswapV2Router02 = await ethers.getContractAt("IUniswapV2Router02", ADDRESSES["UNISWAP_V2_ROUTER"]);
     });
@@ -332,6 +336,7 @@ describe("IndexPool", function () {
             // Code above was tested elsewhere
 
             _bridgeAddresses = [
+                wmaticBridge.address,
                 uniswapV2SwapBridge.address,
             ];
 
@@ -343,8 +348,14 @@ describe("IndexPool", function () {
 
             // Set encoded calls
             _bridgeEncodedCalls = [
+                wmaticBridge.interface.encodeFunctionData(
+                    "wrap",
+                    [
+                        100000
+                    ],
+                ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
+                    "swapTokenToToken",
                     [
                         100000,
                         1,
@@ -428,6 +439,7 @@ describe("IndexPool", function () {
         it("Withdraw from portfolio - in DAI", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
+                wmaticBridge.address,
                 uniswapV2SwapBridge.address,
             ];
 
@@ -439,8 +451,14 @@ describe("IndexPool", function () {
 
             // Set encoded calls
             var _bridgeEncodedCalls = [
+                wmaticBridge.interface.encodeFunctionData(
+                    "wrap",
+                    [
+                        100000
+                    ],
+                ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
+                    "swapTokenToToken",
                     [
                         100000,
                         1,
@@ -646,6 +664,7 @@ describe("IndexPool", function () {
 
             // Set bridges addresses
             var _bridgeAddresses = [
+                wmaticBridge.address,
                 uniswapV2SwapBridge.address,
             ];
 
@@ -657,8 +676,14 @@ describe("IndexPool", function () {
 
             // Set encoded calls
             var _bridgeEncodedCalls = [
+                wmaticBridge.interface.encodeFunctionData(
+                    "wrap",
+                    [
+                        100000
+                    ],
+                ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
+                    "swapTokenToToken",
                     [
                         50000,
                         1,

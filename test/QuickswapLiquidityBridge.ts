@@ -12,6 +12,7 @@ describe("QuickswapLiquidityBridge", function () {
     let uniswapV2SwapBridge;
     let wallet;
     let quickswapLiquidityBridge;
+    let wmaticBridge;
 
     const ADDRESSES = constants['POLYGON'];
     const TOKENS = constants['POLYGON']['TOKENS'];
@@ -27,6 +28,9 @@ describe("QuickswapLiquidityBridge", function () {
         let QuickswapLiquidityBridge = await ethers.getContractFactory("QuickswapLiquidityBridge");
         quickswapLiquidityBridge = await QuickswapLiquidityBridge.deploy();
 
+        let WMaticBridge = await ethers.getContractFactory("WMaticBridge");
+        wmaticBridge = await WMaticBridge.deploy();
+
         // Instantiate Wallet
         let Wallet = await ethers.getContractFactory("Wallet");
         wallet = await Wallet.deploy();
@@ -36,18 +40,22 @@ describe("QuickswapLiquidityBridge", function () {
         it("Add Liquidity - WETH/QUICK LP Token", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
+                wmaticBridge.address,
                 uniswapV2SwapBridge.address,
                 uniswapV2SwapBridge.address,
                 quickswapLiquidityBridge.address,
             ];
 
-            // Set path
-
-
             // Set encoded calls
             var _bridgeEncodedCalls = [
+                wmaticBridge.interface.encodeFunctionData(
+                    "wrap",
+                    [
+                        100000
+                    ],
+                ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
+                    "swapTokenToToken",
                     [
                         50000,
                         1,
@@ -55,7 +63,7 @@ describe("QuickswapLiquidityBridge", function () {
                     ],
                 ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
+                    "swapTokenToToken",
                     [
                         100000,
                         1,
@@ -96,6 +104,7 @@ describe("QuickswapLiquidityBridge", function () {
         it("Add Liquidity - WETH/WMATIC LP Token", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
+                wmaticBridge.address,
                 uniswapV2SwapBridge.address,
                 quickswapLiquidityBridge.address,
             ];
@@ -106,8 +115,14 @@ describe("QuickswapLiquidityBridge", function () {
 
             // Set encoded calls
             var _bridgeEncodedCalls = [
+                wmaticBridge.interface.encodeFunctionData(
+                    "wrap",
+                    [
+                        100000
+                    ],
+                ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
+                    "swapTokenToToken",
                     [
                         50000,
                         minAmountEth,
@@ -115,7 +130,7 @@ describe("QuickswapLiquidityBridge", function () {
                     ],
                 ),
                 quickswapLiquidityBridge.interface.encodeFunctionData(
-                    "addLiquidityETH",
+                    "addLiquidity",
                     [
                         100000, // uint256 ethPercentage,
                         minAmountEth, // uint256 minAmountEth,

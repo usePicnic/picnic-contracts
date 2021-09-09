@@ -12,6 +12,7 @@ describe("AutofarmDepositBridge", function () {
     let uniswapV2SwapBridge;
     let quickswapLiquidityBridge;
     let autofarm;
+    let wmaticBridge;
     let wallet;
 
     const TOKENS = constants['POLYGON']['TOKENS'];
@@ -30,6 +31,9 @@ describe("AutofarmDepositBridge", function () {
         let Autofarm = await ethers.getContractFactory("AutofarmDepositBridge");
         autofarm = await Autofarm.deploy();
 
+        let WMaticBridge = await ethers.getContractFactory("WMaticBridge");
+        wmaticBridge = await WMaticBridge.deploy();
+
         // Instantiate Wallet
         let Wallet = await ethers.getContractFactory("Wallet");
         wallet = await Wallet.deploy();
@@ -39,6 +43,7 @@ describe("AutofarmDepositBridge", function () {
         it("Deposit - WETH/QUICK LP Token", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
+                wmaticBridge.address,
                 uniswapV2SwapBridge.address,
                 uniswapV2SwapBridge.address,
                 quickswapLiquidityBridge.address,
@@ -47,8 +52,14 @@ describe("AutofarmDepositBridge", function () {
 
             // Set encoded calls
             var _bridgeEncodedCalls = [
+                wmaticBridge.interface.encodeFunctionData(
+                    "wrap",
+                    [
+                        100000
+                    ],
+                ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
+                    "swapTokenToToken",
                     [
                         50000,
                         1,
@@ -56,7 +67,7 @@ describe("AutofarmDepositBridge", function () {
                     ],
                 ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
+                    "swapTokenToToken",
                     [
                         100000,
                         1,
@@ -104,6 +115,7 @@ describe("AutofarmDepositBridge", function () {
         it("Withdraw - WETH/QUICK LP Token", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
+                wmaticBridge.address,
                 uniswapV2SwapBridge.address,
                 uniswapV2SwapBridge.address,
                 quickswapLiquidityBridge.address,
@@ -113,8 +125,14 @@ describe("AutofarmDepositBridge", function () {
 
             // Set encoded calls
             var _bridgeEncodedCalls = [
+                wmaticBridge.interface.encodeFunctionData(
+                    "wrap",
+                    [
+                        100000
+                    ],
+                ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
+                    "swapTokenToToken",
                     [
                         50000,
                         1,
@@ -122,7 +140,7 @@ describe("AutofarmDepositBridge", function () {
                     ],
                 ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
+                    "swapTokenToToken",
                     [
                         100000,
                         1,
