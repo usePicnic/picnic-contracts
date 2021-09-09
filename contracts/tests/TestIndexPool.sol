@@ -11,28 +11,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract TestIndexPool is IIndexPool, ERC721, Ownable {
     using SafeERC20 for IERC20;
 
-    // Events
-    event INDEXPOOL_MINT_NFT(
-        uint256 nftId,
-        address wallet,
-        address nftOwner
-    );
-
-    event INDEXPOOL_DEPOSIT(
-        uint256 nftId,
-        address[] inputTokens,
-        uint256[] inputAmounts,
-        uint256 ethAmount
-    );
-
-    event INDEXPOOL_WITHDRAW(
-        uint256 nftId,
-        address[] outputTokens,
-        uint256[] outputAmounts,
-        uint256 ethAmount
-    );
-
-    // Modifiers
+     // Modifiers
     modifier onlyNFTOwner(uint256 nftId) {
         require(
             msg.sender == ownerOf(nftId),
