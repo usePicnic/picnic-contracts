@@ -48,7 +48,7 @@ contract AutofarmDepositBridge is IStake {
 
         autofarm.deposit(poolId, amountIn);
 
-        emit IndexPool_Stake_Deposit(assetIn, amountIn);
+        emit INDEXPOOL_STAKE_DEPOSIT(assetIn, amountIn);
     }
 
     /**
@@ -72,15 +72,15 @@ contract AutofarmDepositBridge is IStake {
         uint256 amountOut = autofarm.stakedWantTokens(poolId, address(this)) * percentageOut / 100000;
         autofarm.withdraw(poolId, amountOut);
 
-        emit IndexPool_Stake_Withdraw(assetOut, amountOut);
+        emit INDEXPOOL_STAKE_WITHDRAW(assetOut, amountOut);
 
         // WMatic
         uint256 wMaticReward = IERC20(pAutoAddress).balanceOf(address(this)) - wMaticBalance;
-        emit IndexPool_Stake_Harvest(wMaticAddress, wMaticReward);
+        emit INDEXPOOL_STAKE_HARVEST(wMaticAddress, wMaticReward);
 
         // PAuto
         uint256 pAutoReward = IERC20(pAutoAddress).balanceOf(address(this)) - pAutoBalance;
-        emit IndexPool_Stake_Harvest(wMaticAddress, pAutoReward);
+        emit INDEXPOOL_STAKE_HARVEST(wMaticAddress, pAutoReward);
     }
 
     /**
@@ -103,10 +103,10 @@ contract AutofarmDepositBridge is IStake {
 
         // WMatic
         uint256 wMaticReward = IERC20(pAutoAddress).balanceOf(address(this)) - wMaticBalance;
-        emit IndexPool_Stake_Harvest(wMaticAddress, wMaticReward);
+        emit INDEXPOOL_STAKE_HARVEST(wMaticAddress, wMaticReward);
 
         // PAuto
         uint256 pAutoReward = IERC20(pAutoAddress).balanceOf(address(this)) - pAutoBalance;
-        emit IndexPool_Stake_Harvest(wMaticAddress, pAutoReward);
+        emit INDEXPOOL_STAKE_HARVEST(wMaticAddress, pAutoReward);
     }
 }

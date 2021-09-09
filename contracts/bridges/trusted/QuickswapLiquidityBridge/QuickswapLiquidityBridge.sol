@@ -25,6 +25,7 @@ contract QuickswapLiquidityBridge is ILiquidity {
     IUniswapV2Router02 constant _uniswapRouter = IUniswapV2Router02(routerAddress);
     IUniswapV2Factory constant _uniswapFactory = IUniswapV2Factory(factoryAddress);
 
+
     /**
       * @notice Adds liquidity from 2 ERC20 tokens
       *

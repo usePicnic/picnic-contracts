@@ -48,8 +48,8 @@ contract AaveV2DepositBridge is IStake {
 
         address assetOut = _aaveLendingPool.getReserveData(assetIn).aTokenAddress;
 
-        emit IndexPool_Stake_Deposit(assetIn, amount);
-        emit IndexPool_Stake_Withdraw(assetOut, amount);
+        emit INDEXPOOL_STAKE_DEPOSIT(assetIn, amount);
+        emit INDEXPOOL_STAKE_WITHDRAW(assetOut, amount);
     }
 
     /**
@@ -67,8 +67,8 @@ contract AaveV2DepositBridge is IStake {
         uint256 amount = IERC20(assetIn).balanceOf(address(this)) * percentageOut / 100000;
         _aaveLendingPool.withdraw(assetOut, amount, address(this));
 
-        emit IndexPool_Stake_Deposit(assetIn, amount);
-        emit IndexPool_Stake_Withdraw(assetOut, amount);
+        emit INDEXPOOL_STAKE_DEPOSIT(assetIn, amount);
+        emit INDEXPOOL_STAKE_WITHDRAW(assetOut, amount);
     }
 
     /**
@@ -94,6 +94,6 @@ contract AaveV2DepositBridge is IStake {
         uint256 claimedReward = distributor.claimRewards(assets, amountToClaim, address(this));
         address claimedAsset = distributor.REWARD_TOKEN();
 
-        emit IndexPool_Stake_Harvest(claimedAsset, claimedReward);
+        emit INDEXPOOL_STAKE_HARVEST(claimedAsset, claimedReward);
     }
 }

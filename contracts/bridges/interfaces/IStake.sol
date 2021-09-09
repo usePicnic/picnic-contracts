@@ -2,17 +2,17 @@ pragma solidity ^0.8.6;
 
 interface IStake {
 
-    event IndexPool_Stake_Deposit (
+    event INDEXPOOL_STAKE_DEPOSIT (
         address assetIn,
         uint256 amountIn
     );
 
-    event IndexPool_Stake_Withdraw (
+    event INDEXPOOL_STAKE_WITHDRAW (
         address assetOut,
         uint256 amountOut
     );
 
-    event IndexPool_Stake_Harvest (
+    event INDEXPOOL_STAKE_HARVEST (
         address claimedAsset,
         uint256 claimedReward
     );
