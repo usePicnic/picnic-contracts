@@ -33,6 +33,8 @@ const deployLogic = async ({ networkName, contractName, filePath, nonce } : Depl
         let contractInterface = await ethers.getContractFactory(contractName);
     
         const deployedContract = await contractInterface.deploy({'nonce': nonce});
+
+        await deployedContract.wait();
     
         console.log(`${contractName} contract deployed on ${networkName} at: ${deployedContract.address}`);
     
