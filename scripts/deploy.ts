@@ -78,11 +78,12 @@ async function main() {
     var allOk = true;
 
     for (var i = 0; i < contractsToDeploy.length; i++) {
+        let nonce = await deployer.getTransactionCount();
         const isOk = await deployLogic({
             networkName: networkName,
             contractName: contractsToDeploy[i].contractName,
             filePath: contractsToDeploy[i].filePath,
-            nonce: startingNonce + i
+            nonce: nonce
         })
         if (!isOk) {
             allOk = false;
