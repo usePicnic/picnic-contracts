@@ -59,9 +59,8 @@ async function main() {
             ],
         ),
         uniswapV2SwapBridge.interface.encodeFunctionData(
-            "tradeFromETHToToken",
+            "swapTokenToToken",
             [
-                ADDRESSES['UNISWAP_V2_ROUTER'],
                 100000,
                 1,
                 [
