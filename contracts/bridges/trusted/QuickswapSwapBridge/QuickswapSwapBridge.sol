@@ -11,23 +11,12 @@ import "../../interfaces/ISwap.sol";
  *
  * @notice Swaps using the Quickswap contract in Polygon.
  *
- * @dev This contract has 3 main functions:
- *
- * 1. Swap ETH (Matic) to ERC20 tokens.
- * 2. Swap ERC20 tokens to ETH (Matic).
- * 3. Swap ERC20 tokens to ERC20 tokens.
- *
- * Notice that we haven't implemented any kind of borrowing mechanisms, mostly because that would require control
- * mechanics to go along with it.
+ * @dev This contract swaps ERC20 tokens to ERC20 tokens. Please notice that there are no payable functions.
  *
  */
 
-contract QuickswapSwapBridge {
+contract QuickswapSwapBridge is ISwap {
     address constant routerAddress = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
-    event TradedFromTokenToToken(
-        address[] path,
-        uint256[] amounts
-    );
     /**
       * @notice Swaps from ERC20 token to ERC20 token.
       *
@@ -43,7 +32,7 @@ contract QuickswapSwapBridge {
         uint256 amountInPercentage,
         uint256 amountOutMin,
         address[] calldata path
-    ) external {
+    ) external override {
         IUniswapV2Router02 router = IUniswapV2Router02(routerAddress);
 
         uint256 amountIn = IERC20(path[0]).balanceOf(address(this)) * amountInPercentage / 100000;
