@@ -54,6 +54,9 @@ async function main() {
     const balanceBegin = await deployer.getBalance();
     console.log("Account balance:", weiToString(balanceBegin));
 
+    let startingNonce = await deployer.getTransactionCount();
+    console.log('Starting nonce:', startingNonce);
+
     const response = await prompts({
             type: 'confirm',
             name: 'confirm',
@@ -69,11 +72,13 @@ async function main() {
     }
 
     var allOk = true;
-    for (const c of contractsToDeploy) {
+
+    for (var i = 0; i < contractsToDeploy.length; i++) {
         const isOk = await deployLogic({
             networkName: networkName,
-            contractName: c.contractName,
-            filePath: c.filePath
+            contractName: contractsToDeploy[i].contractName,
+            filePath: contractsToDeploy[i].filePath,
+            nonce: startingNonce + i
         })
         if (!isOk) {
             allOk = false;

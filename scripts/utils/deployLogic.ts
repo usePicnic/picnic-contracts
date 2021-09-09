@@ -5,10 +5,11 @@ import { MongoClient } from 'mongodb';
 type DeployLogicProps = {
     networkName: string,
     contractName: string,
-    filePath: string
+    filePath: string,
+    nonce: number
 }
 
-const deployLogic = async ({ networkName, contractName, filePath } : DeployLogicProps):Promise<boolean> => {
+const deployLogic = async ({ networkName, contractName, filePath, nonce } : DeployLogicProps):Promise<boolean> => {
     const client = new MongoClient(process.env.MONGODB_URI);
     try {
         await client.connect();
@@ -31,7 +32,7 @@ const deployLogic = async ({ networkName, contractName, filePath } : DeployLogic
         console.log(`Deploying ${contractName}...`);
         let contractInterface = await ethers.getContractFactory(contractName);
     
-        const deployedContract = await contractInterface.deploy();
+        const deployedContract = await contractInterface.deploy({'nonce': nonce});
     
         console.log(`${contractName} contract deployed on ${networkName} at: ${deployedContract.address}`);
     
