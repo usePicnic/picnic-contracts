@@ -36,6 +36,10 @@ const contractsToDeploy = [
         contractName: "AutofarmDepositBridge",
         filePath: bridgeNameToFilePath("AutofarmDepositBridge")
     },
+    {
+        contractName: "WMaticBridge",
+        filePath: bridgeNameToFilePath("WMaticBridge")
+    },
 ]
 
 async function main() {
