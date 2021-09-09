@@ -34,7 +34,7 @@ const deployLogic = async ({ networkName, contractName, filePath, nonce } : Depl
     
         const deployedContract = await contractInterface.deploy({'nonce': nonce});
 
-        await deployedContract.wait();
+        await deployedContract.deployed();
     
         console.log(`${contractName} contract deployed on ${networkName} at: ${deployedContract.address}`);
     
