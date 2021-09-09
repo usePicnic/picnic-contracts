@@ -39,7 +39,7 @@ contract QuickswapSwapBridge {
       * the output token, and any intermediate elements represent intermediate pairs to trade through (if, for example,
       * a direct pair does not exist).
       */
-    function swapFromTokenToToken(
+    function swapTokenToToken(
         uint256 amountInPercentage,
         uint256 amountOutMin,
         address[] calldata path
