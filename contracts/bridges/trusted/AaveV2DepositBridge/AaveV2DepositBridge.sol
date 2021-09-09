@@ -60,6 +60,7 @@ contract AaveV2DepositBridge is IStake {
       * @param percentageOut Percentage of the balance of the asset that will be withdrawn
       */
     function withdraw(address assetOut, uint256 percentageOut) external override {
+        IAaveIncentivesController distributor = IAaveIncentivesController(incentivesControllerAddress);
         ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
 
         address assetIn = _aaveLendingPool.getReserveData(assetOut).aTokenAddress;
@@ -68,9 +69,9 @@ contract AaveV2DepositBridge is IStake {
             uint256 amount = IERC20(assetIn).balanceOf(address(this)) * percentageOut / 100000;
             _aaveLendingPool.withdraw(assetOut, amount, address(this));
 
-                emit INDEXPOOL_STAKE_IN(assetIn, amount);
-                emit INDEXPOOL_STAKE_OUT(assetOut, amount);
-            }
+            emit INDEXPOOL_STAKE_IN(assetIn, amount);
+            emit INDEXPOOL_STAKE_OUT(assetOut, amount);
+        }
 
         address[] memory assets = new address[](1);
         assets[0] = assetIn;
