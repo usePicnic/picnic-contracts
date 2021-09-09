@@ -50,7 +50,11 @@ contract QuickswapLiquidityBridge is ILiquidity {
         IERC20(tokens[1]).approve(routerAddress, 0);
         IERC20(tokens[1]).approve(routerAddress, amountB);
 
-        (, , uint liquidity) = _uniswapRouter.addLiquidity(
+        // Receive addLiquidityETH output in a array to avoid stack too deep error
+        uint256[3] memory routerOutputs;
+
+        // [amountToken, amountETH, liquidity]
+        (routerOutputs[0], routerOutputs[1], routerOutputs[2]) = _uniswapRouter.addLiquidity(
             tokens[0], //        address tokenA,
             tokens[1], //        address tokenB,
             amountA, //        uint amountADesired,
@@ -61,10 +65,14 @@ contract QuickswapLiquidityBridge is ILiquidity {
             block.timestamp + 100000  //   uint deadline
         );
 
+        // Prepare arguments for emitting event
+        uint[] memory amountTokensArray = new uint[](2);
+        amountTokensArray[0] = routerOutputs[0];
+        amountTokensArray[1] = routerOutputs[1];
+
         address assetOut = _uniswapFactory.getPair(tokens[0], tokens[1]);
 
-        // todo percentages to amounts
-        emit IndexPool_Liquidity_Add(tokens, percentages, assetOut, liquidity);
+        emit IndexPool_Liquidity_Add(tokens, amountTokensArray, assetOut, routerOutputs[2]);
     }
 
     /**
@@ -126,7 +134,7 @@ contract QuickswapLiquidityBridge is ILiquidity {
         uint256[] calldata minAmounts,
         address lpToken,
         uint256 percentage
-    ) external { // todo override
+    ) external {// todo override
         uint256 liquidity = IERC20(lpToken).balanceOf(address(this)) * percentage / 100000;
 
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
@@ -134,17 +142,17 @@ contract QuickswapLiquidityBridge is ILiquidity {
         IERC20(lpToken).approve(routerAddress, liquidity);
 
         _uniswapRouter.removeLiquidity(
-                tokens[0], // tokenA
-                tokens[1], // tokenB
-                liquidity, // liquidity,
-                minAmounts[0], // amountAMin
-                minAmounts[1], // amountBMin
-                address(this), // address to,
-                block.timestamp + 100000  // uint deadline
-                );
-        }
-        //emit IndexPool_Liquidity_Remove(tokens, percentages, assetOut, liquidity);
+            tokens[0], // tokenA
+            tokens[1], // tokenB
+            liquidity, // liquidity,
+            minAmounts[0], // amountAMin
+            minAmounts[1], // amountBMin
+            address(this), // address to,
+            block.timestamp + 100000  // uint deadline
+        );
     }
+    //emit IndexPool_Liquidity_Remove(tokens, percentages, assetOut, liquidity);
+}
 
 
 
