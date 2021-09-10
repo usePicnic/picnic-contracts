@@ -16,14 +16,15 @@ interface ILiquidity {
         uint256 liquidity
     );
 
-    function addLiquidity(address[] calldata tokens,
-                          uint256[] calldata percentages,
-                          uint256[] calldata minAmounts
-                        ) external;
+    function addLiquidity(
+        address[] calldata tokens,
+        uint256[] calldata percentages,
+        uint256[] calldata minAmounts
+    ) external;
 
-    function removeLiquidity(address[] calldata tokens,
-        uint256[] calldata minAmounts,
-        address lpToken,
-        uint256 percentage
+    function removeLiquidity(
+        address[] calldata tokens,
+        uint256 percentage,
+        uint256[] calldata minAmounts
     ) external;
 }

@@ -78,10 +78,10 @@ contract QuickswapLiquidityBridge is ILiquidity {
 
     function removeLiquidity(
         address[] calldata tokens,
-        uint256[] calldata minAmounts,
-        address lpToken,
-        uint256 percentage
+        uint256 percentage,
+        uint256[] calldata minAmounts
     ) external override {
+        address lpToken = _uniswapFactory.getPair(tokens[0], tokens[1]);
         uint256 liquidity = IERC20(lpToken).balanceOf(address(this)) * percentage / 100000;
 
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
