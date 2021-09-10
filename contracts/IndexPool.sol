@@ -57,7 +57,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
     // NFT properties
     uint256 public tokenCounter = 0;
     mapping(uint256 => address) private _nftIdToWallet;
-    string _nftImageURI = "http://art.indexpool.org";
+    string _nftImageURI = "http://test-art.indexpool.org";
 
     // Constructor
     constructor() ERC721("INDEXPOOL", "IPNFT") Ownable() {}
