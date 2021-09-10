@@ -1,9 +1,6 @@
 import {expect} from "chai";
 import {ethers} from "hardhat";
 import constants from "../constants";
-import {getFirstEvent} from "./utils";
-
-// TODO this bridge is work in progress
 
 describe("AutofarmDepositBridge", function () {
     let owner;
