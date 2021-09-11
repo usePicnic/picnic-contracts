@@ -7,14 +7,14 @@ contract AutofarmAddressToPoolId {
     uint256 updatedLen = 0;
     address constant autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;
 
-    function getPoolId(address asset) external returns (uint256) {
+    function getPoolId(address strategyPoolAddress) external returns (uint256) {
         IAutofarmV2_CrossChain autofarm = IAutofarmV2_CrossChain(autofarmAddress);
 
         updatePools();
 
-        uint256 poolId = poolMapper[asset];
-        (IERC20 a, , , , ) = autofarm.poolInfo(poolId);
-        require(address(a) == asset, "ASSET NOT AVAILABLE IN AUTOFARM");
+        uint256 poolId = poolMapper[strategyPoolAddress];
+        (, , , , address e) = autofarm.poolInfo(poolId);
+        require(e == strategyPoolAddress, "ASSET NOT AVAILABLE IN AUTOFARM");
         return poolId;
     }
 
@@ -24,8 +24,8 @@ contract AutofarmAddressToPoolId {
         uint256 len = autofarm.poolLength();
         if (len > updatedLen) {
             for (uint256 i = updatedLen; i < len; i++) {
-                (IERC20 a, , , , ) = autofarm.poolInfo(i);
-                poolMapper[address(a)] = i;
+                (, , , , address e) = autofarm.poolInfo(i);
+                poolMapper[e] = i;
                 updatedLen += 1;
             }
         }
