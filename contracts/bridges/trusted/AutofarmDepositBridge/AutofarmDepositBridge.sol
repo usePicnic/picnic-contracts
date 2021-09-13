@@ -2,8 +2,6 @@ pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IAutofarmV2_CrossChain.sol";
-import "../../interfaces/IStake.sol";
-import "./interfaces/IAutoFarmAddressToPoolId.sol";
 
 /**
  * @title AutofarmDepositBridge
@@ -19,10 +17,9 @@ import "./interfaces/IAutoFarmAddressToPoolId.sol";
  *
  */
 
-contract AutofarmDepositBridge is IStake {
+contract AutofarmDepositBridge {
     // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
     address constant autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;
-    address constant helperAddress = 0x44C3d2965a369b32ebB2EECa29b2E99E15feC3aE; // address -> poolId
     address constant pAutoAddress = 0x7f426F6Dc648e50464a0392E60E1BB465a67E9cf;
     address constant wMaticAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270;
 
@@ -34,7 +31,7 @@ contract AutofarmDepositBridge is IStake {
       * @param assetIn Address of the asset to be deposited into the Autofarm protocol
       * @param percentageIn Percentage of the balance of the asset that will be deposited
       */
-    function deposit(address assetIn, uint256 percentageIn) external override {
+    function deposit(address assetIn, uint256 percentageIn, uint256 poolId) external override {
         IAutofarmV2_CrossChain autofarm = IAutofarmV2_CrossChain(autofarmAddress);
 
         uint256 amountIn = IERC20(assetIn).balanceOf(address(this)) * percentageIn / 100000;
@@ -43,12 +40,9 @@ contract AutofarmDepositBridge is IStake {
         IERC20(assetIn).approve(autofarmAddress, 0);
         IERC20(assetIn).approve(autofarmAddress, amountIn);
 
-        IAutoFarmAddressToPoolId addressToPool = IAutoFarmAddressToPoolId(helperAddress);
-        uint256 poolId = addressToPool.getPoolId(assetIn);
-
         autofarm.deposit(poolId, amountIn);
 
-        emit INDEXPOOL_STAKE_IN(assetIn, amountIn);
+        // emit INDEXPOOL_STAKE_IN(assetIn, amountIn);
     }
 
     /**
@@ -60,26 +54,23 @@ contract AutofarmDepositBridge is IStake {
       * @param assetOut Address of the asset to be withdrawn from the Autofarm protocol
       * @param percentageOut Percentage of the balance of the asset that will be withdrawn
       */
-    function withdraw(address assetOut, uint256 percentageOut) external override {
+    function withdraw(address assetOut, uint256 percentageOut, uint256 poolId) external override {
         IAutofarmV2_CrossChain autofarm = IAutofarmV2_CrossChain(autofarmAddress);
 
         uint256 wMaticBalance = IERC20(wMaticAddress).balanceOf(address(this));
         uint256 pAutoBalance = IERC20(pAutoAddress).balanceOf(address(this));
 
-        IAutoFarmAddressToPoolId addressToPool = IAutoFarmAddressToPoolId(helperAddress);
-        uint256 poolId = addressToPool.getPoolId(assetOut);
-
         uint256 amountOut = autofarm.stakedWantTokens(poolId, address(this)) * percentageOut / 100000;
         autofarm.withdraw(poolId, amountOut);
 
-        emit INDEXPOOL_STAKE_OUT(assetOut, amountOut);
+        // emit INDEXPOOL_STAKE_OUT(assetOut, amountOut);
 
         // WMatic
         uint256 wMaticReward = IERC20(pAutoAddress).balanceOf(address(this)) - wMaticBalance;
-        emit INDEXPOOL_STAKE_OUT(wMaticAddress, wMaticReward);
+        // emit INDEXPOOL_STAKE_OUT(wMaticAddress, wMaticReward);
 
         // PAuto
         uint256 pAutoReward = IERC20(pAutoAddress).balanceOf(address(this)) - pAutoBalance;
-        emit INDEXPOOL_STAKE_OUT(wMaticAddress, pAutoReward);
+        // emit INDEXPOOL_STAKE_OUT(wMaticAddress, pAutoReward);
     }
 }
