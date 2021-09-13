@@ -13,6 +13,7 @@ describe("QuickswapSwapBridge", function () {
 
     const ADDRESSES = constants['POLYGON'];
     const TOKENS = constants['POLYGON']['TOKENS'];
+    const TOKEN_TO_TEST = "CEL";
 
     beforeEach(async function () {
         // Get 2 signers to enable to test for permission rights
@@ -37,7 +38,7 @@ describe("QuickswapSwapBridge", function () {
             // Set path
             let pathUniswap = [
                 TOKENS['WMAIN'],
-                TOKENS['DAI'],
+                TOKENS[TOKEN_TO_TEST],
             ];
 
             // Set encoded calls
@@ -66,7 +67,7 @@ describe("QuickswapSwapBridge", function () {
             );
 
             // Wallet DAI amount should be 0
-            let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])
+            let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS[TOKEN_TO_TEST])
             let daiBalance = await dai.balanceOf(wallet.address);
             expect(daiBalance).to.be.above(0);
         })
@@ -80,7 +81,7 @@ describe("QuickswapSwapBridge", function () {
             // Set path
             let pathUniswap = [
                 TOKENS['WMAIN'],
-                TOKENS['DAI'],
+                TOKENS[TOKEN_TO_TEST],
             ];
 
             // Set encoded calls
@@ -109,13 +110,13 @@ describe("QuickswapSwapBridge", function () {
             );
 
             // Wallet DAI amount should be 0
-            let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])
+            let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS[TOKEN_TO_TEST])
             let previousDaiBalance = await dai.balanceOf(wallet.address);
             expect(previousDaiBalance).to.be.above(0);
 
             // Set path
             pathUniswap = [
-                TOKENS['DAI'],
+                TOKENS[TOKEN_TO_TEST],
                 TOKENS['WMAIN'],
             ];
 
@@ -158,7 +159,7 @@ describe("QuickswapSwapBridge", function () {
             // Set path
             let pathUniswap = [
                 TOKENS['WMAIN'],
-                TOKENS['DAI'],
+                TOKENS[TOKEN_TO_TEST],
             ];
 
             // Set encoded calls
@@ -187,7 +188,7 @@ describe("QuickswapSwapBridge", function () {
             );
 
             // Wallet DAI amount should be 0
-            let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])
+            let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS[TOKEN_TO_TEST])
             let previousDaiBalance = await dai.balanceOf(wallet.address);
             expect(previousDaiBalance).to.be.above(0);
 
@@ -197,7 +198,7 @@ describe("QuickswapSwapBridge", function () {
 
             // Set path
             pathUniswap = [
-                TOKENS['DAI'],
+                TOKENS[TOKEN_TO_TEST],
                 TOKENS['WMAIN'],
             ];
 
