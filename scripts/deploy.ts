@@ -40,7 +40,7 @@ const contractsToDeploy = [
     },
     {
         contractName: "AutofarmDepositBridge",
-        interfaceName: "IStake",
+        interfaceName: "IFarmPoolId",
         filePath: bridgeNameToFilePath("AutofarmDepositBridge")
     },
     {
