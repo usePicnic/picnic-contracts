@@ -9,6 +9,7 @@ describe("QuickswapSwapBridge", function () {
     let other;
     let UniswapV2SwapBridge;
     let uniswapV2SwapBridge;
+    let wmaticBridge;
     let wallet;
 
     const ADDRESSES = constants['POLYGON'];
@@ -23,9 +24,54 @@ describe("QuickswapSwapBridge", function () {
         UniswapV2SwapBridge = await ethers.getContractFactory("QuickswapSwapBridge");
         uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
 
+        let WMaticBridge = await ethers.getContractFactory("WMaticBridge");
+        wmaticBridge = await WMaticBridge.deploy();
+
         // Instantiate Wallet
         let Wallet = await ethers.getContractFactory("Wallet");
         wallet = await Wallet.deploy();
+
+        var _bridgeAddresses = [
+            wmaticBridge.address,
+            uniswapV2SwapBridge.address,
+        ];
+
+        // Set path
+        let pathUniswap = [
+            TOKENS['WMAIN'],
+            TOKENS['DAI'],
+        ];
+
+        // Set encoded calls
+        var _bridgeEncodedCalls = [
+            wmaticBridge.interface.encodeFunctionData(
+                "wrap",
+                [
+                    100000
+                ],
+            ),
+            uniswapV2SwapBridge.interface.encodeFunctionData(
+                "swapTokenToToken",
+                [
+                    100000,
+                    1,
+                    pathUniswap
+                ],
+            ),
+        ];
+
+        // Transfer money to wallet (similar as IndexPool contract would have done)
+        const transactionHash = await owner.sendTransaction({
+            to: wallet.address,
+            value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
+        });
+        await transactionHash.wait();
+
+        // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
+        await wallet.useBridges(
+            _bridgeAddresses,
+            _bridgeEncodedCalls,
+        );
     });
 
     describe("Actions", function () {
@@ -72,28 +118,31 @@ describe("QuickswapSwapBridge", function () {
             expect(daiBalance).to.be.above(0);
         })
 
-        it("tradeFromTokenToETH - Buys DAI and then sells DAI", async function () {
-            // Set bridges addresses
+        it("tradeFromTokenToETH - Sells DAI", async function () {
             var _bridgeAddresses = [
                 uniswapV2SwapBridge.address,
+                wmaticBridge.address,
             ];
 
             // Set path
             let pathUniswap = [
+
                 TOKENS['WMAIN'],
                 TOKENS[TOKEN_TO_TEST],
+
             ];
 
             // Set encoded calls
-            var _bridgeEncodedCalls = [
+            let _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
+                    "swapTokenToToken",
                     [
                         100000,
                         1,
                         pathUniswap
                     ],
                 ),
+
             ];
 
             // Transfer money to wallet (similar as IndexPool contract would have done)
@@ -125,9 +174,7 @@ describe("QuickswapSwapBridge", function () {
                 uniswapV2SwapBridge.interface.encodeFunctionData(
                     "tradeFromTokenToETH",
                     [
-                        100000,
-                        1,
-                        pathUniswap
+                        100000
                     ],
                 ),
             ];
@@ -142,6 +189,7 @@ describe("QuickswapSwapBridge", function () {
             );
 
             // Check if DAI balance is 0
+            let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])
             let currentDaiBalance = await dai.balanceOf(wallet.address);
             expect(currentDaiBalance).to.be.equal(0);
 
@@ -150,8 +198,7 @@ describe("QuickswapSwapBridge", function () {
             expect(currentETHBalance).to.be.above(previousETHBalance);
         })
 
-        it("tradeFromTokenToToken - Buys DAI and then swaps to WMAIN", async function () {
-            // Set bridges addresses
+        it("tradeFromTokenToToken - Swaps DAI to WMatic", async function () {
             var _bridgeAddresses = [
                 uniswapV2SwapBridge.address,
             ];
@@ -161,31 +208,6 @@ describe("QuickswapSwapBridge", function () {
                 TOKENS['WMAIN'],
                 TOKENS[TOKEN_TO_TEST],
             ];
-
-            // Set encoded calls
-            var _bridgeEncodedCalls = [
-                uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
-                    [
-                        100000,
-                        1,
-                        pathUniswap
-                    ],
-                ),
-            ];
-
-            // Transfer money to wallet (similar as IndexPool contract would have done)
-            const transactionHash = await owner.sendTransaction({
-                to: wallet.address,
-                value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
-            });
-            await transactionHash.wait();
-
-            // Execute bridge calls (buys DAI on Uniswap)
-            await wallet.useBridges(
-                _bridgeAddresses,
-                _bridgeEncodedCalls,
-            );
 
             // Wallet DAI amount should be 0
             let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS[TOKEN_TO_TEST])
@@ -238,186 +260,14 @@ describe("QuickswapSwapBridge", function () {
 
             // Set path
             let pathUniswap = [
-                TOKENS['WMAIN'],
-                TOKENS['DAI'],
-            ];
-
-            // Set encoded calls
-            var _bridgeEncodedCalls = [
-                uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
-                    [
-                        100000,
-                        1,
-                        pathUniswap
-                    ],
-                ),
-            ];
-
-            // Transfer money to wallet (similar as IndexPool contract would have done)
-            const transactionHash = await owner.sendTransaction({
-                to: wallet.address,
-                value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
-            });
-            await transactionHash.wait();
-
-            // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
-            await wallet.useBridges(
-                _bridgeAddresses,
-                _bridgeEncodedCalls,
-            );
-
-            // Get DAI balance on Wallet
-            let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])
-            let daiBalance = await dai.balanceOf(wallet.address);
-
-            // Get Deposit event
-            var event = await getFirstEvent({address: wallet.address}, UniswapV2SwapBridge, 'TradedFromETHToToken');
-
-            expect(event.args.path).to.be.eql(pathUniswap);
-            expect(event.args.path.length).to.be.equal(2);
-            expect(event.args.amounts[0]).to.be.equal(ethers.utils.parseEther("1"));
-            expect(event.args.amounts[1]).to.be.equal(daiBalance);
-            expect(event.args.amounts.length).to.be.equal(2);
-        })
-
-        it("Emits TradedFromTokensToETH", async function () {
-            // Set bridges addresses
-            var _bridgeAddresses = [
-                uniswapV2SwapBridge.address,
-            ];
-
-            // Set path
-            let pathUniswap = [
-                TOKENS['WMAIN'],
-                TOKENS['DAI'],
-            ];
-
-            // Set encoded calls
-            var _bridgeEncodedCalls = [
-                uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
-                    [
-                        100000,
-                        1,
-                        pathUniswap
-                    ],
-                ),
-            ];
-
-            // Transfer money to wallet (similar as IndexPool contract would have done)
-            const transactionHash = await owner.sendTransaction({
-                to: wallet.address,
-                value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
-            });
-            await transactionHash.wait();
-
-            // Execute bridge calls (buys DAI on Uniswap)
-            await wallet.useBridges(
-                _bridgeAddresses,
-                _bridgeEncodedCalls,
-            );
-
-            // Wallet DAI amount should be 0
-            let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])
-            let previousDaiBalance = await dai.balanceOf(wallet.address);
-
-            // Set path
-            pathUniswap = [
                 TOKENS['DAI'],
                 TOKENS['WMAIN'],
             ];
 
             // Set encoded calls
-            _bridgeEncodedCalls = [
+            let _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromTokenToETH",
-                    [
-                        100000,
-                        1,
-                        pathUniswap
-                    ],
-                ),
-            ];
-
-            // Get previous ETH balance
-            let previousETHBalance = await ethers.provider.getBalance(wallet.address);
-
-            // Execute bridge calls (sells DAI for ETH)
-            await wallet.useBridges(
-                _bridgeAddresses,
-                _bridgeEncodedCalls,
-            );
-
-            // Check if ETH balance is larger than previous balance
-            let currentETHBalance = await ethers.provider.getBalance(wallet.address);
-
-            // Get Deposit event
-            var event = await getFirstEvent({address: wallet.address}, UniswapV2SwapBridge, 'TradedFromTokenToETH');
-
-            expect(event.args.path).to.be.eql(pathUniswap);
-            expect(event.args.path.length).to.be.equal(2);
-            expect(event.args.amounts[0]).to.be.equal(previousDaiBalance);
-            expect(event.args.amounts[1]).to.be.equal(currentETHBalance);
-            expect(event.args.amounts.length).to.be.equal(2);
-        })
-
-        it("Emits TradedFromTokensToTokens", async function () {
-            // Set bridges addresses
-            var _bridgeAddresses = [
-                uniswapV2SwapBridge.address,
-            ];
-
-            // Set path
-            let pathUniswap = [
-                TOKENS['WMAIN'],
-                TOKENS['DAI'],
-            ];
-
-            // Set encoded calls
-            var _bridgeEncodedCalls = [
-                uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
-                    [
-                        100000,
-                        1,
-                        pathUniswap
-                    ],
-                ),
-            ];
-
-            // Transfer money to wallet (similar as IndexPool contract would have done)
-            const transactionHash = await owner.sendTransaction({
-                to: wallet.address,
-                value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
-            });
-            await transactionHash.wait();
-
-            // Execute bridge calls (buys DAI on Uniswap)
-            await wallet.useBridges(
-                _bridgeAddresses,
-                _bridgeEncodedCalls,
-            );
-
-            // Wallet DAI amount should be 0
-            let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])
-            let previousDaiBalance = await dai.balanceOf(wallet.address);
-            expect(previousDaiBalance).to.be.above(0);
-
-            let weth = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["WMAIN"])
-            let previousWMAINBalance = await weth.balanceOf(wallet.address);
-            expect(previousWMAINBalance).to.be.equal(0);
-
-            // Set path
-            pathUniswap = [
-                TOKENS['DAI'],
-                TOKENS['WMAIN'],
-            ];
-
-            // Set encoded calls
-            _bridgeEncodedCalls = [
-                uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromTokenToToken",
+                    "swapTokenToToken",
                     [
                         100000,
                         1,
@@ -439,16 +289,228 @@ describe("QuickswapSwapBridge", function () {
             // Check if ETH balance is larger than previous balance
             let currentWMAINBalance = await weth.balanceOf(wallet.address);
             expect(currentWMAINBalance).to.be.above(previousWMAINBalance);
-
-            // Get Deposit event
-            var event = await getFirstEvent({address: wallet.address}, UniswapV2SwapBridge, 'TradedFromTokenToToken');
-
-            expect(event.args.path).to.be.eql(pathUniswap);
-            expect(event.args.path.length).to.be.equal(2);
-            expect(event.args.amounts[0]).to.be.equal(previousDaiBalance);
-            expect(event.args.amounts[1]).to.be.equal(currentWMAINBalance);
-            expect(event.args.amounts.length).to.be.equal(2);
         })
     })
+    // describe("Events", function () {
+    //     it("Emits TradedFromETHToTokens", async function () {
+    //         // Set bridges addresses
+    //         var _bridgeAddresses = [
+    //             uniswapV2SwapBridge.address,
+    //         ];
+    //
+    //         // Set path
+    //         let pathUniswap = [
+    //             TOKENS['WMAIN'],
+    //             TOKENS['DAI'],
+    //         ];
+    //
+    //         // Set encoded calls
+    //         var _bridgeEncodedCalls = [
+    //             uniswapV2SwapBridge.interface.encodeFunctionData(
+    //                 "swapTokenToToken",
+    //                 [
+    //                     100000,
+    //                     1,
+    //                     pathUniswap
+    //                 ],
+    //             ),
+    //         ];
+    //
+    //         // Transfer money to wallet (similar as IndexPool contract would have done)
+    //         const transactionHash = await owner.sendTransaction({
+    //             to: wallet.address,
+    //             value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
+    //         });
+    //         await transactionHash.wait();
+    //
+    //         // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
+    //         await wallet.useBridges(
+    //             _bridgeAddresses,
+    //             _bridgeEncodedCalls,
+    //         );
+    //
+    //         // Get DAI balance on Wallet
+    //         let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])
+    //         let daiBalance = await dai.balanceOf(wallet.address);
+    //
+    //         // Get Deposit event
+    //         var event = await getFirstEvent({address: wallet.address}, UniswapV2SwapBridge, 'TradedFromETHToToken');
+    //
+    //         expect(event.args.path).to.be.eql(pathUniswap);
+    //         expect(event.args.path.length).to.be.equal(2);
+    //         expect(event.args.amounts[0]).to.be.equal(ethers.utils.parseEther("1"));
+    //         expect(event.args.amounts[1]).to.be.equal(daiBalance);
+    //         expect(event.args.amounts.length).to.be.equal(2);
+    //     })
+    //
+    //     it("Emits TradedFromTokensToETH", async function () {
+    //         // Set bridges addresses
+    //         var _bridgeAddresses = [
+    //             uniswapV2SwapBridge.address,
+    //         ];
+    //
+    //         // Set path
+    //         let pathUniswap = [
+    //             TOKENS['WMAIN'],
+    //             TOKENS['DAI'],
+    //         ];
+    //
+    //         // Set encoded calls
+    //         var _bridgeEncodedCalls = [
+    //             uniswapV2SwapBridge.interface.encodeFunctionData(
+    //                 "swapTokenToToken",
+    //                 [
+    //                     100000,
+    //                     1,
+    //                     pathUniswap
+    //                 ],
+    //             ),
+    //         ];
+    //
+    //         // Transfer money to wallet (similar as IndexPool contract would have done)
+    //         const transactionHash = await owner.sendTransaction({
+    //             to: wallet.address,
+    //             value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
+    //         });
+    //         await transactionHash.wait();
+    //
+    //         // Execute bridge calls (buys DAI on Uniswap)
+    //         await wallet.useBridges(
+    //             _bridgeAddresses,
+    //             _bridgeEncodedCalls,
+    //         );
+    //
+    //         // Wallet DAI amount should be 0
+    //         let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])
+    //         let previousDaiBalance = await dai.balanceOf(wallet.address);
+    //
+    //         // Set path
+    //         pathUniswap = [
+    //             TOKENS['DAI'],
+    //             TOKENS['WMAIN'],
+    //         ];
+    //
+    //         // Set encoded calls
+    //         _bridgeEncodedCalls = [
+    //             uniswapV2SwapBridge.interface.encodeFunctionData(
+    //                 "swapTokenToToken",
+    //                 [
+    //                     100000,
+    //                     1,
+    //                     pathUniswap
+    //                 ],
+    //             ),
+    //         ];
+    //
+    //         // Get previous ETH balance
+    //         let previousETHBalance = await ethers.provider.getBalance(wallet.address);
+    //
+    //         // Execute bridge calls (sells DAI for ETH)
+    //         await wallet.useBridges(
+    //             _bridgeAddresses,
+    //             _bridgeEncodedCalls,
+    //         );
+    //
+    //         // Check if ETH balance is larger than previous balance
+    //         let currentETHBalance = await ethers.provider.getBalance(wallet.address);
+    //
+    //         // Get Deposit event
+    //         var event = await getFirstEvent({address: wallet.address}, UniswapV2SwapBridge, 'TradedFromTokenToETH');
+    //
+    //         expect(event.args.path).to.be.eql(pathUniswap);
+    //         expect(event.args.path.length).to.be.equal(2);
+    //         expect(event.args.amounts[0]).to.be.equal(previousDaiBalance);
+    //         expect(event.args.amounts[1]).to.be.equal(currentETHBalance);
+    //         expect(event.args.amounts.length).to.be.equal(2);
+    //     })
+    //
+    //     it("Emits TradedFromTokensToTokens", async function () {
+    //         // Set bridges addresses
+    //         var _bridgeAddresses = [
+    //             uniswapV2SwapBridge.address,
+    //         ];
+    //
+    //         // Set path
+    //         let pathUniswap = [
+    //             TOKENS['WMAIN'],
+    //             TOKENS['DAI'],
+    //         ];
+    //
+    //         // Set encoded calls
+    //         var _bridgeEncodedCalls = [
+    //             uniswapV2SwapBridge.interface.encodeFunctionData(
+    //                 "swapTokenToToken",
+    //                 [
+    //                     100000,
+    //                     1,
+    //                     pathUniswap
+    //                 ],
+    //             ),
+    //         ];
+    //
+    //         // Transfer money to wallet (similar as IndexPool contract would have done)
+    //         const transactionHash = await owner.sendTransaction({
+    //             to: wallet.address,
+    //             value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
+    //         });
+    //         await transactionHash.wait();
+    //
+    //         // Execute bridge calls (buys DAI on Uniswap)
+    //         await wallet.useBridges(
+    //             _bridgeAddresses,
+    //             _bridgeEncodedCalls,
+    //         );
+    //
+    //         // Wallet DAI amount should be 0
+    //         let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])
+    //         let previousDaiBalance = await dai.balanceOf(wallet.address);
+    //         expect(previousDaiBalance).to.be.above(0);
+    //
+    //         let weth = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["WMAIN"])
+    //         let previousWMAINBalance = await weth.balanceOf(wallet.address);
+    //         expect(previousWMAINBalance).to.be.equal(0);
+    //
+    //         // Set path
+    //         pathUniswap = [
+    //             TOKENS['DAI'],
+    //             TOKENS['WMAIN'],
+    //         ];
+    //
+    //         // Set encoded calls
+    //         _bridgeEncodedCalls = [
+    //             uniswapV2SwapBridge.interface.encodeFunctionData(
+    //                 "swapTokenToToken",
+    //                 [
+    //                     100000,
+    //                     1,
+    //                     pathUniswap
+    //                 ],
+    //             ),
+    //         ];
+    //
+    //         // Execute bridge calls (sells DAI for ETH)
+    //         await wallet.useBridges(
+    //             _bridgeAddresses,
+    //             _bridgeEncodedCalls,
+    //         );
+    //
+    //         // Check if DAI balance is 0
+    //         let currentDaiBalance = await dai.balanceOf(wallet.address);
+    //         expect(currentDaiBalance).to.be.equal(0);
+    //
+    //         // Check if ETH balance is larger than previous balance
+    //         let currentWMAINBalance = await weth.balanceOf(wallet.address);
+    //         expect(currentWMAINBalance).to.be.above(previousWMAINBalance);
+    //
+    //         // Get Deposit event
+    //         var event = await getFirstEvent({address: wallet.address}, UniswapV2SwapBridge, 'TradedFromTokenToToken');
+    //
+    //         expect(event.args.path).to.be.eql(pathUniswap);
+    //         expect(event.args.path.length).to.be.equal(2);
+    //         expect(event.args.amounts[0]).to.be.equal(previousDaiBalance);
+    //         expect(event.args.amounts[1]).to.be.equal(currentWMAINBalance);
+    //         expect(event.args.amounts.length).to.be.equal(2);
+    //     })
+    // })
 });
 

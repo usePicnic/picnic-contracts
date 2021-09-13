@@ -27,27 +27,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract IndexPool is IIndexPool, ERC721, Ownable {
     using SafeERC20 for IERC20;
 
-    // Events
-    event INDEXPOOL_MINT_NFT(
-        uint256 nftId,
-        address wallet,
-        address nftOwner
-    );
-
-    event INDEXPOOL_DEPOSIT(
-        uint256 nftId,
-        address[] inputTokens,
-        uint256[] inputAmounts,
-        uint256 ethAmount
-    );
-
-    event INDEXPOOL_WITHDRAW(
-        uint256 nftId,
-        address[] outputTokens,
-        uint256[] outputAmounts,
-        uint256 ethAmount
-    );
-
     // Modifiers
     modifier onlyNFTOwner(uint256 nftId) {
         require(
@@ -78,7 +57,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
     // NFT properties
     uint256 public tokenCounter = 0;
     mapping(uint256 => address) private _nftIdToWallet;
-    string _nftImageURI = "http://art.indexpool.org";
+    string _nftImageURI = "http://test-art.indexpool.org";
 
     // Constructor
     constructor() ERC721("INDEXPOOL", "IPNFT") Ownable() {}

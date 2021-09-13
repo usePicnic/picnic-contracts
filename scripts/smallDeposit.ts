@@ -38,20 +38,29 @@ async function main() {
     let aaveV2DepositBridge = await ethers.getContractAt("AaveV2DepositBridge",
         await getDeployedAddress("AaveV2DepositBridge", client));
 
+    let wMaticBridge = await ethers.getContractAt("WMaticBridge",
+        await getDeployedAddress("WMaticBridge", client));
+
     const [deployer] = await ethers.getSigners();
     const balanceBegin = await deployer.getBalance();
     console.log("Deploying from:", deployer.address);
     console.log("Account balance:", weiToString(balanceBegin));
 
     var _bridgeAddresses = [
+        wMaticBridge.address,
         uniswapV2SwapBridge.address,
         aaveV2DepositBridge.address,
     ];
     var _bridgeEncodedCalls = [
-        uniswapV2SwapBridge.interface.encodeFunctionData(
-            "tradeFromETHToToken",
+        wMaticBridge.interface.encodeFunctionData(
+            "wrap",
             [
-                ADDRESSES['UNISWAP_V2_ROUTER'],
+                100000
+            ],
+        ),
+        uniswapV2SwapBridge.interface.encodeFunctionData(
+            "swapTokenToToken",
+            [
                 100000,
                 1,
                 [

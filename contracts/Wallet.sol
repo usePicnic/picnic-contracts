@@ -58,7 +58,8 @@ contract Wallet is IWallet {
 
         for (uint16 i = 0; i < bridgeAddresses.length; i++) {
             (isSuccess, result) = bridgeAddresses[i].delegatecall(bridgeEncodedCalls[i]);
-
+            emit INDEXPOOL_BRIDGE_CALL();
+            
             // Assembly code was the only way we found to display clean revert error messages from delegate calls
             if (isSuccess == false) {
                 assembly {

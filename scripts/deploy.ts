@@ -19,22 +19,34 @@ function bridgeNameToFilePath(bridgeName : string) : string{
 }
 
 const contractsToDeploy = [
-    {contractName: "IndexPool", filePath: "./artifacts/contracts/IndexPool.sol/IndexPool.json"},
+    {
+        contractName: "IndexPool",
+        interfaceName: "IIndexPool",
+        filePath: "./artifacts/contracts/IndexPool.sol/IndexPool.json"},
     {
         contractName: "AaveV2DepositBridge",
+        interfaceName: "IStake",
         filePath: bridgeNameToFilePath("AaveV2DepositBridge")
     },
     {
         contractName: "QuickswapSwapBridge",
+        interfaceName: "ISwap",
         filePath: bridgeNameToFilePath("QuickswapSwapBridge")
     },
     {
         contractName: "QuickswapLiquidityBridge",
+        interfaceName: "ILiquidity",
         filePath: bridgeNameToFilePath("QuickswapLiquidityBridge")
     },
     {
         contractName: "AutofarmDepositBridge",
+        interfaceName: "IStake",
         filePath: bridgeNameToFilePath("AutofarmDepositBridge")
+    },
+    {
+        contractName: "WMaticBridge",
+        interfaceName: "IWrap",
+        filePath: bridgeNameToFilePath("WMaticBridge")
     },
 ]
 
@@ -74,11 +86,13 @@ async function main() {
     var allOk = true;
 
     for (var i = 0; i < contractsToDeploy.length; i++) {
+        let nonce = await deployer.getTransactionCount();
         const isOk = await deployLogic({
             networkName: networkName,
             contractName: contractsToDeploy[i].contractName,
+            interfaceName: contractsToDeploy[i].interfaceName,
             filePath: contractsToDeploy[i].filePath,
-            nonce: startingNonce + i
+            nonce: nonce
         })
         if (!isOk) {
             allOk = false;

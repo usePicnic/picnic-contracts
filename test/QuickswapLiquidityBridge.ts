@@ -12,6 +12,7 @@ describe("QuickswapLiquidityBridge", function () {
     let uniswapV2SwapBridge;
     let wallet;
     let quickswapLiquidityBridge;
+    let wmaticBridge;
 
     const ADDRESSES = constants['POLYGON'];
     const TOKENS = constants['POLYGON']['TOKENS'];
@@ -27,6 +28,9 @@ describe("QuickswapLiquidityBridge", function () {
         let QuickswapLiquidityBridge = await ethers.getContractFactory("QuickswapLiquidityBridge");
         quickswapLiquidityBridge = await QuickswapLiquidityBridge.deploy();
 
+        let WMaticBridge = await ethers.getContractFactory("WMaticBridge");
+        wmaticBridge = await WMaticBridge.deploy();
+
         // Instantiate Wallet
         let Wallet = await ethers.getContractFactory("Wallet");
         wallet = await Wallet.deploy();
@@ -36,18 +40,22 @@ describe("QuickswapLiquidityBridge", function () {
         it("Add Liquidity - WETH/QUICK LP Token", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
+                wmaticBridge.address,
                 uniswapV2SwapBridge.address,
                 uniswapV2SwapBridge.address,
                 quickswapLiquidityBridge.address,
             ];
 
-            // Set path
-
-
             // Set encoded calls
             var _bridgeEncodedCalls = [
+                wmaticBridge.interface.encodeFunctionData(
+                    "wrap",
+                    [
+                        100000
+                    ],
+                ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
+                    "swapTokenToToken",
                     [
                         50000,
                         1,
@@ -55,7 +63,7 @@ describe("QuickswapLiquidityBridge", function () {
                     ],
                 ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
+                    "swapTokenToToken",
                     [
                         100000,
                         1,
@@ -96,6 +104,7 @@ describe("QuickswapLiquidityBridge", function () {
         it("Add Liquidity - WETH/WMATIC LP Token", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
+                wmaticBridge.address,
                 uniswapV2SwapBridge.address,
                 quickswapLiquidityBridge.address,
             ];
@@ -106,8 +115,14 @@ describe("QuickswapLiquidityBridge", function () {
 
             // Set encoded calls
             var _bridgeEncodedCalls = [
+                wmaticBridge.interface.encodeFunctionData(
+                    "wrap",
+                    [
+                        100000
+                    ],
+                ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
+                    "swapTokenToToken",
                     [
                         50000,
                         minAmountEth,
@@ -115,13 +130,11 @@ describe("QuickswapLiquidityBridge", function () {
                     ],
                 ),
                 quickswapLiquidityBridge.interface.encodeFunctionData(
-                    "addLiquidityETH",
+                    "addLiquidity",
                     [
-                        100000, // uint256 ethPercentage,
-                        minAmountEth, // uint256 minAmountEth,
-                        [TOKENS['WETH']], // address[] tokenA,
-                        [100000], // uint256[] tokenAPercentage,
-                        [minAmountA], // uint256[] minAmountA,
+                        [TOKENS['WETH'], TOKENS['WMAIN'],], // address[] tokens,
+                        [100000, 100000,], // uint256[] percentages,
+                        [1, 1,], // uint256[] minAmounts
                     ],
                 ),
             ];
@@ -145,6 +158,165 @@ describe("QuickswapLiquidityBridge", function () {
                 "0xadbF1854e5883eB8aa7BAf50705338739e558E5b")
             let lpTokenBalance = await lpToken.balanceOf(wallet.address);
             expect(lpTokenBalance).to.be.above(0);
+        });
+        it("Remove Liquidity - WETH/QUICK LP Token", async function () {
+            // Set bridges addresses
+            var _bridgeAddresses = [
+                wmaticBridge.address,
+                uniswapV2SwapBridge.address,
+                uniswapV2SwapBridge.address,
+                quickswapLiquidityBridge.address,
+                quickswapLiquidityBridge.address,
+            ];
+
+            // Set encoded calls
+            var _bridgeEncodedCalls = [
+                wmaticBridge.interface.encodeFunctionData(
+                    "wrap",
+                    [
+                        100000
+                    ],
+                ),
+                uniswapV2SwapBridge.interface.encodeFunctionData(
+                    "swapTokenToToken",
+                    [
+                        50000,
+                        1,
+                        [TOKENS['WMAIN'], TOKENS['WETH']]
+                    ],
+                ),
+                uniswapV2SwapBridge.interface.encodeFunctionData(
+                    "swapTokenToToken",
+                    [
+                        100000,
+                        1,
+                        [TOKENS['WMAIN'], TOKENS['QUICK']]
+                    ],
+                ),
+                quickswapLiquidityBridge.interface.encodeFunctionData(
+                    "addLiquidity",
+                    [
+                        [TOKENS['WETH'], TOKENS['QUICK'],], // address[] tokens,
+                        [100000, 100000,], // uint256[] percentages,
+                        [1, 1,], // uint256[] minAmounts
+                    ],
+                ),
+                quickswapLiquidityBridge.interface.encodeFunctionData(
+                    "removeLiquidity",
+                    [
+                        [TOKENS['WETH'], TOKENS['QUICK'],], // address[] tokens,
+                        100000, // uint256[] percentages,
+                        [1, 1,], // uint256[] minAmounts
+                    ],
+                ),
+            ];
+
+            // Transfer money to wallet (similar as IndexPool contract would have done)
+            const transactionHash = await owner.sendTransaction({
+                to: wallet.address,
+                value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
+            });
+            await transactionHash.wait();
+
+            // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
+            await wallet.useBridges(
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+            );
+
+            // Wallet DAI amount should be 0
+            let lpToken = await ethers.getContractAt(
+                "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+                "0x1Bd06B96dd42AdA85fDd0795f3B4A79DB914ADD5")
+            let lpTokenBalance = await lpToken.balanceOf(wallet.address);
+            expect(lpTokenBalance).to.be.equal(0);
+
+            let weth = await ethers.getContractAt(
+                "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+                TOKENS['WETH'])
+            let wethBalance = await weth.balanceOf(wallet.address);
+            expect(wethBalance).to.be.above(0);
+
+            let quick = await ethers.getContractAt(
+                "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+                TOKENS['QUICK'])
+            let quickBalance = await quick.balanceOf(wallet.address);
+            expect(quickBalance).to.be.above(0);
+        });
+        it("Remove Liquidity - WETH/WMATIC LP Token", async function () {
+            // Set bridges addresses
+            var _bridgeAddresses = [
+                wmaticBridge.address,
+                uniswapV2SwapBridge.address,
+                quickswapLiquidityBridge.address,
+                quickswapLiquidityBridge.address,
+            ];
+
+            // Set encoded calls
+            var _bridgeEncodedCalls = [
+                wmaticBridge.interface.encodeFunctionData(
+                    "wrap",
+                    [
+                        100000
+                    ],
+                ),
+                uniswapV2SwapBridge.interface.encodeFunctionData(
+                    "swapTokenToToken",
+                    [
+                        50000,
+                        1,
+                        [TOKENS['WMAIN'], TOKENS['WETH']]
+                    ],
+                ),
+                quickswapLiquidityBridge.interface.encodeFunctionData(
+                    "addLiquidity",
+                    [
+                        [TOKENS['WETH'], TOKENS['WMAIN'],], // address[] tokens,
+                        [100000, 100000,], // uint256[] percentages,
+                        [1, 1,], // uint256[] minAmounts
+                    ],
+                ),
+                quickswapLiquidityBridge.interface.encodeFunctionData(
+                    "removeLiquidity",
+                    [
+                        [TOKENS['WETH'], TOKENS['WMAIN'],], // address[] tokens,
+                        100000, // uint256[] percentages,
+                        [1, 1,], // uint256[] minAmounts
+                    ],
+                ),
+            ];
+
+            // Transfer money to wallet (similar as IndexPool contract would have done)
+            const transactionHash = await owner.sendTransaction({
+                to: wallet.address,
+                value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
+            });
+            await transactionHash.wait();
+
+            // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
+            await wallet.useBridges(
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+            );
+
+            // Wallet DAI amount should be 0
+            let lpToken = await ethers.getContractAt(
+                "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+                "0xadbF1854e5883eB8aa7BAf50705338739e558E5b")
+            let lpTokenBalance = await lpToken.balanceOf(wallet.address);
+            expect(lpTokenBalance).to.be.equal(0);
+
+            let weth = await ethers.getContractAt(
+                "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+                TOKENS['WETH'])
+            let wethBalance = await weth.balanceOf(wallet.address);
+            expect(wethBalance).to.be.above(0);
+
+            let quick = await ethers.getContractAt(
+                "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+                TOKENS['WMAIN'])
+            let quickBalance = await quick.balanceOf(wallet.address);
+            expect(quickBalance).to.be.above(0);
         });
     });
 });

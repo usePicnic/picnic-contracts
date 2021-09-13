@@ -8,6 +8,7 @@ describe("Wallet", function () {
     let other;
     let uniswapV2SwapBridge;
     let aaveV2DepositBridge;
+    let wmaticBridge;
     let wallet;
 
     const TOKENS = constants['POLYGON']['TOKENS'];
@@ -24,6 +25,9 @@ describe("Wallet", function () {
         let AaveV2DepositBridge = await ethers.getContractFactory("AaveV2DepositBridge");
         aaveV2DepositBridge = await AaveV2DepositBridge.deploy();
 
+        let WMaticBridge = await ethers.getContractFactory("WMaticBridge");
+        wmaticBridge = await WMaticBridge.deploy();
+
         // Instantiate Wallet
         let Wallet = await ethers.getContractFactory("Wallet");
         wallet = await Wallet.deploy();
@@ -32,6 +36,7 @@ describe("Wallet", function () {
     it("UseBridges (Buys DAI on Uniswap)", async function () {
         // Set bridges addresses
         var _bridgeAddresses = [
+            wmaticBridge.address,
             uniswapV2SwapBridge.address,
         ];
 
@@ -43,8 +48,14 @@ describe("Wallet", function () {
 
         // Set encoded calls
         var _bridgeEncodedCalls = [
+            wmaticBridge.interface.encodeFunctionData(
+                "wrap",
+                [
+                    100000
+                ],
+            ),
             uniswapV2SwapBridge.interface.encodeFunctionData(
-                "tradeFromETHToToken",
+                "swapTokenToToken",
                 [
                     100000,
                     1,
@@ -105,6 +116,7 @@ describe("Wallet", function () {
         // STEP 1: Buys DAI
         // Set bridges addresses
         var _bridgeAddresses = [
+            wmaticBridge.address,
             uniswapV2SwapBridge.address,
         ];
 
@@ -116,8 +128,14 @@ describe("Wallet", function () {
 
         // Set encoded calls
         var _bridgeEncodedCalls = [
+            wmaticBridge.interface.encodeFunctionData(
+                "wrap",
+                [
+                    100000
+                ],
+            ),
             uniswapV2SwapBridge.interface.encodeFunctionData(
-                "tradeFromETHToToken",
+                "swapTokenToToken",
                 [
                     100000,
                     1,
@@ -179,13 +197,20 @@ describe("Wallet", function () {
 
     it("Revert on Aave bridge propagates correctly", async function () {
         var _bridgeAddresses = [
+            wmaticBridge.address,
             uniswapV2SwapBridge.address,
             aaveV2DepositBridge.address,
             aaveV2DepositBridge.address,
         ];
         var _bridgeEncodedCalls = [
+            wmaticBridge.interface.encodeFunctionData(
+                "wrap",
+                [
+                    100000
+                ],
+            ),
             uniswapV2SwapBridge.interface.encodeFunctionData(
-                "tradeFromETHToToken",
+                "swapTokenToToken",
                 [
                     100000,
                     1,

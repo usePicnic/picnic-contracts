@@ -25,6 +25,7 @@ contract QuickswapLiquidityBridge is ILiquidity {
     IUniswapV2Router02 constant _uniswapRouter = IUniswapV2Router02(routerAddress);
     IUniswapV2Factory constant _uniswapFactory = IUniswapV2Factory(factoryAddress);
 
+
     /**
       * @notice Adds liquidity from 2 ERC20 tokens
       *
@@ -72,69 +73,15 @@ contract QuickswapLiquidityBridge is ILiquidity {
 
         address assetOut = _uniswapFactory.getPair(tokens[0], tokens[1]);
 
-        emit IndexPool_Liquidity_Add(tokens, amountTokensArray, assetOut, routerOutputs[2]);
-    }
-
-    /**
-      * @notice Adds liquidity from ETH and ERC20 token
-      *
-      * @dev Wraps add liquidity and generate the necessary events to communicate with IndexPool's UI and back-end.
-      *
-      * @param ethPercentage Percentage of the balance of input ETH (Matic) that will be added to liquidity pool
-      * @param minAmountEth Minimum amount of the input token required to add liquidity
-      * @param tokens List of one - token that will have liquidity added alongside ETH (Matic)
-      * @param percentages List of one - percentage of the balance of the ERC20 token that will be added to pool
-      * @param minAmounts List of one - minimum amount of the ERC20 token required to add liquidity
-      */
-    function addLiquidityETH(
-        uint256 ethPercentage,
-        uint256 minAmountEth,
-        address[] calldata tokens,
-        uint256[] calldata percentages,
-        uint256[] calldata minAmounts
-    ) external override {
-
-        uint256 amountTokenDesired = IERC20(tokens[0]).balanceOf(address(this)) * percentages[0] / 100000;
-
-        // Approve 0 first as a few ERC20 tokens are requiring this pattern.
-        IERC20(tokens[0]).approve(routerAddress, 0);
-        IERC20(tokens[0]).approve(routerAddress, amountTokenDesired);
-
-        // Receive addLiquidityETH output in a array to avoid stack too deep error 
-        uint256[3] memory routerOutputs;
-        // [amountToken, amountETH, liquidity]
-        (routerOutputs[0], routerOutputs[1], routerOutputs[2]) = _uniswapRouter.addLiquidityETH{
-        value : address(this).balance * ethPercentage / 100000}(
-            tokens[0], // address token,
-            amountTokenDesired, // uint amountTokenDesired,
-            minAmounts[0], // uint amountTokenMin,
-            minAmountEth, // uint amountETHMin,
-            address(this), // address to,
-            block.timestamp + 100000  // uint deadline
-        );
-
-        // Prepare arguments for emitting event 
-        uint[] memory amountTokensArray = new uint[](1);
-        amountTokensArray[0] = routerOutputs[0];
-
-        // Address is for WMATIC
-        address assetOut = _uniswapFactory.getPair(tokens[0], 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270);
-
-        emit IndexPool_Liquidity_AddETH(
-            routerOutputs[1], //uint256 ethAmount
-            tokens, //address[] assetIn
-            amountTokensArray, //uint256[] amountIn
-            assetOut, //address assetOut
-            routerOutputs[2]    //uint256 amountOut
-        );
+        emit INDEXPOOL_LIQUIDITY_ADD(tokens, amountTokensArray, assetOut, routerOutputs[2]);
     }
 
     function removeLiquidity(
         address[] calldata tokens,
-        uint256[] calldata minAmounts,
-        address lpToken,
-        uint256 percentage
+        uint256 percentage,
+        uint256[] calldata minAmounts
     ) external override {
+        address lpToken = _uniswapFactory.getPair(tokens[0], tokens[1]);
         uint256 liquidity = IERC20(lpToken).balanceOf(address(this)) * percentage / 100000;
 
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
@@ -153,38 +100,7 @@ contract QuickswapLiquidityBridge is ILiquidity {
             block.timestamp + 100000  // uint deadline
         );
 
-        emit IndexPool_Liquidity_Remove(tokens, amountTokensArray, lpToken, liquidity);
-    }
-
-    function removeLiquidityETH(
-        uint256 minAmountEth,
-        address[] calldata tokens,
-        uint256[] calldata minAmounts,
-        address lpToken,
-        uint256 percentage
-    ) external override {
-        uint256 liquidity = IERC20(lpToken).balanceOf(address(this)) * percentage / 100000;
-
-        // Approve 0 first as a few ERC20 tokens are requiring this pattern.
-        IERC20(lpToken).approve(routerAddress, 0);
-        IERC20(lpToken).approve(routerAddress, liquidity);
-
-        uint[] memory routerOutput = new uint[](2);
-        // [amountToken, amountETH, liquidity]
-        (routerOutput[0], routerOutput[1]) =  _uniswapRouter.removeLiquidityETH(
-            tokens[0], // tokenA
-            liquidity, // liquidity,
-            minAmounts[0], // amountAMin
-            minAmountEth,
-            address(this), // address to,
-            block.timestamp + 100000  // uint deadline
-        );
-
-        // Prepare arguments for emitting event
-        uint256[] memory amountTokensArray = new uint[](1);
-        amountTokensArray[0] = routerOutput[0];
-
-        emit IndexPool_Liquidity_RemoveETH(routerOutput[1], tokens, amountTokensArray, lpToken, liquidity);
+        emit INDEXPOOL_LIQUIDITY_REMOVE(tokens, amountTokensArray, lpToken, liquidity);
     }
 }
 

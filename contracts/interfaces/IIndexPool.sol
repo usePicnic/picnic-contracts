@@ -3,6 +3,27 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "../libraries/IPDataTypes.sol";
 
 interface IIndexPool is IERC721 {
+    // Events
+    event INDEXPOOL_MINT_NFT(
+        uint256 nftId,
+        address wallet,
+        address nftOwner
+    );
+
+    event INDEXPOOL_DEPOSIT(
+        uint256 nftId,
+        address[] inputTokens,
+        uint256[] inputAmounts,
+        uint256 ethAmount
+    );
+
+    event INDEXPOOL_WITHDRAW(
+        uint256 nftId,
+        address[] outputTokens,
+        uint256[] outputAmounts,
+        uint256 ethAmount
+    );
+
     function createPortfolio(
         IPDataTypes.TokenData calldata inputs,
         address[] calldata _bridgeAddresses,

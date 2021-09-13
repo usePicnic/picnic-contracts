@@ -2,58 +2,29 @@ pragma solidity ^0.8.6;
 
 interface ILiquidity {
 
-    event IndexPool_Liquidity_Add (
+    event INDEXPOOL_LIQUIDITY_ADD(
         address[] assetIn,
         uint256[] amountIn,
         address assetOut,
         uint256 amountOut
     );
 
-    event IndexPool_Liquidity_AddETH (
-        uint256 ethAmount,
-        address[] assetIn,
-        uint256[] amountIn,
-        address assetOut,
-        uint256 amountOut
-    );
-
-    event IndexPool_Liquidity_Remove(
+    event INDEXPOOL_LIQUIDITY_REMOVE(
         address[] tokens,
         uint256[] amountTokensArray,
         address assetOut,
         uint256 liquidity
     );
 
-    event IndexPool_Liquidity_RemoveETH(
-        uint256 ethAmount,
-        address[] tokens,
-        uint256[] amountTokensArray,
-        address assetOut,
-        uint256 liquidity
-    );
-
-    function addLiquidity(address[] calldata tokens,
-                          uint256[] calldata percentages,
-                          uint256[] calldata minAmounts
-                        ) external;
-
-    function addLiquidityETH(uint256 ethPercentage,
-                            uint256 minAmountEth,
-                            address[] calldata tokens,
-                            uint256[] calldata percentages,
-                            uint256[] calldata minAmounts
-                            ) external;
-
-    function removeLiquidity(address[] calldata tokens,
-        uint256[] calldata minAmounts,
-        address lpToken,
-        uint256 percentage
+    function addLiquidity(
+        address[] calldata tokens,
+        uint256[] calldata percentages,
+        uint256[] calldata minAmounts
     ) external;
 
-    function removeLiquidityETH(uint256 minAmountEth,
+    function removeLiquidity(
         address[] calldata tokens,
-        uint256[] calldata minAmounts,
-        address lpToken,
-        uint256 percentage
+        uint256 percentage,
+        uint256[] calldata minAmounts
     ) external;
 }
