@@ -82,8 +82,8 @@ describe("AutofarmDepositBridge", function () {
                 autofarm.interface.encodeFunctionData(
                     "deposit",
                     [
-                       "0x1Bd06B96dd42AdA85fDd0795f3B4A79DB914ADD5", // address assetIn,
-                       100000 // uint256 percentageIn
+                       8, // uint256 poolId
+                       100000, // uint256 percentageIn
                     ],
                 ),
             ];
@@ -155,15 +155,15 @@ describe("AutofarmDepositBridge", function () {
                 autofarm.interface.encodeFunctionData(
                     "deposit",
                     [
-                        "0x1Bd06B96dd42AdA85fDd0795f3B4A79DB914ADD5", // address assetIn,
-                        100000 // uint256 percentageIn
+                        8, // uint256 poolId
+                        100000, // uint256 percentageIn
                     ],
                 ),
                 autofarm.interface.encodeFunctionData(
                     "withdraw",
                     [
-                        "0x1Bd06B96dd42AdA85fDd0795f3B4A79DB914ADD5", // address assetOut,
-                        100000 // uint256 percentageOut
+                        8, // uint256 poolId
+                        100000, // uint256 percentageOut
                     ],
                 ),
             ];
