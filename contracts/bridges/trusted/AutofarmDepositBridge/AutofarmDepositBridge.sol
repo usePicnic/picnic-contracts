@@ -14,7 +14,6 @@ import "../../interfaces/IFarmPoolId.sol";
  *
  * 1. Deposit in AutofarmV2_CrossChain (example: QUICK/ETH -> autofarm doesn't return a deposit token)
  * 2. Withdraw from AutofarmV2_CrossChain
- * 3. Harvest rewards from deposits (it is a withdraw of value 0)
  *
  */
 
@@ -64,14 +63,9 @@ contract AutofarmDepositBridge is IFarmPoolId {
         uint256 amountOut = autofarm.stakedWantTokens(poolId, address(this)) * percentageOut / 100000;
         autofarm.withdraw(poolId, amountOut);
 
-        emit INDEXPOOL_FARM_OUT(vaultAddress, address(assetOut), amountOut);
-
-        // WMatic
         uint256 wMaticReward = IERC20(pAutoAddress).balanceOf(address(this)) - wMaticBalance;
-        emit INDEXPOOL_FARM_HARVEST(wMaticAddress, wMaticReward);
-
-        // PAuto
         uint256 pAutoReward = IERC20(pAutoAddress).balanceOf(address(this)) - pAutoBalance;
-        emit INDEXPOOL_FARM_HARVEST(wMaticAddress, pAutoReward);
+
+        emit INDEXPOOL_FARM_OUT(vaultAddress, address(assetOut), amountOut, wMaticReward, pAutoReward);
     }
 }

@@ -11,12 +11,9 @@ interface IFarmPoolId {
     event INDEXPOOL_FARM_OUT (
         address vaultAddress,
         address assetOut,
-        uint256 amountOut
-    );
-
-    event INDEXPOOL_FARM_HARVEST (
-        address assetOut,
-        uint256 amountOut
+        uint256 amountOut,
+        uint256 wMaticReward,
+        uint256 pAutoReward
     );
 
     function deposit(uint256 percentageIn, uint256 poolId) external;
