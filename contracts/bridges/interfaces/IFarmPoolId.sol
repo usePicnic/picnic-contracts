@@ -5,13 +5,13 @@ interface IFarmPoolId {
     event INDEXPOOL_FARM_IN (
         address vaultAddress,
         address assetIn,
-        uint256 amountIn
+        uint256 amount
     );
 
     event INDEXPOOL_FARM_OUT (
         address vaultAddress,
         address assetOut,
-        uint256 amountOut,
+        uint256 amount,
         uint256 wMaticReward,
         uint256 pAutoReward
     );

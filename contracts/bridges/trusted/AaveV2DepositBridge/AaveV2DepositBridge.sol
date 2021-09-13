@@ -77,6 +77,6 @@ contract AaveV2DepositBridge is IStake {
         uint256 claimedReward = distributor.claimRewards(assets, amountToClaim, address(this));
         address claimedAsset = distributor.REWARD_TOKEN();
 
-        emit INDEXPOOL_STAKE_DEPOSIT(assetIn, assetOut, amount, claimedAsset, claimedReward);
+        emit INDEXPOOL_STAKE_WITHDRAW(assetIn, assetOut, amount, claimedAsset, claimedReward);
     }
 }
