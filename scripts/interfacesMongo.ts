@@ -28,6 +28,10 @@ const interfacesToDeploy = [
     {
         interfaceName: "IWrap",
         filePath: bridgeNameToFilePath("IWrap")
+    },
+    {
+        interfaceName: "IFarmPoolId",
+        filePath: bridgeNameToFilePath("IFarmPoolId")
     }
 ]
 
