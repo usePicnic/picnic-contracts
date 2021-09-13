@@ -34,6 +34,7 @@ const POLYGON = {
         "FISH": "0x3a3Df212b7AA91Aa0402B9035b098891d276572B",
         "ELE": "0xAcD7B3D9c10e97d0efA418903C0c7669E702E4C0",
         "iFARM": "0xab0b2ddB9C7e440fAc8E140A89c0dbCBf2d7Bbff",
+        "CEL": "0xd85d1e945766fea5eda9103f918bd915fbca63e6", 
     },
 }
 
