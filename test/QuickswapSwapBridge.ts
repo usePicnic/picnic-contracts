@@ -9,6 +9,7 @@ describe("QuickswapSwapBridge", function () {
     let other;
     let UniswapV2SwapBridge;
     let uniswapV2SwapBridge;
+    let wmaticBridge;
     let wallet;
 
     const ADDRESSES = constants['POLYGON'];
@@ -23,6 +24,9 @@ describe("QuickswapSwapBridge", function () {
         UniswapV2SwapBridge = await ethers.getContractFactory("QuickswapSwapBridge");
         uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
 
+        let WMaticBridge = await ethers.getContractFactory("WMaticBridge");
+        wmaticBridge = await WMaticBridge.deploy();
+
         // Instantiate Wallet
         let Wallet = await ethers.getContractFactory("Wallet");
         wallet = await Wallet.deploy();
@@ -32,6 +36,7 @@ describe("QuickswapSwapBridge", function () {
         it("tradeFromTokenToETH - Buys DAI", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
+                wmaticBridge.address,
                 uniswapV2SwapBridge.address,
             ];
 
@@ -43,8 +48,14 @@ describe("QuickswapSwapBridge", function () {
 
             // Set encoded calls
             var _bridgeEncodedCalls = [
+                wmaticBridge.interface.encodeFunctionData(
+                    "wrap",
+                    [
+                        100000
+                    ],
+                ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
+                    "swapTokenToToken",
                     [
                         100000,
                         1,
@@ -75,6 +86,7 @@ describe("QuickswapSwapBridge", function () {
         it("tradeFromTokenToETH - Buys DAI and then sells DAI", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
+                wmaticBridge.address,
                 uniswapV2SwapBridge.address,
             ];
 
@@ -86,8 +98,14 @@ describe("QuickswapSwapBridge", function () {
 
             // Set encoded calls
             var _bridgeEncodedCalls = [
+                wmaticBridge.interface.encodeFunctionData(
+                    "wrap",
+                    [
+                        100000
+                    ],
+                ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
+                    "swapTokenToToken",
                     [
                         100000,
                         1,
@@ -109,6 +127,11 @@ describe("QuickswapSwapBridge", function () {
                 _bridgeEncodedCalls,
             );
 
+            _bridgeAddresses = [
+                uniswapV2SwapBridge.address,
+                wmaticBridge.address,
+            ];
+
             // Wallet DAI amount should be 0
             let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS[TOKEN_TO_TEST])
             let previousDaiBalance = await dai.balanceOf(wallet.address);
@@ -123,11 +146,17 @@ describe("QuickswapSwapBridge", function () {
             // Set encoded calls
             _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromTokenToETH",
+                    "swapTokenToToken",
                     [
                         100000,
                         1,
                         pathUniswap
+                    ],
+                ),
+                wmaticBridge.interface.encodeFunctionData(
+                    "unwrap",
+                    [
+                        100000
                     ],
                 ),
             ];
@@ -153,6 +182,7 @@ describe("QuickswapSwapBridge", function () {
         it("tradeFromTokenToToken - Buys DAI and then swaps to WMAIN", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
+                wmaticBridge.address,
                 uniswapV2SwapBridge.address,
             ];
 
@@ -164,8 +194,14 @@ describe("QuickswapSwapBridge", function () {
 
             // Set encoded calls
             var _bridgeEncodedCalls = [
+                wmaticBridge.interface.encodeFunctionData(
+                    "wrap",
+                    [
+                        100000
+                    ],
+                ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
+                    "swapTokenToToken",
                     [
                         100000,
                         1,
@@ -187,6 +223,10 @@ describe("QuickswapSwapBridge", function () {
                 _bridgeEncodedCalls,
             );
 
+            _bridgeAddresses = [
+                uniswapV2SwapBridge.address,
+            ];
+
             // Wallet DAI amount should be 0
             let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS[TOKEN_TO_TEST])
             let previousDaiBalance = await dai.balanceOf(wallet.address);
@@ -205,7 +245,7 @@ describe("QuickswapSwapBridge", function () {
             // Set encoded calls
             _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromTokenToToken",
+                    "swapTokenToToken",
                     [
                         100000,
                         1,
@@ -233,6 +273,7 @@ describe("QuickswapSwapBridge", function () {
         it("Emits TradedFromETHToTokens", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
+                wmaticBridge.address,
                 uniswapV2SwapBridge.address,
             ];
 
@@ -244,8 +285,14 @@ describe("QuickswapSwapBridge", function () {
 
             // Set encoded calls
             var _bridgeEncodedCalls = [
+                wmaticBridge.interface.encodeFunctionData(
+                    "wrap",
+                    [
+                        100000
+                    ],
+                ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
+                    "swapTokenToToken",
                     [
                         100000,
                         1,
@@ -284,6 +331,7 @@ describe("QuickswapSwapBridge", function () {
         it("Emits TradedFromTokensToETH", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
+                wmaticBridge.address,
                 uniswapV2SwapBridge.address,
             ];
 
@@ -295,8 +343,14 @@ describe("QuickswapSwapBridge", function () {
 
             // Set encoded calls
             var _bridgeEncodedCalls = [
+                wmaticBridge.interface.encodeFunctionData(
+                    "wrap",
+                    [
+                        100000
+                    ],
+                ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
+                    "swapTokenToToken",
                     [
                         100000,
                         1,
@@ -318,6 +372,11 @@ describe("QuickswapSwapBridge", function () {
                 _bridgeEncodedCalls,
             );
 
+            _bridgeAddresses = [
+                uniswapV2SwapBridge.address,
+                wmaticBridge.address,
+            ];
+
             // Wallet DAI amount should be 0
             let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])
             let previousDaiBalance = await dai.balanceOf(wallet.address);
@@ -331,11 +390,17 @@ describe("QuickswapSwapBridge", function () {
             // Set encoded calls
             _bridgeEncodedCalls = [
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromTokenToETH",
+                    "swapTokenToToken",
                     [
                         100000,
                         1,
                         pathUniswap
+                    ],
+                ),
+                wmaticBridge.interface.encodeFunctionData(
+                    "unwrap",
+                    [
+                        100000
                     ],
                 ),
             ];
@@ -365,6 +430,7 @@ describe("QuickswapSwapBridge", function () {
         it("Emits TradedFromTokensToTokens", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
+                wmaticBridge.address,
                 uniswapV2SwapBridge.address,
             ];
 
@@ -376,8 +442,14 @@ describe("QuickswapSwapBridge", function () {
 
             // Set encoded calls
             var _bridgeEncodedCalls = [
+                wmaticBridge.interface.encodeFunctionData(
+                    "wrap",
+                    [
+                        100000
+                    ],
+                ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "tradeFromETHToToken",
+                    "swapTokenToToken",
                     [
                         100000,
                         1,
@@ -431,6 +503,10 @@ describe("QuickswapSwapBridge", function () {
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             );
+
+            _bridgeAddresses = [
+                uniswapV2SwapBridge.address,
+            ];
 
             // Check if DAI balance is 0
             let currentDaiBalance = await dai.balanceOf(wallet.address);
