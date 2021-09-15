@@ -63,7 +63,7 @@ contract AutofarmDepositBridge is IFarmPoolId {
         uint256 amountOut = autofarm.stakedWantTokens(poolId, address(this)) * percentageOut / 100000;
         autofarm.withdraw(poolId, amountOut);
 
-        uint256 wMaticReward = IERC20(pAutoAddress).balanceOf(address(this)) - wMaticBalance;
+        uint256 wMaticReward = IERC20(wMaticAddress).balanceOf(address(this)) - wMaticBalance;
         uint256 pAutoReward = IERC20(pAutoAddress).balanceOf(address(this)) - pAutoBalance;
 
         emit INDEXPOOL_FARM_OUT(vaultAddress, address(assetOut), amountOut, wMaticReward, pAutoReward);
