@@ -589,6 +589,20 @@ describe("IndexPool", function () {
             )).to.be.revertedWith("INDEXPOOL: A AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED");
         })
     });
+    describe("NFT URI", function () {
+        it("Sets and reads Base URI", async function () {
+            await indexpool.createPortfolio(
+                {'tokens': [], 'amounts': []},
+                [],
+                [],
+                {value: ethers.utils.parseEther("1")} // overrides
+            );
+
+            await indexpool.setBaseURI('indexpool-test/');
+
+            expect(await indexpool.tokenURI(0)).to.be.equal('indexpool-test/0');
+        })
+    })
     describe("Events", function () {
         it("Emits INDEXPOOL_MINT_NFT", async function () {
             // Set bridges addresses and encoded calls
