@@ -13,10 +13,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        env: 
-          INFURA_KEY:  ${{ secrets.INFURA_KEY }}
-          COINMARKETCAP_KEY: ${{ secrets.COINMARKETCAP_KEY }}
-          POLYGON_TEST_MNEMONIC: ${{ secrets.POLYGON_TEST_MNEMONIC }}
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
@@ -46,6 +42,10 @@ jobs:
           pip3 install slither-analyzer
       - name: Run slither
         run: slither . --sarif slither.sarif || true
+        env: 
+          INFURA_KEY:  ${{ secrets.INFURA_KEY }}
+          COINMARKETCAP_KEY: ${{ secrets.COINMARKETCAP_KEY }}
+          POLYGON_TEST_MNEMONIC: ${{ secrets.POLYGON_TEST_MNEMONIC }}        
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v1
         with:
