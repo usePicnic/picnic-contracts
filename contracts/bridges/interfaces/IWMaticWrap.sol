@@ -1,6 +1,6 @@
 pragma solidity ^0.8.6;
 
-interface IMaticWrap {
+interface IWMaticWrap {
     event INDEXPOOL_WMATIC_WRAP (
         uint256 amountIn
     );
