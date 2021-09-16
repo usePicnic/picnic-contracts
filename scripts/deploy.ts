@@ -1,74 +1,138 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional 
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
-// const hre = require("hardhat");
-import { ethers } from "hardhat";
-import { readFileSync } from "fs";
-import fetch from "node-fetch";
-import constants from "../constants";
+import deployLogic from "./utils/deployLogic";
+import {ethers} from "hardhat";
+import {BigNumber} from "ethers";
+import {MongoClient} from 'mongodb';
 
+const hre = require("hardhat");
+const prompts = require("prompts");
 
-function delay(ms) {
-  return new Promise( resolve => setTimeout(resolve, ms) );
+const weiToString = (wei) => {
+    return wei
+        .div(
+            BigNumber.from(10).pow(14)
+        )
+        .toNumber() / Math.pow(10, 4);
 }
 
+function bridgeNameToFilePath(bridgeName : string) : string{
+    return `./artifacts/contracts/bridges/trusted/${bridgeName}/${bridgeName}.sol/${bridgeName}.json`;
+}
+
+const contractsToDeploy = [
+    {
+        contractName: "IndexPool",
+        interfaceName: "IIndexPool",
+        filePath: "./artifacts/contracts/IndexPool.sol/IndexPool.json"},
+    {
+        contractName: "AaveV2DepositBridge",
+        interfaceName: "IStake",
+        filePath: bridgeNameToFilePath("AaveV2DepositBridge")
+    },
+    {
+        contractName: "QuickswapSwapBridge",
+        interfaceName: "ISwap",
+        filePath: bridgeNameToFilePath("QuickswapSwapBridge")
+    },
+    {
+        contractName: "QuickswapLiquidityBridge",
+        interfaceName: "ILiquidity",
+        filePath: bridgeNameToFilePath("QuickswapLiquidityBridge")
+    },
+    {
+        contractName: "AutofarmDepositBridge",
+        interfaceName: "IFarmPoolId",
+        filePath: bridgeNameToFilePath("AutofarmDepositBridge")
+    },
+    {
+        contractName: "WMaticWrapBridge",
+        interfaceName: "IWrap",
+        filePath: bridgeNameToFilePath("WMaticWrapBridge")
+    },
+]
+
 async function main() {
+    const networkName = hre.hardhatArguments.network;
 
-  const [deployer] = await ethers.getSigners();
-  const ADDRESSES = constants['POLYGON'];
+    if (networkName === undefined) {
+        console.log('Please set a network before deploying :D');
+        return;
+    }
 
-  console.log(
-    "Deploying contracts with the account:",
-    deployer.address
-  );
+    const startBlockNumber = await ethers.provider.getBlockNumber();
 
-  console.log("Account balance:", (await deployer.getBalance()).toString());
+    const [deployer] = await ethers.getSigners();
+    console.log("Deploying contracts with the account:", deployer.address);
 
-  let Oracle = await ethers.getContractFactory("OraclePath");
+    const balanceBegin = await deployer.getBalance();
+    console.log("Account balance:", weiToString(balanceBegin));
 
-  let oracle = (await Oracle.deploy(ADDRESSES['FACTORY']));
+    let startingNonce = await deployer.getTransactionCount();
+    console.log('Starting nonce:', startingNonce);
 
-  const Pool = await ethers.getContractFactory("Pool");
+    const response = await prompts({
+            type: 'confirm',
+            name: 'confirm',
+            message: `Are you sure you want to deploy to ${networkName}?`,
+            initial: false
+        }
+    )
 
-  // DEPLOY
-  const pool = await Pool.deploy(ADDRESSES['ROUTER'], oracle.address);
+    console.log(response.confirm)
+    if (!response.confirm) {
+        console.log("Aborting");
+        return;
+    }
 
-  console.log("Pool address:", pool.address);
+    var allOk = true;
 
-  const nftAddress = await pool.getPortfolioNFTAddress();
+    for (var i = 0; i < contractsToDeploy.length; i++) {
+        let nonce = await deployer.getTransactionCount();
+        const isOk = await deployLogic({
+            networkName: networkName,
+            contractName: contractsToDeploy[i].contractName,
+            interfaceName: contractsToDeploy[i].interfaceName,
+            filePath: contractsToDeploy[i].filePath,
+            nonce: nonce
+        })
+        if (!isOk) {
+            allOk = false;
+        }
+    }
+    const balanceEnd = await deployer.getBalance();
+    console.log("Account balance:", weiToString(balanceEnd));
+    console.log("Cost to deploy:", weiToString(balanceBegin.sub(balanceEnd)));
 
-  console.log("NFT Address", nftAddress)
+    if (!allOk) {
+        console.log('There was a problem during deployment. Will not set network blockNumber.')
+    } else {
+        const client = new MongoClient(process.env.MONGODB_URI);
+        try {
+            await client.connect();
 
-  // REGISTER ON SERVER
-  const poolFile = readFileSync('./artifacts/contracts/Pool.sol/Pool.json', 'utf8')
-  const poolContract = JSON.parse(poolFile)
+            console.log(`Setting network blockNumber to ${startBlockNumber}`)
 
-  const nftFile = readFileSync('./artifacts/contracts/nft/IndexPoolNFT.sol/IndexPoolNFT.json', 'utf8')
-  const nftContract = JSON.parse(nftFile)
-
-  const response = await fetch(
-    'https://indexpool-appservice.azurewebsites.net/api/setcontract?code=yKjNRKdRLV4xl5fdmZU6bPveAg6lxpmxmRB3ocSXYTkrCUyXIa3QgA%3D%3D', {
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        networkName: "polygon-testnet",
-        address: pool.address,
-        abi: poolContract['abi'],
-        nftAddress: nftAddress,
-        nftAbi: nftContract['abi']
-      })
-    })
-  const responseText = await response.text()
-  console.log(responseText)
+            await client
+                .db('indexpool')
+                .collection('networks')
+                .updateOne(
+                    {
+                        'name': networkName
+                    },
+                    {
+                        $set: {
+                            'latestBlock': startBlockNumber
+                        }
+                    }
+                );
+        } finally {
+            await client.close();
+        }
+    }
 }
 
 main()
-  .then(() => process.exit(0))
-  .catch(error => {
-    console.error(error);
-    process.exit(1);
-  });
+    .then(() => process.exit(0))
+    .catch(error => {
+        console.error(error);
+        process.exit(1);
+    });
