@@ -10,7 +10,7 @@ import "../../interfaces/IAutofarmDeposit.sol";
  *
  * @notice Deposits, withdraws and harvest rewards from AutofarmV2_CrossChain contract in Polygon.
  *
- * @dev This contract has 3 main functions:
+ * @dev This contract has 2 main functions:
  *
  * 1. Deposit in AutofarmV2_CrossChain (example: QUICK/ETH -> autofarm doesn't return a deposit token)
  * 2. Withdraw from AutofarmV2_CrossChain
@@ -49,8 +49,9 @@ contract AutofarmDepositBridge is IAutofarmDeposit {
       * @notice Withdraws from the Autofarm protocol.
       *
       * @dev Wraps the Autofarm withdraw and generate the necessary events to communicate with IndexPool's UI and
-      * back-end.
+      * back-end. A harvest is withdraw where percentageOut == 0.
       *
+      * @param poolId Autofarm pool id
       * @param percentageOut Percentage of the balance of the asset that will be withdrawn
       */
     function withdraw(uint256 poolId, uint256 percentageOut) external override {

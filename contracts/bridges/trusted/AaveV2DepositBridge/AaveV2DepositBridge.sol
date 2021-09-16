@@ -16,8 +16,8 @@ import "../../interfaces/IAaveV2Deposit.sol";
  * 1. Deposit in Aave's LendingPool (example: DAI -> amDAI)
  * 2. Withdraw from Aave's LendingPool (example: amDAI -> DAI)
  *
- * Notice that we haven't implemented any kind of borrowing mechanisms, mostly because that would require control
- * mechanics to go along with it.
+ * Notice that we haven't implemented any kind of borrowing mechanisms, mostly because that would be nice to have
+ * control mechanics to go along with it.
  *
  */
 
@@ -54,6 +54,7 @@ contract AaveV2DepositBridge is IAaveV2Deposit {
       * @notice Withdraws from the Aave protocol.
       *
       * @dev Wraps the Aave withdraw and generate the necessary events to communicate with IndexPool's UI and back-end.
+      * A harvest is withdraw where percentageOut == 0.
       *
       * @param assetOut Address of the asset to be withdrawn from the Aave protocol
       * @param percentageOut Percentage of the balance of the asset that will be withdrawn

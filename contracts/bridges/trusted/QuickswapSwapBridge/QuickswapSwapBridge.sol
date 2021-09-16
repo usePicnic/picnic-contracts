@@ -25,7 +25,7 @@ contract QuickswapSwapBridge is IUniswapV2Swap {
       * @param amountOutMin Minimum amount of the output token required to execute swap
       * @param path The swap route determined by the path. The first element of path is the input token, the last is
       * the output token, and any intermediate elements represent intermediate pairs to trade through (if, for example,
-      * a direct pair does not exist).
+      * a direct pair does not exist)
       */
     function swapTokenToToken(
         uint256 amountInPercentage,

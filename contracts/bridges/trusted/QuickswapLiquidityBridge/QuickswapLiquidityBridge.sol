@@ -12,10 +12,10 @@ import "hardhat/console.sol";
  *
  * @notice Swaps using the Quickswap contract in Polygon.
  *
- * @dev This contract adds liquidity to Quickswap through 2 functions:
+ * @dev This contract adds or removes liquidity from Quickswap through 2 functions:
  *
  * 1. addLiquidity works with 2 ERC20 tokens
- * 2. addLiquidityETH works with 1 ERC20 token plus ETH
+ * 2. removeLiquidity works with 2 ERC20 tokens
  *
  */
 contract QuickswapLiquidityBridge is IUniswapV2Liquidity {
@@ -76,6 +76,16 @@ contract QuickswapLiquidityBridge is IUniswapV2Liquidity {
         emit INDEXPOOL_UNISWAP_ADD_LIQUIDITY(tokens, amountTokensArray, assetOut, routerOutputs[2]);
     }
 
+    /**
+      * @notice Removes liquidity from 2 ERC20 tokens
+      *
+      * @dev Wraps remove liquidity and generate the necessary events to communicate with IndexPool's UI and
+      * back-end.
+      *
+      * @param tokens List of two - token that will have liquidity removed from pool
+      * @param percentage Percentage of LP token to be removed from pool
+      * @param minAmounts List of two - minimum amounts of the ERC20 tokens required to remove liquidity
+      */
     function removeLiquidity(
         address[] calldata tokens,
         uint256 percentage,
