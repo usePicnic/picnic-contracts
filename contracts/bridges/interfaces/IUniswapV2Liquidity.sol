@@ -1,6 +1,6 @@
 pragma solidity ^0.8.6;
 
-interface ILiquidity {
+interface IUniswapV2Liquidity {
 
     event INDEXPOOL_LIQUIDITY_ADD(
         address[] assetIn,

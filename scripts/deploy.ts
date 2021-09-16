@@ -44,9 +44,9 @@ const contractsToDeploy = [
         filePath: bridgeNameToFilePath("AutofarmDepositBridge")
     },
     {
-        contractName: "WMaticBridge",
+        contractName: "WMaticWrapBridge",
         interfaceName: "IWrap",
-        filePath: bridgeNameToFilePath("WMaticBridge")
+        filePath: bridgeNameToFilePath("WMaticWrapBridge")
     },
 ]
 

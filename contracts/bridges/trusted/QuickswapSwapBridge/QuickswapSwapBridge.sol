@@ -2,7 +2,7 @@ pragma solidity ^0.8.6;
 
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
-import "../../interfaces/ISwap.sol";
+import "../../interfaces/IUniswapV2Swap.sol";
 
 /**
  * @title QuickswapSwapBridge
@@ -14,7 +14,7 @@ import "../../interfaces/ISwap.sol";
  *
  */
 
-contract QuickswapSwapBridge is ISwap {
+contract QuickswapSwapBridge is IUniswapV2Swap {
     address constant routerAddress = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
     /**
       * @notice Swaps from ERC20 token to ERC20 token.

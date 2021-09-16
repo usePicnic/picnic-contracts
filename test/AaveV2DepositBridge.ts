@@ -32,7 +32,7 @@ describe("AaveV2DepositBridge", function () {
     );
     aaveV2DepositBridge = await AaveV2DepositBridge.deploy();
 
-    let WMaticBridge = await ethers.getContractFactory("WMaticBridge");
+    let WMaticBridge = await ethers.getContractFactory("WMaticWrapBridge");
     wmaticBridge = await WMaticBridge.deploy();
 
     // Instantiate Wallet

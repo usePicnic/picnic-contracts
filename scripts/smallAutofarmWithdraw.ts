@@ -44,8 +44,8 @@ async function main() {
     let autofarm = await ethers.getContractAt("AutofarmDepositBridge",
         await getDeployedAddress("AutofarmDepositBridge", client));
 
-    let wMaticBridge = await ethers.getContractAt("WMaticBridge",
-        await getDeployedAddress("WMaticBridge", client));
+    let wMaticBridge = await ethers.getContractAt("WMaticWrapBridge",
+        await getDeployedAddress("WMaticWrapBridge", client));
 
     const [deployer] = await ethers.getSigners();
     const balanceBegin = await deployer.getBalance();

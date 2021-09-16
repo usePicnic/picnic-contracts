@@ -1,6 +1,6 @@
 pragma solidity ^0.8.6;
 
-interface IFarmPoolId {
+interface IAutofarmDeposit {
 
     event INDEXPOOL_FARM_IN (
         address vaultAddress,

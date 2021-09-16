@@ -3,7 +3,7 @@ pragma solidity ^0.8.6;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/ILendingPool.sol";
 import "./interfaces/IAaveIncentivesController.sol";
-import "../../interfaces/IStake.sol";
+import "../../interfaces/IAaveV2Deposit.sol";
 
 /**
  * @title AaveV2DepositBridge
@@ -21,7 +21,7 @@ import "../../interfaces/IStake.sol";
  *
  */
 
-contract AaveV2DepositBridge is IStake {
+contract AaveV2DepositBridge is IAaveV2Deposit {
 
     address constant aaveLendingPoolAddress = 0x8dFf5E27EA6b7AC08EbFdf9eB090F32ee9a30fcf;
     address constant incentivesControllerAddress = 0x357D51124f59836DeD84c8a1730D72B749d8BC23;

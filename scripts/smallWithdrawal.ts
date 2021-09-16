@@ -38,8 +38,8 @@ async function main() {
     let aaveV2DepositBridge = await ethers.getContractAt("AaveV2DepositBridge",
         await getDeployedAddress("AaveV2DepositBridge", client));
 
-    let wMaticBridge = await ethers.getContractAt("WMaticBridge",
-        await getDeployedAddress("WMaticBridge", client));
+    let wMaticBridge = await ethers.getContractAt("WMaticWrapBridge",
+        await getDeployedAddress("WMaticWrapBridge", client));
 
     const [deployer] = await ethers.getSigners();
     const balanceBegin = await deployer.getBalance();

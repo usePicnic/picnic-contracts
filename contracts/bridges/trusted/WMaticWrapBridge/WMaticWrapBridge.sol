@@ -2,9 +2,9 @@ pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IWMatic.sol";
-import "../../interfaces/IWrap.sol";
+import "../../interfaces/IMaticWrap.sol";
 
-contract WMaticBridge is IWrap {
+contract WMaticWrapBridge is IMaticWrap {
     address constant wMaticAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270;
     IWMatic constant wmatic = IWMatic(wMaticAddress);
 

@@ -28,7 +28,7 @@ describe("QuickswapLiquidityBridge", function () {
         let QuickswapLiquidityBridge = await ethers.getContractFactory("QuickswapLiquidityBridge");
         quickswapLiquidityBridge = await QuickswapLiquidityBridge.deploy();
 
-        let WMaticBridge = await ethers.getContractFactory("WMaticBridge");
+        let WMaticBridge = await ethers.getContractFactory("WMaticWrapBridge");
         wmaticBridge = await WMaticBridge.deploy();
 
         // Instantiate Wallet

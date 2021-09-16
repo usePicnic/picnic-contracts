@@ -2,7 +2,7 @@ pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IAutofarmV2_CrossChain.sol";
-import "../../interfaces/IFarmPoolId.sol";
+import "../../interfaces/IAutofarmDeposit.sol";
 
 /**
  * @title AutofarmDepositBridge
@@ -17,7 +17,7 @@ import "../../interfaces/IFarmPoolId.sol";
  *
  */
 
-contract AutofarmDepositBridge is IFarmPoolId {
+contract AutofarmDepositBridge is IAutofarmDeposit {
     // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
     address constant autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;
     address constant wMaticAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270;

@@ -24,7 +24,7 @@ describe("QuickswapSwapBridge", function () {
         UniswapV2SwapBridge = await ethers.getContractFactory("QuickswapSwapBridge");
         uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
 
-        let WMaticBridge = await ethers.getContractFactory("WMaticBridge");
+        let WMaticBridge = await ethers.getContractFactory("WMaticWrapBridge");
         wmaticBridge = await WMaticBridge.deploy();
 
         // Instantiate Wallet

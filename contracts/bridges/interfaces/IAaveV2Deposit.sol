@@ -1,6 +1,6 @@
 pragma solidity ^0.8.6;
 
-interface IStake {
+interface IAaveV2Deposit {
     event INDEXPOOL_STAKE_DEPOSIT (
         address assetIn,
         address assetOut,

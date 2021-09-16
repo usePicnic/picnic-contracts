@@ -28,7 +28,7 @@ describe("AutofarmDepositBridge", function () {
         let Autofarm = await ethers.getContractFactory("AutofarmDepositBridge");
         autofarm = await Autofarm.deploy();
 
-        let WMaticBridge = await ethers.getContractFactory("WMaticBridge");
+        let WMaticBridge = await ethers.getContractFactory("WMaticWrapBridge");
         wmaticBridge = await WMaticBridge.deploy();
 
         // Instantiate Wallet

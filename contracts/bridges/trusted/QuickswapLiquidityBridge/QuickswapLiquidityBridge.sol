@@ -3,7 +3,7 @@ pragma solidity ^0.8.6;
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
-import "../../interfaces/ILiquidity.sol";
+import "../../interfaces/IUniswapV2Liquidity.sol";
 import "hardhat/console.sol";
 
 /**
@@ -18,7 +18,7 @@ import "hardhat/console.sol";
  * 2. addLiquidityETH works with 1 ERC20 token plus ETH
  *
  */
-contract QuickswapLiquidityBridge is ILiquidity {
+contract QuickswapLiquidityBridge is IUniswapV2Liquidity {
 
     address constant routerAddress = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
     address constant factoryAddress = 0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32;
