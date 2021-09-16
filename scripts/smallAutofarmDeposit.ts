@@ -41,6 +41,12 @@ async function main() {
     let wMaticBridge = await ethers.getContractAt("WMaticBridge",
         await getDeployedAddress("WMaticBridge", client));
 
+    let quickswapLiquidityBridge = await ethers.getContractAt("QuickswapLiquidityBridge",
+        await getDeployedAddress("QuickswapLiquidityBridge", client));
+
+    let autofarm = await ethers.getContractAt("AutofarmDepositBridge",
+        await getDeployedAddress("AutofarmDepositBridge", client));
+
     const [deployer] = await ethers.getSigners();
     const balanceBegin = await deployer.getBalance();
     console.log("Deploying from:", deployer.address);
@@ -49,7 +55,9 @@ async function main() {
     var _bridgeAddresses = [
         wMaticBridge.address,
         uniswapV2SwapBridge.address,
-        aaveV2DepositBridge.address,
+        uniswapV2SwapBridge.address,
+        quickswapLiquidityBridge.address,
+        autofarm.address,
     ];
     var _bridgeEncodedCalls = [
         wMaticBridge.interface.encodeFunctionData(
@@ -61,21 +69,34 @@ async function main() {
         uniswapV2SwapBridge.interface.encodeFunctionData(
             "swapTokenToToken",
             [
-                100000,
+                50000,
                 1,
-                [
-                    TOKENS['WMAIN'],
-                    TOKENS['DAI'],
-                ]
+                [TOKENS['WMAIN'], TOKENS['WETH']]
             ],
         ),
-        aaveV2DepositBridge.interface.encodeFunctionData(
+        uniswapV2SwapBridge.interface.encodeFunctionData(
+            "swapTokenToToken",
+            [
+                50000,
+                1,
+                [TOKENS['WMAIN'], TOKENS['QUICK']]
+            ],
+        ),
+        quickswapLiquidityBridge.interface.encodeFunctionData(
+            "addLiquidity",
+            [
+                [TOKENS['WETH'], TOKENS['QUICK'],], // address[] tokens,
+                [100000, 100000,], // uint256[] percentages,
+                [1, 1,], // uint256[] minAmounts
+            ],
+        ),
+        autofarm.interface.encodeFunctionData(
             "deposit",
             [
-                TOKENS['DAI'],
-                100000
-            ]
-        )
+                8, // uint256 poolId
+                100000, // uint256 percentageIn
+            ],
+        ),
     ];
 
     let startingNonce = await deployer.getTransactionCount();

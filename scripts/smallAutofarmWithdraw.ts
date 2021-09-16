@@ -38,6 +38,12 @@ async function main() {
     let aaveV2DepositBridge = await ethers.getContractAt("AaveV2DepositBridge",
         await getDeployedAddress("AaveV2DepositBridge", client));
 
+    let quickswapLiquidityBridge = await ethers.getContractAt("QuickswapLiquidityBridge",
+        await getDeployedAddress("QuickswapLiquidityBridge", client));
+
+    let autofarm = await ethers.getContractAt("AutofarmDepositBridge",
+        await getDeployedAddress("AutofarmDepositBridge", client));
+
     let wMaticBridge = await ethers.getContractAt("WMaticBridge",
         await getDeployedAddress("WMaticBridge", client));
 
@@ -46,16 +52,27 @@ async function main() {
     console.log("Deploying from:", deployer.address);
     console.log("Account balance:", weiToString(balanceBegin));
 
-    var _bridgeAddresses = [
-        wMaticBridge.address,
+    const _bridgeAddresses = [
+        autofarm.address,
+        quickswapLiquidityBridge.address,
         uniswapV2SwapBridge.address,
-        aaveV2DepositBridge.address,
+        uniswapV2SwapBridge.address,
+        wMaticBridge.address,
     ];
-    var _bridgeEncodedCalls = [
-        wMaticBridge.interface.encodeFunctionData(
-            "wrap",
+    const _bridgeEncodedCalls = [
+        autofarm.interface.encodeFunctionData(
+            "withdraw",
             [
-                100000
+                8, // uint256 poolId
+                100000, // uint256 percentageIn
+            ],
+        ),
+        quickswapLiquidityBridge.interface.encodeFunctionData(
+            "removeLiquidity",
+            [
+                [TOKENS['WETH'], TOKENS['QUICK'],], // address[] tokens,
+                100000, // uint256[] percentage,
+                [1, 1,], // uint256[] minAmounts
             ],
         ),
         uniswapV2SwapBridge.interface.encodeFunctionData(
@@ -64,30 +81,42 @@ async function main() {
                 100000,
                 1,
                 [
-                    TOKENS['WMAIN'],
-                    TOKENS['DAI'],
+                    TOKENS['WETH'],
+                    TOKENS['WMAIN']
                 ]
             ],
         ),
-        aaveV2DepositBridge.interface.encodeFunctionData(
-            "deposit",
+        uniswapV2SwapBridge.interface.encodeFunctionData(
+            "swapTokenToToken",
             [
-                TOKENS['DAI'],
+                100000,
+                1,
+                [
+                    TOKENS['QUICK'],
+                    TOKENS['WMAIN']
+                ]
+            ],
+        ),
+        wMaticBridge.interface.encodeFunctionData(
+            "unwrap",
+            [
                 100000
-            ]
-        )
+            ],
+        ),
     ];
 
     let startingNonce = await deployer.getTransactionCount();
 
-    let overrides = {value: ethers.utils.parseEther("0.000001"), gasLimit:2000000, nonce:startingNonce};
-    await indexPool.createPortfolio(
+    await indexPool.withdrawPortfolio(
+        0,
         {'tokens': [], 'amounts': []},
+        100000,
         _bridgeAddresses,
         _bridgeEncodedCalls,
-        overrides
+        {gasLimit: 6000000, nonce:startingNonce}
     );
-    console.log("Mint succeeded:", weiToString(balanceBegin));
+
+    console.log("Withdraw succeeded:", weiToString(balanceBegin));
     console.log("Account balance:", weiToString(balanceBegin));
 
 }

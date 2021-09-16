@@ -78,13 +78,15 @@ async function main() {
         ),
     ];
 
+    let startingNonce = await deployer.getTransactionCount();
+
     await indexPool.withdrawPortfolio(
         0,
         {'tokens': [], 'amounts': []},
         100000,
         _bridgeAddresses,
         _bridgeEncodedCalls,
-        {gasLimit: 600000}
+        {gasLimit: 6000000, nonce:startingNonce}
     );
 
     console.log("Withdraw succeeded:", weiToString(balanceBegin));
