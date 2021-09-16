@@ -1,5 +1,5 @@
 {
-  "name": "crypto_index_fund",
+  "name": "indexpool-contracts",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
@@ -7,40 +7,48 @@
     "test": "hardhat test --network hardhat",
     "lint": "./node_modules/.bin/solhint -f table contracts/**/*.sol",
     "compile": "hardhat compile",
-    "coverage": "hardhat coverage"
+    "coverage": "hardhat coverage",
+    "deploy": "hardhat run ./scripts/deploy.ts --network polygon",
+    "undeploy": "hardhat run ./scripts/undeploy.ts --network polygon"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/indexpool/contracts.git"
+    "url": "git+https://github.com/indexpool/indexpool-contracts.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/indexpool/contracts/issues"
+    "url": "https://github.com/indexpool/indexpool-contracts/issues"
   },
   "homepage": "https://indexpool.org",
   "devDependencies": {
+    "@aave/protocol-v2": "^1.0.1",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@openzeppelin/contracts": "^4.2.0",
     "@types/chai": "^4.2.15",
     "@types/mocha": "^8.2.2",
+    "@types/mongodb": "^4.0.7",
     "@types/node": "^14.14.35",
     "@uniswap/v2-core": "^1.0.1",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "abi-decoder": "^2.4.0",
     "chai": "^4.3.4",
+    "dotenv": "^10.0.0",
     "ethereum-waffle": "^3.3.0",
     "ethers": "^5.0.32",
     "hardhat": "^2.1.1",
+    "hardhat-contract-sizer": "^2.0.3",
     "hardhat-gas-reporter": "^1.0.4",
+    "mongodb": "^4.1.0",
+    "node-fetch": "^2.6.1",
+    "prompts": "^2.4.1",
     "solc": "^0.8.4",
+    "solhint": "^3.3.6",
     "solidity-coverage": "^0.7.16",
     "ts-node": "^9.1.1",
-    "typescript": "^4.2.3"
-  },
-  "dependencies": {
-    "@openzeppelin/contracts": "^4.1.0",
-    "node-fetch": "^2.6.1",
-    "solhint": "^3.3.6",
+    "typescript": "^4.2.3",
     "zeppelin-solidity": "^1.12.0"
-  }
+  },
+  "dependencies": {}
 }

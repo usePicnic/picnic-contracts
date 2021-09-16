@@ -3,6 +3,8 @@ import "@nomiclabs/hardhat-waffle";
 import "solidity-coverage";
 import "hardhat-gas-reporter";
 
+require('dotenv').config()
+require('hardhat-contract-sizer');
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -23,32 +25,29 @@ module.exports = {
   solidity: {
     compilers: [
       {
-        version: "0.4.21"
-      },
-      {
-        version: "0.4.24"
-      },
-      {
-        version: "0.6.6"
-      },
-      {
         version: "0.8.6",
-      }
+        settings: {
+          optimizer: { enabled: true, runs: 200 },
+        },
+      },
     ],
-    settings: {
-      optimizer: { enabled: true, runs: 200 },
-    },
   },
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-      chainId: 7671,
       forking: {
         url: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_KEY}`, 
       }
     },
+    polygon: {
+      url: `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_KEY}`,
+      accounts: {
+        mnemonic: process.env.POLYGON_TEST_MNEMONIC
+      },
+      gasPrice: 5*gwei
+    }
   },
-  mocha: { timeout: '180000'},
+  mocha: { timeout: '1800000'},
   gasReporter: {
     currency: 'USD',
     gasPrice: 1,

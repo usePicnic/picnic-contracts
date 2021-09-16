@@ -12,7 +12,7 @@ jobs:
       - name: setup-node
         uses: actions/setup-node@v1
         with:
-          node-version: '10.x'
+          node-version: '14.x'
       - name: install yarn
         run: npm install yarn
       - name: install packages
@@ -24,16 +24,19 @@ jobs:
         env:
           COINMARKETCAP_KEY: ${{ secrets.COINMARKETCAP_KEY }}
           INFURA_KEY: ${{ secrets.INFURA_KEY }} 
+          POLYGON_TEST_MNEMONIC: ${{ secrets.POLYGON_TEST_MNEMONIC }} 
       - name: test
         run: yarn test --no-compile
         env:
           COINMARKETCAP_KEY: ${{ secrets.COINMARKETCAP_KEY }}
           INFURA_KEY: ${{ secrets.INFURA_KEY }} 
+          POLYGON_TEST_MNEMONIC: ${{ secrets.POLYGON_TEST_MNEMONIC }} 
       - name: coverage
         run: yarn run coverage
         env:
           COINMARKETCAP_KEY: ${{ secrets.COINMARKETCAP_KEY }}
           INFURA_KEY: ${{ secrets.INFURA_KEY }} 
+          POLYGON_TEST_MNEMONIC: ${{ secrets.POLYGON_TEST_MNEMONIC }} 
       - name: "Upload report to Coveralls"
         uses: "coverallsapp/github-action@master"
         with:
