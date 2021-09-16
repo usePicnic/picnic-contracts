@@ -22,7 +22,7 @@ jobs:
         run: |
           npm install
           npm run compile
-        env: |
+        env: 
           INFURA_KEY:  ${{ secrets.INFURA_KEY }}
           COINMARKETCAP_KEY: ${{ secrets.COINMARKETCAP_KEY }}
           POLYGON_TEST_MNEMONIC: ${{ secrets.POLYGON_TEST_MNEMONIC }}                  
@@ -46,7 +46,7 @@ jobs:
           pip3 install slither-analyzer
       - name: Run slither
         run: slither . --sarif slither.sarif || true
-        env: |
+        env: 
           INFURA_KEY:  ${{ secrets.INFURA_KEY }}
           COINMARKETCAP_KEY: ${{ secrets.COINMARKETCAP_KEY }}
           POLYGON_TEST_MNEMONIC: ${{ secrets.POLYGON_TEST_MNEMONIC }}        
