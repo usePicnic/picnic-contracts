@@ -1,11 +1,11 @@
 pragma solidity ^0.8.6;
 
 interface IMaticWrap {
-    event INDEXPOOL_WRAP_IN (
+    event INDEXPOOL_WMATIC_WRAP (
         uint256 amountIn
     );
 
-    event INDEXPOOL_WRAP_OUT (
+    event INDEXPOOL_WMATIC_UNWRAP (
         uint256 amountOut
     );
 

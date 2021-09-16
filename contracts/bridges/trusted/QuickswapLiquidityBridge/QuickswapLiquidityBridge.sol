@@ -73,7 +73,7 @@ contract QuickswapLiquidityBridge is IUniswapV2Liquidity {
 
         address assetOut = _uniswapFactory.getPair(tokens[0], tokens[1]);
 
-        emit INDEXPOOL_LIQUIDITY_ADD(tokens, amountTokensArray, assetOut, routerOutputs[2]);
+        emit INDEXPOOL_UNISWAP_ADD_LIQUIDITY(tokens, amountTokensArray, assetOut, routerOutputs[2]);
     }
 
     function removeLiquidity(
@@ -100,7 +100,7 @@ contract QuickswapLiquidityBridge is IUniswapV2Liquidity {
             block.timestamp + 100000  // uint deadline
         );
 
-        emit INDEXPOOL_LIQUIDITY_REMOVE(tokens, amountTokensArray, lpToken, liquidity);
+        emit INDEXPOOL_UNISWAP_REMOVE_LIQUIDITY(tokens, amountTokensArray, lpToken, liquidity);
     }
 }
 

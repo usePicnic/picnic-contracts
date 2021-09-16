@@ -48,6 +48,6 @@ contract QuickswapSwapBridge is IUniswapV2Swap {
             block.timestamp + 100000
         );
 
-        emit INDEXPOOL_SWAP_TOKEN(path, amounts);
+        emit INDEXPOOL_UNISWAP_SWAP(path, amounts);
     }
 }

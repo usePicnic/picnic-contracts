@@ -9,12 +9,12 @@ contract WMaticWrapBridge is IMaticWrap {
     IWMatic constant wmatic = IWMatic(wMaticAddress);
 
     function wrap(uint256 percentageIn) external override {
-        emit INDEXPOOL_WRAP_IN(address(this).balance * percentageIn / 100000);
+        emit INDEXPOOL_WMATIC_WRAP(address(this).balance * percentageIn / 100000);
         wmatic.deposit{value : address(this).balance * percentageIn / 100000}();
     }
 
     function unwrap(uint256 percentageOut) external override {
-        emit INDEXPOOL_WRAP_OUT(IERC20(wMaticAddress).balanceOf(address(this)) * percentageOut / 100000);
+        emit INDEXPOOL_WMATIC_UNWRAP(IERC20(wMaticAddress).balanceOf(address(this)) * percentageOut / 100000);
         wmatic.withdraw(IERC20(wMaticAddress).balanceOf(address(this)) * percentageOut / 100000);
     }
 }

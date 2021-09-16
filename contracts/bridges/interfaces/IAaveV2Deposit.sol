@@ -1,13 +1,13 @@
 pragma solidity ^0.8.6;
 
 interface IAaveV2Deposit {
-    event INDEXPOOL_STAKE_DEPOSIT (
+    event INDEXPOOL_AAVEV2_DEPOSIT (
         address assetIn,
         address assetOut,
         uint256 amount
     );
 
-    event INDEXPOOL_STAKE_WITHDRAW (
+    event INDEXPOOL_AAVEV2_WITHDRAW (
         address assetIn,
         address assetOut,
         uint256 amount,
