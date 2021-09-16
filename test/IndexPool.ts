@@ -135,6 +135,20 @@ describe("IndexPool", function () {
                 _bridgeEncodedCalls
             )).to.be.revertedWith("INDEXPOOL: A AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED");
         })
+
+        it("Rejects different bridges and calls sizes", async function () {
+            // Set bridges addresses and encoded calls
+            var _bridgeAddresses = [uniswapV2Router02.address];
+            var _bridgeEncodedCalls = [];
+
+            // Create a portfolio
+            await expect(indexpool.createPortfolio(
+                {'tokens': [], 'amounts': []},
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+                {value: ethers.utils.parseEther("1")}
+            )).to.be.revertedWith("INDEXPOOL: BRIDGE ENCODED CALLS AND ADDRESSES MUST HAVE THE SAME LENGTH");
+        })
     });
 
     describe("Deposit in a portfolio", function () {
@@ -315,6 +329,32 @@ describe("IndexPool", function () {
                 _bridgeEncodedCalls,
             )).to.be.revertedWith("INDEXPOOL: A AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED");
         })
+
+        it("Rejects different bridges and calls sizes", async function () {
+            // Set bridges addresses and encoded calls
+            var _bridgeAddresses = [];
+            var _bridgeEncodedCalls = [];
+
+            // Create a portfolio (just holds ether)
+            let tx = await indexpool.createPortfolio(
+                {'tokens': [], 'amounts': []},
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+                {value: ethers.utils.parseEther("1")} // overrides
+            );
+
+            // Set bridges addresses and encoded calls
+            _bridgeAddresses = [uniswapV2Router02.address];
+
+            // Create a portfolio
+            await expect(indexpool.depositPortfolio(
+                0,
+                {'tokens': [], 'amounts': []},
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+                {value: ethers.utils.parseEther("1")} // overrides
+            )).to.be.revertedWith("INDEXPOOL: BRIDGE ENCODED CALLS AND ADDRESSES MUST HAVE THE SAME LENGTH");
+        })
     });
 
     describe("Edits portfolio", function () {
@@ -399,6 +439,30 @@ describe("IndexPool", function () {
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             )).to.be.revertedWith("INDEXPOOL: ONLY NFT OWNER CAN CALL THIS FUNCTION");
+        })
+
+        it("Rejects different bridges and calls sizes", async function () {
+            // Set bridges addresses and encoded calls
+            var _bridgeAddresses = [];
+            var _bridgeEncodedCalls = [];
+
+            // Create a portfolio (just holds ether)
+            let tx = await indexpool.createPortfolio(
+                {'tokens': [], 'amounts': []},
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+                {value: ethers.utils.parseEther("1")} // overrides
+            );
+
+            // Set bridges addresses and encoded calls
+            _bridgeAddresses = [uniswapV2Router02.address];
+
+            // Create a portfolio
+            await expect(indexpool.editPortfolio(
+                0,
+                _bridgeAddresses,
+                _bridgeEncodedCalls
+            )).to.be.revertedWith("INDEXPOOL: BRIDGE ENCODED CALLS AND ADDRESSES MUST HAVE THE SAME LENGTH");
         })
     });
 
@@ -587,6 +651,32 @@ describe("IndexPool", function () {
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
             )).to.be.revertedWith("INDEXPOOL: A AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED");
+        })
+
+        it("Rejects different bridges and calls sizes", async function () {
+            // Set bridges addresses and encoded calls
+            var _bridgeAddresses = [];
+            var _bridgeEncodedCalls = [];
+
+            // Create a portfolio (just holds ether)
+            let tx = await indexpool.createPortfolio(
+                {'tokens': [], 'amounts': []},
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+                {value: ethers.utils.parseEther("1")} // overrides
+            );
+
+            // Set bridges addresses and encoded calls
+            _bridgeAddresses = [uniswapV2Router02.address];
+
+            // Create a portfolio
+            await expect(indexpool.withdrawPortfolio(
+                0,
+                {'tokens': [], 'amounts': []},
+                100000, // Withdraw percentage
+                _bridgeAddresses,
+                _bridgeEncodedCalls
+            )).to.be.revertedWith("INDEXPOOL: BRIDGE ENCODED CALLS AND ADDRESSES MUST HAVE THE SAME LENGTH");
         })
     });
     describe("NFT URI", function () {
