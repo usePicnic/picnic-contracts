@@ -2,7 +2,7 @@ pragma solidity ^0.8.6;
 
 interface IUniswapV2Swap {
     event INDEXPOOL_SWAP_TOKEN(
-        address[] path, // TODO is this path necessary? already on header
+        address[] path,
         uint256[] amounts
     );
 

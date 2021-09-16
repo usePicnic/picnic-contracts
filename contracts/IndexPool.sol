@@ -54,6 +54,14 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         _;
     }
 
+    modifier checkBridgeCalls(address[] calldata bridgeAddresses, bytes[] calldata bridgeEncodedCalls) {
+        require(
+            bridgeAddresses.length == bridgeEncodedCalls.length,
+            "INDEXPOOL: BRIDGE ENCODED CALLS AND ADDRESSES MUST HAVE THE SAME LENGTH"
+        );
+        _;
+    }
+
     // NFT properties
     uint256 public tokenCounter = 0;
     mapping(uint256 => address) private _nftIdToWallet;
@@ -93,7 +101,8 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         address[] calldata bridgeAddresses,
         bytes[] calldata bridgeEncodedCalls
     ) payable external
-        checkIO(inputs, msg.value) override
+        checkIO(inputs, msg.value)
+        checkBridgeCalls(bridgeAddresses, bridgeEncodedCalls) override
     {
         uint256 nftId = _mintNFT(msg.sender);
         _depositToWallet(nftId, inputs, msg.value);
@@ -120,6 +129,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         bytes[] calldata bridgeEncodedCalls
     ) payable external
         checkIO(inputs, msg.value)
+        checkBridgeCalls(bridgeAddresses, bridgeEncodedCalls)
         onlyNFTOwner(nftId) override
     {
         _depositToWallet(nftId, inputs, msg.value);
@@ -140,7 +150,8 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         address[] calldata bridgeAddresses,
         bytes[] calldata bridgeEncodedCalls
     ) external
-    onlyNFTOwner(nftId) override
+        checkBridgeCalls(bridgeAddresses, bridgeEncodedCalls)
+        onlyNFTOwner(nftId) override
     {
         _writeToWallet(nftId, bridgeAddresses, bridgeEncodedCalls);
     }
@@ -167,6 +178,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         bytes[] calldata bridgeEncodedCalls
     ) external
         checkIO(outputs, outputEthPercentage)
+        checkBridgeCalls(bridgeAddresses, bridgeEncodedCalls)
         onlyNFTOwner(nftId) override
     {
         _writeToWallet(nftId, bridgeAddresses, bridgeEncodedCalls);

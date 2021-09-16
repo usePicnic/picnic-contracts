@@ -5,14 +5,14 @@ interface IUniswapV2Liquidity {
     event INDEXPOOL_LIQUIDITY_ADD(
         address[] assetIn,
         uint256[] amountIn,
-        address assetOut,
-        uint256 amountOut
+        address lpToken,
+        uint256 liquidity
     );
 
     event INDEXPOOL_LIQUIDITY_REMOVE(
         address[] tokens,
-        uint256[] amountTokensArray,
-        address assetOut,
+        uint256[] amountOut,
+        address lpToken,
         uint256 liquidity
     );
 
