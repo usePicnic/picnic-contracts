@@ -8,10 +8,10 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
  * @title Wallet
  * @author IndexPool
  *
- * @notice Wallet holds assets for an NFT and it interact with bridges to integrate with other DeFi protocols.
+ * @notice Wallet holds assets for an NFT and interacts with bridges to integrate with other DeFi protocols.
  *
  * @dev Wallet holds the funds and is quite extensible as we decided to go with an architecture of delegate calls and
- * bridges, which are contracts that shapes the interfaces we interact with other protocols.
+ * bridges, which are contracts that shape the interfaces we use to interact with other protocols.
  */
 
 contract Wallet is IWallet {
@@ -40,7 +40,7 @@ contract Wallet is IWallet {
     }
 
     /**
-      * @notice This is how the Wallet interact with DeFi protocols.
+      * @notice This is how the Wallet interacts with DeFi protocols.
       *
       * @dev This gives the bridges control over the Wallet funds, so they can make all the transactions necessary to
       * build a portfolio. We need to ensure that all the bridges we support on the UI are as safe as they can be.
@@ -72,9 +72,9 @@ contract Wallet is IWallet {
     }
 
     /**
-      * @notice Withdraw funds from wallet back to NFT owner.
+      * @notice Withdraws funds from wallet back to NFT owner.
       *
-      * @dev Transfer requested percentages back to NFT owner.
+      * @dev Transfers requested percentages back to NFT owner.
       *
       * @param outputs ERC20 token addresses and percentages that will exit the Wallet and go to NFT owner
       * @param outputEthPercentage percentage of ETH that will exit the Wallet and go to NFT owner

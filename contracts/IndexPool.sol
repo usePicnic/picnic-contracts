@@ -37,7 +37,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         _;
     }
 
-    modifier checkIO(IPDataTypes.TokenData calldata inputs, uint256 ethAmount) {
+    modifier checkInputs(IPDataTypes.TokenData calldata inputs, uint256 ethAmount) {
         require(
             inputs.tokens.length == inputs.amounts.length,
             "INDEXPOOL: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS"
@@ -45,12 +45,12 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         for (uint16 i = 0; i < inputs.amounts.length; i++) {
             require(
                 inputs.amounts[i] > 0,
-                "INDEXPOOL WALLET: ERC20 TOKENS AMOUNTS NEED TO BE > 0"
+                "INDEXPOOL WALLET: ERC20 TOKEN AMOUNTS NEED TO BE > 0"
             );
         }
         require(
             inputs.amounts.length > 0 || ethAmount > 0, // ERC20 Tokens or ETH is needed
-            "INDEXPOOL: A AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED"
+            "INDEXPOOL: AN AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED"
         );
         _;
     }
@@ -81,9 +81,10 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
     // External functions
 
     /**
-     * @notice Returns wallet address of a given NFT id.
+     * @notice Returns wallet address of a given NFT Id.
      *
-     * @dev Each NFT id has its own Wallet, which is a contract that holds funds separately from other users funds.
+     * @dev Each NFT Id is associated to its own Wallet, which is a contract
+     * that holds funds separately from other users' funds.
      *
      * @param nftId NFT Id
      */
@@ -109,7 +110,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         address[] calldata bridgeAddresses,
         bytes[] calldata bridgeEncodedCalls
     ) payable external
-        checkIO(inputs, msg.value)
+        checkInputs(inputs, msg.value)
         checkBridgeCalls(bridgeAddresses, bridgeEncodedCalls) override
     {
         uint256 nftId = _mintNFT(msg.sender);
@@ -136,7 +137,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         address[] calldata bridgeAddresses,
         bytes[] calldata bridgeEncodedCalls
     ) payable external
-        checkIO(inputs, msg.value)
+        checkInputs(inputs, msg.value)
         checkBridgeCalls(bridgeAddresses, bridgeEncodedCalls)
         onlyNFTOwner(nftId) override
     {
@@ -145,9 +146,9 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
     }
 
     /**
-     * @notice Edit positions of an existing portfolio. No deposits or withdraws allowed.
+     * @notice Edit positions of an existing portfolio. No deposits or withdrawals allowed.
      *
-     * @dev This functions only processes bridge calls, no deposit or withdraw on the wallet.
+     * @dev This functions only processes bridge calls, no deposits or withdrawals on the wallet.
      *
      * @param nftId NFT Id
      * @param bridgeAddresses Addresses of deployed bridge contracts
@@ -185,7 +186,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         address[] calldata bridgeAddresses,
         bytes[] calldata bridgeEncodedCalls
     ) external
-        checkIO(outputs, outputEthPercentage)
+        checkInputs(outputs, outputEthPercentage)
         checkBridgeCalls(bridgeAddresses, bridgeEncodedCalls)
         onlyNFTOwner(nftId) override
     {

@@ -20,7 +20,7 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
         _;
     }
 
-    modifier checkIO(IPDataTypes.TokenData calldata inputs, uint256 ethAmount) {
+    modifier checkInputs(IPDataTypes.TokenData calldata inputs, uint256 ethAmount) {
         require(
             inputs.tokens.length == inputs.amounts.length,
             "INDEXPOOL: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS"
@@ -77,7 +77,7 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) payable external
-        checkIO(inputs, msg.value) override
+        checkInputs(inputs, msg.value) override
     {
         uint256 nftId = _mintNFT(msg.sender);
         _depositToWallet(nftId, inputs, msg.value);
@@ -103,7 +103,7 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) payable external
-        checkIO(inputs, msg.value)
+        checkInputs(inputs, msg.value)
         onlyNFTOwner(nftId) override
     {
         _depositToWallet(nftId, inputs, msg.value);
@@ -150,7 +150,7 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) external
-        checkIO(outputs, outputEthPercentage)
+        checkInputs(outputs, outputEthPercentage)
         onlyNFTOwner(nftId) override
     {
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
