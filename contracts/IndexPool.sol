@@ -6,6 +6,7 @@ import "./libraries/IPDataTypes.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/proxy/Clones.sol";
 
 /**
  * @title IndexPool
@@ -67,8 +68,15 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
     mapping(uint256 => address) private _nftIdToWallet;
     string _nftImageURI = "http://test-art.indexpool.org";
 
+    // Address of the implementation of the Wallet contract
+    address immutable implementationWalletAddress;    
+
     // Constructor
-    constructor() ERC721("INDEXPOOL", "IPNFT") Ownable() {}
+    constructor() ERC721("INDEXPOOL", "IPNFT") Ownable() {
+        // Deploy a Wallet implementation that will be used as template for clones
+        Wallet wallet = Wallet(new Wallet());
+        implementationWalletAddress = address(wallet);
+    }
 
     // External functions
 
@@ -196,12 +204,13 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
      * @param nftOwner address of NFT owner
      */
     function _mintNFT(address nftOwner) internal returns (uint256){
-        // Create new wallet
-        Wallet wallet = Wallet(new Wallet());
-
+        // Clone Wallet using implementation Wallet as template
+        // See https://eips.ethereum.org/EIPS/eip-1167 for reference
+        address walletAddress = Clones.clone(implementationWalletAddress);
+        
         // Save NFT data
         uint256 nftId = tokenCounter;
-        _nftIdToWallet[nftId] = address(wallet);
+        _nftIdToWallet[nftId] = walletAddress;
         tokenCounter = tokenCounter + 1;
 
         // Mint NFT
@@ -209,7 +218,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
 
         emit INDEXPOOL_MINT_NFT(
             nftId,
-            address(wallet),
+            walletAddress,
             msg.sender);
 
         return nftId;
