@@ -24,8 +24,8 @@ const deployLogic = async ({ networkName, contractName, interfaceName , filePath
                     'networkName': networkName
                 }
             );        
-    
-        if (mongoContract !== undefined) {
+
+        if (mongoContract !== null) {
             console.log(`${contractName} is already deployed on ${networkName}. If you want to redeploy it, please undeploy it first.`)
             return Promise.resolve(false);
         }
