@@ -21,31 +21,13 @@
 
 ---
 
-## Compile
-
-```bash
-$ yarn compile
-```
-
-## Testing
-
-```
-yarn test
-```
-
-## Coverage
-
-```
-yarn coverage
-```
-
 ## Contributing
 
 We highly encourage participation from the community to help shape the development of IndexPool. If you are interested in
-contributing or have any questions, ping us on [Twitter](https://twitter.com/indexpool) or [Discord](https://discord.gg/MyfRfmGn);
+contributing or have any questions, ping us on [Twitter](https://twitter.com/indexpool) or [Discord](https://discord.gg/5AVTGwkCEs);
 
 We use [Yarn](https://yarnpkg.com/) as a dependency manager and [Hardhat](https://hardhat.org/)
-as a development environment for compiling, testing, and deploying our contracts. The contracts were written in [Solidity v0.8.4](https://github.com/ethereum/solidity).
+as a development environment for compiling, testing, and deploying our contracts. The contracts were written in [Solidity v0.8.6](https://github.com/ethereum/solidity).
 
 ## Maintainers
 
