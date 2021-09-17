@@ -14,24 +14,24 @@ const interfacesToDeploy = [
         filePath: "./artifacts/contracts/interfaces/IIndexPool.sol/IIndexPool.json"
     },
     {
-        interfaceName: "IStake",
-        filePath: bridgeNameToFilePath("IStake")
+        interfaceName: "IAaveV2Deposit",
+        filePath: bridgeNameToFilePath("IAaveV2Deposit")
     },
     {
-        interfaceName: "ISwap",
-        filePath: bridgeNameToFilePath("ISwap")
+        interfaceName: "IUniswapV2Swap",
+        filePath: bridgeNameToFilePath("IUniswapV2Swap")
     },
     {
-        interfaceName: "ILiquidity",
-        filePath: bridgeNameToFilePath("ILiquidity")
+        interfaceName: "IUniswapV2Liquidity",
+        filePath: bridgeNameToFilePath("IUniswapV2Liquidity")
     },
     {
-        interfaceName: "IWrap",
-        filePath: bridgeNameToFilePath("IWrap")
+        interfaceName: "IWMaticWrap",
+        filePath: bridgeNameToFilePath("IWMaticWrap")
     },
     {
-        interfaceName: "IFarmPoolId",
-        filePath: bridgeNameToFilePath("IFarmPoolId")
+        interfaceName: "IAutofarmDeposit",
+        filePath: bridgeNameToFilePath("IAutofarmDeposit")
     }
 ]
 

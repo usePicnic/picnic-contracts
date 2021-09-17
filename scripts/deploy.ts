@@ -25,27 +25,27 @@ const contractsToDeploy = [
         filePath: "./artifacts/contracts/IndexPool.sol/IndexPool.json"},
     {
         contractName: "AaveV2DepositBridge",
-        interfaceName: "IStake",
+        interfaceName: "IAaveV2Deposit",
         filePath: bridgeNameToFilePath("AaveV2DepositBridge")
     },
     {
         contractName: "QuickswapSwapBridge",
-        interfaceName: "ISwap",
+        interfaceName: "IUniswapV2Swap",
         filePath: bridgeNameToFilePath("QuickswapSwapBridge")
     },
     {
         contractName: "QuickswapLiquidityBridge",
-        interfaceName: "ILiquidity",
+        interfaceName: "IUniswapV2Liquidity",
         filePath: bridgeNameToFilePath("QuickswapLiquidityBridge")
     },
     {
         contractName: "AutofarmDepositBridge",
-        interfaceName: "IFarmPoolId",
+        interfaceName: "IAutofarmDeposit",
         filePath: bridgeNameToFilePath("AutofarmDepositBridge")
     },
     {
         contractName: "WMaticWrapBridge",
-        interfaceName: "IWrap",
+        interfaceName: "IWMaticWrap",
         filePath: bridgeNameToFilePath("WMaticWrapBridge")
     },
 ]
