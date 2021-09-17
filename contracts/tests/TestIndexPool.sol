@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract TestIndexPool is IIndexPool, ERC721, Ownable {
     using SafeERC20 for IERC20;
 
-     // Modifiers
+    // Modifiers
     modifier onlyNFTOwner(uint256 nftId) {
         require(
             msg.sender == ownerOf(nftId),
@@ -28,12 +28,12 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
         for (uint16 i = 0; i < inputs.amounts.length; i++) {
             require(
                 inputs.amounts[i] > 0,
-                "INDEXPOOL WALLET: ERC20 TOKENS AMOUNTS NEED TO BE > 0"
+                "INDEXPOOL WALLET: ERC20 TOKEN AMOUNTS NEED TO BE > 0"
             );
         }
         require(
             inputs.amounts.length > 0 || ethAmount > 0, // ERC20 Tokens or ETH is needed
-            "INDEXPOOL: A AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED"
+            "INDEXPOOL: AN AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED"
         );
         _;
     }
@@ -77,7 +77,7 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) payable external
-        checkInputs(inputs, msg.value) override
+    checkInputs(inputs, msg.value) override
     {
         uint256 nftId = _mintNFT(msg.sender);
         _depositToWallet(nftId, inputs, msg.value);
@@ -103,8 +103,8 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) payable external
-        checkInputs(inputs, msg.value)
-        onlyNFTOwner(nftId) override
+    checkInputs(inputs, msg.value)
+    onlyNFTOwner(nftId) override
     {
         _depositToWallet(nftId, inputs, msg.value);
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
@@ -150,8 +150,8 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) external
-        checkInputs(outputs, outputEthPercentage)
-        onlyNFTOwner(nftId) override
+    checkInputs(outputs, outputEthPercentage)
+    onlyNFTOwner(nftId) override
     {
         _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
         _withdrawFromWallet(nftId, outputs, outputEthPercentage);

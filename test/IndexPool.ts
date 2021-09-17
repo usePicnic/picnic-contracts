@@ -120,7 +120,7 @@ describe("IndexPool", function () {
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
                 {value: ethers.utils.parseEther("1")} // overrides
-            )).to.be.revertedWith("INDEXPOOL WALLET: ERC20 TOKENS AMOUNTS NEED TO BE > 0");
+            )).to.be.revertedWith("INDEXPOOL WALLET: ERC20 TOKEN AMOUNTS NEED TO BE > 0");
         })
 
         it("Rejects no ETH amounts along with empty ERC20 amounts", async function () {
@@ -133,7 +133,7 @@ describe("IndexPool", function () {
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls
-            )).to.be.revertedWith("INDEXPOOL: A AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED");
+            )).to.be.revertedWith("INDEXPOOL: AN AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED");
         })
 
         it("Rejects different bridges and calls sizes", async function () {
@@ -305,7 +305,7 @@ describe("IndexPool", function () {
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
                 {value: ethers.utils.parseEther("1")} // overrides
-            )).to.be.revertedWith("INDEXPOOL WALLET: ERC20 TOKENS AMOUNTS NEED TO BE > 0");
+            )).to.be.revertedWith("INDEXPOOL WALLET: ERC20 TOKEN AMOUNTS NEED TO BE > 0");
         })
 
         it("Rejects no ETH amounts along with empty ERC20 amounts", async function () {
@@ -327,7 +327,7 @@ describe("IndexPool", function () {
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
-            )).to.be.revertedWith("INDEXPOOL: A AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED");
+            )).to.be.revertedWith("INDEXPOOL: AN AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED");
         })
 
         it("Rejects different bridges and calls sizes", async function () {
@@ -627,7 +627,7 @@ describe("IndexPool", function () {
                 100000, // Withdraw percentage
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
-            )).to.be.revertedWith("INDEXPOOL WALLET: ERC20 TOKENS AMOUNTS NEED TO BE > 0");
+            )).to.be.revertedWith("INDEXPOOL WALLET: ERC20 TOKEN AMOUNTS NEED TO BE > 0");
         })
 
         it("Rejects no ETH amounts along with empty ERC20 amounts", async function () {
@@ -650,7 +650,7 @@ describe("IndexPool", function () {
                 0, // Withdraw percentage
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
-            )).to.be.revertedWith("INDEXPOOL: A AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED");
+            )).to.be.revertedWith("INDEXPOOL: AN AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED");
         })
 
         it("Rejects different bridges and calls sizes", async function () {
