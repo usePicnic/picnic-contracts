@@ -24,13 +24,7 @@ jobs:
         env:
           COINMARKETCAP_KEY: ${{ secrets.COINMARKETCAP_KEY }}
           INFURA_KEY: ${{ secrets.INFURA_KEY }} 
-          POLYGON_TEST_MNEMONIC: ${{ secrets.POLYGON_TEST_MNEMONIC }} 
-      - name: test
-        run: yarn test --no-compile
-        env:
-          COINMARKETCAP_KEY: ${{ secrets.COINMARKETCAP_KEY }}
-          INFURA_KEY: ${{ secrets.INFURA_KEY }} 
-          POLYGON_TEST_MNEMONIC: ${{ secrets.POLYGON_TEST_MNEMONIC }} 
+          POLYGON_TEST_MNEMONIC: ${{ secrets.POLYGON_TEST_MNEMONIC }}
       - name: coverage
         run: yarn run coverage
         env:
