@@ -53,8 +53,8 @@ contract AaveV2DepositBridge is IAaveV2Deposit {
     /**
       * @notice Withdraws from the Aave protocol.
       *
-      * @dev Wraps the Aave withdraw and generate the necessary events to communicate with IndexPool's UI and back-end.
-      * A harvest is withdraw where percentageOut == 0.
+      * @dev Wraps the Aave withdrawal and generates the necessary events to communicate with IndexPool's UI and back-end.
+      * To perform a harvest invoke withdraw with percentageOut set to 0.
       *
       * @param assetOut Address of the asset to be withdrawn from the Aave protocol
       * @param percentageOut Percentage of the balance of the asset that will be withdrawn
