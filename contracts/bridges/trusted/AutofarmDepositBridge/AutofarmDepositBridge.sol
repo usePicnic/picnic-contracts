@@ -44,7 +44,7 @@ contract AutofarmDepositBridge is IAutofarmDeposit {
 
         autofarm.deposit(poolId, amountIn);
 
-        emit INDEXPOOL_AUTOFARMV2_DEPOSIT(vaultAddress, address(assetIn), amountIn);
+        emit INDEXPOOL_AUTOFARM_DEPOSIT(vaultAddress, address(assetIn), amountIn);
     }
 
     /**
@@ -69,6 +69,6 @@ contract AutofarmDepositBridge is IAutofarmDeposit {
         uint256 wMaticReward = IERC20(wMaticAddress).balanceOf(address(this)) - wMaticBalance;
         uint256 pAutoReward = IERC20(pAutoAddress).balanceOf(address(this)) - pAutoBalance;
 
-        emit INDEXPOOL_AUTOFARMV2_WITHDRAW(vaultAddress, address(assetOut), amountOut, wMaticReward, pAutoReward);
+        emit INDEXPOOL_AUTOFARM_WITHDRAW(vaultAddress, address(assetOut), amountOut, wMaticReward, pAutoReward);
     }
 }

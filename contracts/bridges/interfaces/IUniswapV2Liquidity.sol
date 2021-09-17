@@ -3,7 +3,6 @@
 pragma solidity ^0.8.6;
 
 interface IUniswapV2Liquidity {
-
     event INDEXPOOL_UNISWAPV2_ADD_LIQUIDITY(
         address[] assetIn,
         uint256[] amountIn,
