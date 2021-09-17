@@ -1,7 +1,7 @@
 pragma solidity ^0.8.6;
 
 interface IUniswapV2Swap {
-    event INDEXPOOL_UNISWAP_SWAP(
+    event INDEXPOOL_UNISWAPV2_SWAP(
         address[] path,
         uint256[] amounts
     );

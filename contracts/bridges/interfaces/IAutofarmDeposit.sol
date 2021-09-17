@@ -1,13 +1,13 @@
 pragma solidity ^0.8.6;
 
 interface IAutofarmDeposit {
-    event INDEXPOOL_AUTOFARM_DEPOSIT (
+    event INDEXPOOL_AUTOFARMV2_DEPOSIT (
         address vaultAddress,
         address assetIn,
         uint256 amount
     );
 
-    event INDEXPOOL_AUTOFARM_WITHDRAW (
+    event INDEXPOOL_AUTOFARMV2_WITHDRAW (
         address vaultAddress,
         address assetOut,
         uint256 amount,
