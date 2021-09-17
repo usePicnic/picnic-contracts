@@ -15,8 +15,8 @@ jobs:
           node-version: '14.x'
       - name: install yarn
         run: npm install yarn
-      - name: install packages
-        run: yarn
+      - name: npm install
+        run: npm install
       - name: lint
         run: yarn lint
       - name: compile
