@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import { ethers, tenderly } from "hardhat";
 import { readFileSync } from "fs";
 import { MongoClient } from 'mongodb';
 
@@ -58,6 +58,11 @@ const deployLogic = async ({ networkName, contractName, interfaceName , filePath
             .insertOne(insertData);
         
         console.log(`${contractName} on ${networkName} inserted into DB.`)
+
+        await tenderly.verify({
+            name: contractName,
+            address: deployedContract.address
+        });        
     
         return Promise.resolve(true);
     } finally {

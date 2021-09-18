@@ -2,6 +2,7 @@ import { task } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
 import "solidity-coverage";
 import "hardhat-gas-reporter";
+import "@tenderly/hardhat-tenderly"
 
 require('dotenv').config()
 require('hardhat-contract-sizer');
