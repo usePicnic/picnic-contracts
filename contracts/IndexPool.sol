@@ -247,11 +247,11 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         // Pay 0.1% fee on ETH deposit to IndexPool
         address indexpoolContractOwner = owner();
         uint256 indexpoolFee = ethAmount / 1000;
-        payable(indexpoolContractOwner).transfer(indexpoolFee);
+        payable(indexpoolContractOwner).call{value: indexpoolFee}("");
 
         // Transfer 99.9% of ETH deposit to Wallet
         address walletAddress = walletOf(nftId);
-        payable(walletAddress).transfer(ethAmount - indexpoolFee);
+        payable(walletAddress).call{value: ethAmount - indexpoolFee}("");
 
         // For each ERC20: Charge 0.1% IndexPool fee and transfer tokens to Wallet
         for (uint16 i = 0; i < inputs.tokens.length; i++) {
