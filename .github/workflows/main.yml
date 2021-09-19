@@ -15,8 +15,8 @@ jobs:
           node-version: '14.x'
       - name: install yarn
         run: npm install yarn
-      - name: npm install
-        run: npm install
+      - name: install packages
+        run: yarn
       - name: lint
         run: yarn lint
       - name: compile
@@ -30,4 +30,15 @@ jobs:
         env:
           COINMARKETCAP_KEY: ${{ secrets.COINMARKETCAP_KEY }}
           INFURA_KEY: ${{ secrets.INFURA_KEY }} 
+          POLYGON_TEST_MNEMONIC: ${{ secrets.POLYGON_TEST_MNEMONIC }}     
+      - name: coverage
+        run: yarn run coverage
+        env:
+          COINMARKETCAP_KEY: ${{ secrets.COINMARKETCAP_KEY }}
+          INFURA_KEY: ${{ secrets.INFURA_KEY }} 
           POLYGON_TEST_MNEMONIC: ${{ secrets.POLYGON_TEST_MNEMONIC }} 
+      - name: "Upload report to Coveralls"
+        uses: "coverallsapp/github-action@master"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: "./coverage/lcov.info"    
