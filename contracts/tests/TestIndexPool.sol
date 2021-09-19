@@ -181,11 +181,6 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
         // Mint NFT
         _safeMint(nftOwner, nftId);
 
-        emit INDEXPOOL_MINT_NFT(
-            nftId,
-            address(wallet),
-            msg.sender);
-
         return nftId;
     }
 
@@ -224,7 +219,6 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
             // Transfer 99.9% of ERC20 token to Wallet
             IERC20(inputs.tokens[i]).safeTransferFrom(ownerOf(nftId), walletAddress, inputs.amounts[i] - indexpoolFee);
         }
-        emit INDEXPOOL_DEPOSIT(nftId, inputs.tokens, inputs.amounts, ethAmount);
     }
 
     /**
@@ -264,7 +258,5 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
 
         Wallet wallet = Wallet(payable(walletOf(nftId)));
         (outputAmounts, outputEth) = wallet.withdraw(outputs, outputEthPercentage, ownerOf(nftId));
-
-        emit INDEXPOOL_WITHDRAW(nftId, outputs.tokens, outputAmounts, outputEth);
     }
 }

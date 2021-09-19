@@ -6,22 +6,16 @@ import "../libraries/IPDataTypes.sol";
 
 interface IIndexPool is IERC721 {
     // Events
-    event INDEXPOOL_MINT_NFT(
+    event INDEXPOOL_CREATE(
         uint256 nftId,
-        address wallet,
-        address nftOwner
+        address wallet
     );
 
-    event INDEXPOOL_DEPOSIT(
-        uint256 nftId,
-        address[] inputTokens,
-        uint256[] inputAmounts,
-        uint256 ethAmount
-    );
+    event INDEXPOOL_DEPOSIT();
+
+    event INDEXPOOL_EDIT();
 
     event INDEXPOOL_WITHDRAW(
-        uint256 nftId,
-        address[] outputTokens,
         uint256[] outputAmounts,
         uint256 ethAmount
     );

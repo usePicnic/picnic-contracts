@@ -76,8 +76,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
     // Constructor
     constructor() ERC721("INDEXPOOL", "IPNFT") Ownable() {
         // Deploy a Wallet implementation that will be used as template for clones
-        Wallet wallet = Wallet(new Wallet());
-        implementationWalletAddress = address(wallet);
+        implementationWalletAddress = address(new Wallet());
     }
 
     // External functions
@@ -116,6 +115,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         checkBridgeCalls(bridgeAddresses, bridgeEncodedCalls) override
     {
         uint256 nftId = _mintNFT(msg.sender);
+
         _depositToWallet(nftId, inputs, msg.value);
         _writeToWallet(nftId, bridgeAddresses, bridgeEncodedCalls);
     }
@@ -143,6 +143,8 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         checkBridgeCalls(bridgeAddresses, bridgeEncodedCalls)
         onlyNFTOwner(nftId) override
     {
+        emit INDEXPOOL_DEPOSIT();
+
         _depositToWallet(nftId, inputs, msg.value);
         _writeToWallet(nftId, bridgeAddresses, bridgeEncodedCalls);
     }
@@ -164,6 +166,8 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         checkBridgeCalls(bridgeAddresses, bridgeEncodedCalls)
         onlyNFTOwner(nftId) override
     {
+        emit INDEXPOOL_EDIT();
+
         _writeToWallet(nftId, bridgeAddresses, bridgeEncodedCalls);
     }
 
@@ -219,10 +223,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         // Mint NFT
         _safeMint(nftOwner, nftId);
 
-        emit INDEXPOOL_MINT_NFT(
-            nftId,
-            walletAddress,
-            msg.sender);
+        emit INDEXPOOL_CREATE(nftId, walletAddress);
 
         return nftId;
     }
@@ -262,7 +263,6 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
             // Transfer 99.9% of ERC20 token to Wallet
             IERC20(inputs.tokens[i]).safeTransferFrom(ownerOf(nftId), walletAddress, inputs.amounts[i] - indexpoolFee);
         }
-        emit INDEXPOOL_DEPOSIT(nftId, inputs.tokens, inputs.amounts, ethAmount);
     }
 
     /**
@@ -303,7 +303,7 @@ contract IndexPool is IIndexPool, ERC721, Ownable {
         Wallet wallet = Wallet(payable(walletOf(nftId)));
         (outputAmounts, outputEth) = wallet.withdraw(outputs, outputEthPercentage, ownerOf(nftId));
 
-        emit INDEXPOOL_WITHDRAW(nftId, outputs.tokens, outputAmounts, outputEth);
+        emit INDEXPOOL_WITHDRAW(outputAmounts, outputEth);
     }
 
     // Art related

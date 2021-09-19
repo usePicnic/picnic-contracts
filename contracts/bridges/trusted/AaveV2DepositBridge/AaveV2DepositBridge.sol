@@ -49,7 +49,7 @@ contract AaveV2DepositBridge is IAaveV2Deposit {
 
         address assetOut = _aaveLendingPool.getReserveData(assetIn).aTokenAddress;
 
-        emit INDEXPOOL_AAVEV2_DEPOSIT(assetIn, assetOut, amount);
+        emit INDEXPOOL_AAVEV2_DEPOSIT(assetOut, amount);
     }
 
     /**
@@ -80,6 +80,6 @@ contract AaveV2DepositBridge is IAaveV2Deposit {
         uint256 claimedReward = distributor.claimRewards(assets, amountToClaim, address(this));
         address claimedAsset = distributor.REWARD_TOKEN();
 
-        emit INDEXPOOL_AAVEV2_WITHDRAW(assetIn, assetOut, amount, claimedAsset, claimedReward);
+        emit INDEXPOOL_AAVEV2_WITHDRAW(assetIn, amount, claimedAsset, claimedReward);
     }
 }
