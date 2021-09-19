@@ -8,8 +8,16 @@ import "../libraries/IPDataTypes.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/proxy/Clones.sol";
 
-// This contract is used only for unit and Echidna tests 
+/**
+ * @title TestIndexPool
+ * @author IndexPool
+ *
+ * @notice Contract used just for security tests
+ *
+ */
+
 contract TestIndexPool is IIndexPool, ERC721, Ownable {
     using SafeERC20 for IERC20;
 
@@ -40,20 +48,35 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
         _;
     }
 
+    modifier checkBridgeCalls(address[] calldata bridgeAddresses, bytes[] calldata bridgeEncodedCalls) {
+        require(
+            bridgeAddresses.length == bridgeEncodedCalls.length,
+            "INDEXPOOL: BRIDGE ENCODED CALLS AND ADDRESSES MUST HAVE THE SAME LENGTH"
+        );
+        _;
+    }
+
     // NFT properties
     uint256 public tokenCounter = 0;
     mapping(uint256 => address) private _nftIdToWallet;
+    string _nftImageURI = "http://test-art.indexpool.org";
+
+    // Address of the implementation of the Wallet contract
+    address immutable implementationWalletAddress;    
 
     // Constructor
     constructor() ERC721("INDEXPOOL", "IPNFT") Ownable() {
+        // Deploy a Wallet implementation that will be used as template for clones
+        implementationWalletAddress = address(new TestWallet());
     }
 
     // External functions
 
     /**
-     * @notice Returns wallet address of a given NFT id.
+     * @notice Returns wallet address of a given NFT Id.
      *
-     * @dev Each NFT id has its own Wallet, which is a contract that holds funds separately from other users funds.
+     * @dev Each NFT Id is associated to its own Wallet, which is a contract
+     * that holds funds separately from other users' funds.
      *
      * @param nftId NFT Id
      */
@@ -71,19 +94,21 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
      * 3. Process bridge calls (interact with Uniswap/Aave...).
      *
      * @param inputs ERC20 token addresses and amounts that will enter the contract
-     * @param _bridgeAddresses Addresses of deployed bridge contracts
-     * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
+     * @param bridgeAddresses Addresses of deployed bridge contracts
+     * @param bridgeEncodedCalls Encoded calls to be passed on to delegate calls
      */
     function createPortfolio(
         IPDataTypes.TokenData calldata inputs,
-        address[] calldata _bridgeAddresses,
-        bytes[] calldata _bridgeEncodedCalls
+        address[] calldata bridgeAddresses,
+        bytes[] calldata bridgeEncodedCalls
     ) payable external
-    checkInputs(inputs, msg.value) override
+        checkInputs(inputs, msg.value)
+        checkBridgeCalls(bridgeAddresses, bridgeEncodedCalls) override
     {
         uint256 nftId = _mintNFT(msg.sender);
+
         _depositToWallet(nftId, inputs, msg.value);
-        _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
+        _writeToWallet(nftId, bridgeAddresses, bridgeEncodedCalls);
     }
 
     /**
@@ -96,39 +121,45 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
      *
      * @param nftId NFT Id
      * @param inputs ERC20 token addresses and amounts that will enter the contract
-     * @param _bridgeAddresses Addresses of deployed bridge contracts
-     * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
+     * @param bridgeAddresses Addresses of deployed bridge contracts
+     * @param bridgeEncodedCalls Encoded calls to be passed on to delegate calls
      */
     function depositPortfolio(
         uint256 nftId,
         IPDataTypes.TokenData calldata inputs,
-        address[] calldata _bridgeAddresses,
-        bytes[] calldata _bridgeEncodedCalls
+        address[] calldata bridgeAddresses,
+        bytes[] calldata bridgeEncodedCalls
     ) payable external
-    checkInputs(inputs, msg.value)
-    onlyNFTOwner(nftId) override
+        checkInputs(inputs, msg.value)
+        checkBridgeCalls(bridgeAddresses, bridgeEncodedCalls)
+        onlyNFTOwner(nftId) override
     {
+        emit INDEXPOOL_DEPOSIT();
+
         _depositToWallet(nftId, inputs, msg.value);
-        _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
+        _writeToWallet(nftId, bridgeAddresses, bridgeEncodedCalls);
     }
 
     /**
-     * @notice Edit positions of an existing portfolio. No deposits or withdraws allowed.
+     * @notice Edit positions of an existing portfolio. No deposits or withdrawals allowed.
      *
-     * @dev This functions only processes bridge calls, no deposit or withdraw on the wallet.
+     * @dev This functions only processes bridge calls, no deposits or withdrawals on the wallet.
      *
      * @param nftId NFT Id
-     * @param _bridgeAddresses Addresses of deployed bridge contracts
-     * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
+     * @param bridgeAddresses Addresses of deployed bridge contracts
+     * @param bridgeEncodedCalls Encoded calls to be passed on to delegate calls
      */
     function editPortfolio(
         uint256 nftId,
-        address[] calldata _bridgeAddresses,
-        bytes[] calldata _bridgeEncodedCalls
+        address[] calldata bridgeAddresses,
+        bytes[] calldata bridgeEncodedCalls
     ) external
-    onlyNFTOwner(nftId) override
+        checkBridgeCalls(bridgeAddresses, bridgeEncodedCalls)
+        onlyNFTOwner(nftId) override
     {
-        _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
+        emit INDEXPOOL_EDIT();
+
+        _writeToWallet(nftId, bridgeAddresses, bridgeEncodedCalls);
     }
 
     /**
@@ -141,21 +172,22 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
     *
     * @param nftId NFT Id
     * @param outputs ERC20 token addresses and percentages that will exit the contract
-    * @param outputEthPercentage percentage of ETH in wallet that will exit the contract
-    * @param _bridgeAddresses Addresses of deployed bridge contracts
-    * @param _bridgeEncodedCalls Encoded calls to be passed on to delegate calls
+    * @param outputEthPercentage percentage of ETH in portfolio that will exit the contract
+    * @param bridgeAddresses Addresses of deployed bridge contracts
+    * @param bridgeEncodedCalls Encoded calls to be passed on to delegate calls
     */
     function withdrawPortfolio(
         uint256 nftId,
         IPDataTypes.TokenData calldata outputs,
         uint256 outputEthPercentage,
-        address[] calldata _bridgeAddresses,
-        bytes[] calldata _bridgeEncodedCalls
+        address[] calldata bridgeAddresses,
+        bytes[] calldata bridgeEncodedCalls
     ) external
-    checkInputs(outputs, outputEthPercentage)
-    onlyNFTOwner(nftId) override
+        checkInputs(outputs, outputEthPercentage)
+        checkBridgeCalls(bridgeAddresses, bridgeEncodedCalls)
+        onlyNFTOwner(nftId) override
     {
-        _writeToWallet(nftId, _bridgeAddresses, _bridgeEncodedCalls);
+        _writeToWallet(nftId, bridgeAddresses, bridgeEncodedCalls);
         _withdrawFromWallet(nftId, outputs, outputEthPercentage);
     }
 
@@ -170,16 +202,19 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
      * @param nftOwner address of NFT owner
      */
     function _mintNFT(address nftOwner) internal returns (uint256){
-        // Create new wallet
-        TestWallet wallet = TestWallet(new TestWallet());
-
+        // Clone Wallet using implementation Wallet as template
+        // See https://eips.ethereum.org/EIPS/eip-1167 for reference
+        address walletAddress = Clones.clone(implementationWalletAddress);
+        
         // Save NFT data
         uint256 nftId = tokenCounter;
-        _nftIdToWallet[nftId] = address(wallet);
+        _nftIdToWallet[nftId] = walletAddress;
         tokenCounter = tokenCounter + 1;
 
         // Mint NFT
         _safeMint(nftOwner, nftId);
+
+        emit INDEXPOOL_CREATE(nftId, walletAddress);
 
         return nftId;
     }
@@ -202,19 +237,19 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
         uint256 ethAmount
     ) internal {
         // Pay 0.1% fee on ETH deposit to IndexPool
-        address indexpoolAddress = owner();
+        address indexpoolContractOwner = owner();
         uint256 indexpoolFee = ethAmount / 1000;
-        payable(indexpoolAddress).transfer(indexpoolFee);
+        payable(indexpoolContractOwner).call{value: indexpoolFee}("");
 
         // Transfer 99.9% of ETH deposit to Wallet
         address walletAddress = walletOf(nftId);
-        payable(walletAddress).transfer(ethAmount - indexpoolFee);
+        payable(walletAddress).call{value: ethAmount - indexpoolFee}("");
 
         // For each ERC20: Charge 0.1% IndexPool fee and transfer tokens to Wallet
         for (uint16 i = 0; i < inputs.tokens.length; i++) {
             // Pay 0.1% fee on ERC20 deposit to IndexPool
             indexpoolFee = inputs.amounts[i] / 1000;
-            IERC20(inputs.tokens[i]).safeTransferFrom(ownerOf(nftId), indexpoolAddress, indexpoolFee);
+            IERC20(inputs.tokens[i]).safeTransferFrom(ownerOf(nftId), indexpoolContractOwner, indexpoolFee);
 
             // Transfer 99.9% of ERC20 token to Wallet
             IERC20(inputs.tokens[i]).safeTransferFrom(ownerOf(nftId), walletAddress, inputs.amounts[i] - indexpoolFee);
@@ -256,7 +291,29 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
         uint256[] memory outputAmounts;
         uint256 outputEth;
 
-        Wallet wallet = Wallet(payable(walletOf(nftId)));
+        TestWallet wallet = TestWallet(payable(walletOf(nftId)));
         (outputAmounts, outputEth) = wallet.withdraw(outputs, outputEthPercentage, ownerOf(nftId));
+
+        emit INDEXPOOL_WITHDRAW(outputAmounts, outputEth);
     }
+
+    // Art related
+    /**
+     * @dev Internal function to set the base URI for all token IDs. It is
+     * automatically added as a prefix to the value returned in {tokenURI},
+     * or to the token ID if {tokenURI} is empty.
+     */
+    function setBaseURI(string memory nftImageURI) external onlyOwner {
+        _nftImageURI = nftImageURI;
+    }
+
+    /**
+     * @notice Returns the base URI for the NFT metadata
+     *
+     * @dev The URI of a specific token will be the base URI concatenated with the token id, e.g. for token 0
+     * the URI will be http://placeholder.com/0.
+     */
+    function _baseURI() internal view override returns (string memory) {
+        return _nftImageURI;
+    }    
 }
