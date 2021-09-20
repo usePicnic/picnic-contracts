@@ -3,3 +3,4 @@
 /artifacts/
 /.idea/
 .env
+.coverage.json
