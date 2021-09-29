@@ -58,7 +58,7 @@ async function main() {
 
     await client
         .db('indexpool')
-        .collection('nfts')
+        .collection('portfolios')
         .deleteMany(
             {
                 networkName: networkName
