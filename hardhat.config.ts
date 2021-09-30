@@ -2,7 +2,8 @@ import { task } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
 import "solidity-coverage";
 import "hardhat-gas-reporter";
-import "@tenderly/hardhat-tenderly"
+import "@tenderly/hardhat-tenderly";
+import "@nomiclabs/hardhat-etherscan";
 
 require('dotenv').config()
 require('hardhat-contract-sizer');
@@ -47,6 +48,9 @@ module.exports = {
       },
       gasPrice: 5*gwei
     }
+  },
+  etherscan: {
+    apiKey: process.env.POLYGON_SCAN
   },
   mocha: { timeout: '1800000'},
   gasReporter: {
