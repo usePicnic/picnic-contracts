@@ -62,7 +62,7 @@ contract Wallet is IWallet {
             (isSuccess, result) = bridgeAddresses[i].delegatecall(bridgeEncodedCalls[i]);
 
             // Assembly code was the only way we found to display clean revert error messages from delegate calls
-            if (isSuccess == false) {
+            if (!isSuccess) {
                 assembly {
                     let ptr := mload(0x40)
                     let size := returndatasize()
