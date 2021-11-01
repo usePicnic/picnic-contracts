@@ -2,48 +2,57 @@
 
 pragma solidity ^0.8.6;
 
-import "../interfaces/IIndexPool.sol";
-import "./TestWallet.sol";
-import "../libraries/IPDataTypes.sol";
+import "./interfaces/IDeFiBasket.sol";
+import "./Wallet.sol";
+import "./libraries/DBDataTypes.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 
 /**
- * @title TestIndexPool
- * @author IndexPool
+ * @title DeFiBasket
+ * @author DeFi Basket
  *
- * @notice Contract used just for security tests
+ * @notice Coordinates portfolio creation, deposits/withdrawals, and fee payments.
  *
+ * @dev This contract has 3 main functions:
+ *
+ * 1. Mint and manage NFTs
+ * 1.1 Track ownership of NFTs
+ * 1.2 Track NFT and Wallet relationship
+ * 2. Create and manage wallets
+ * 2.1 Control deposits / withdrawals to wallets
+ * 2.2 Control the permissions for delegate calls to bridges
+ * 3. Collect fees for the DeFi Basket protocol
  */
 
-contract TestIndexPool is IIndexPool, ERC721, Ownable {
+contract DeFiBasket is IDeFiBasket, ERC721, Ownable {
     using SafeERC20 for IERC20;
 
     // Modifiers
     modifier onlyNFTOwner(uint256 nftId) {
         require(
             msg.sender == ownerOf(nftId),
-            "INDEXPOOL: ONLY NFT OWNER CAN CALL THIS FUNCTION"
+            "DEFIBASKET: ONLY NFT OWNER CAN CALL THIS FUNCTION"
         );
         _;
     }
 
-    modifier checkInputs(IPDataTypes.TokenData calldata inputs, uint256 ethAmount) {
+    modifier checkInputs(DBDataTypes.TokenData calldata inputs, uint256 ethAmount) {
         require(
             inputs.tokens.length == inputs.amounts.length,
-            "INDEXPOOL: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS"
+            "DEFIBASKET: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS"
         );
         for (uint16 i = 0; i < inputs.amounts.length; i++) {
             require(
                 inputs.amounts[i] > 0,
-                "INDEXPOOL WALLET: ERC20 TOKEN AMOUNTS NEED TO BE > 0"
+                "DEFIBASKET WALLET: ERC20 TOKEN AMOUNTS NEED TO BE > 0"
             );
         }
         require(
             inputs.amounts.length > 0 || ethAmount > 0, // ERC20 Tokens or ETH is needed
-            "INDEXPOOL: AN AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED"
+            "DEFIBASKET: AN AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED"
         );
         _;
     }
@@ -51,7 +60,7 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
     modifier checkBridgeCalls(address[] calldata bridgeAddresses, bytes[] calldata bridgeEncodedCalls) {
         require(
             bridgeAddresses.length == bridgeEncodedCalls.length,
-            "INDEXPOOL: BRIDGE ENCODED CALLS AND ADDRESSES MUST HAVE THE SAME LENGTH"
+            "DEFIBASKET: BRIDGE ENCODED CALLS AND ADDRESSES MUST HAVE THE SAME LENGTH"
         );
         _;
     }
@@ -59,15 +68,15 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
     // NFT properties
     uint256 public tokenCounter = 0;
     mapping(uint256 => address) private _nftIdToWallet;
-    string _nftImageURI = "http://test-art.indexpool.org";
+    string _nftImageURI = "https://www.defibasket.org/api/get-nft-metadata/";
 
     // Address of the implementation of the Wallet contract
     address immutable implementationWalletAddress;    
 
     // Constructor
-    constructor() ERC721("INDEXPOOL", "IPNFT") Ownable() {
+    constructor() ERC721("DeFi Basket NFT", "BASKETNFT") Ownable() {
         // Deploy a Wallet implementation that will be used as template for clones
-        implementationWalletAddress = address(new TestWallet());
+        implementationWalletAddress = address(new Wallet());
     }
 
     // External functions
@@ -98,7 +107,7 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
      * @param bridgeEncodedCalls Encoded calls to be passed on to delegate calls
      */
     function createPortfolio(
-        IPDataTypes.TokenData calldata inputs,
+        DBDataTypes.TokenData calldata inputs,
         address[] calldata bridgeAddresses,
         bytes[] calldata bridgeEncodedCalls
     ) payable external
@@ -126,7 +135,7 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
      */
     function depositPortfolio(
         uint256 nftId,
-        IPDataTypes.TokenData calldata inputs,
+        DBDataTypes.TokenData calldata inputs,
         address[] calldata bridgeAddresses,
         bytes[] calldata bridgeEncodedCalls
     ) payable external
@@ -134,7 +143,7 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
         checkBridgeCalls(bridgeAddresses, bridgeEncodedCalls)
         onlyNFTOwner(nftId) override
     {
-        emit INDEXPOOL_DEPOSIT();
+        emit DEFIBASKET_DEPOSIT();
 
         _depositToWallet(nftId, inputs, msg.value);
         _writeToWallet(nftId, bridgeAddresses, bridgeEncodedCalls);
@@ -157,7 +166,7 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
         checkBridgeCalls(bridgeAddresses, bridgeEncodedCalls)
         onlyNFTOwner(nftId) override
     {
-        emit INDEXPOOL_EDIT();
+        emit DEFIBASKET_EDIT();
 
         _writeToWallet(nftId, bridgeAddresses, bridgeEncodedCalls);
     }
@@ -178,7 +187,7 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
     */
     function withdrawPortfolio(
         uint256 nftId,
-        IPDataTypes.TokenData calldata outputs,
+        DBDataTypes.TokenData calldata outputs,
         uint256 outputEthPercentage,
         address[] calldata bridgeAddresses,
         bytes[] calldata bridgeEncodedCalls
@@ -214,7 +223,7 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
         // Mint NFT
         _safeMint(nftOwner, nftId);
 
-        emit INDEXPOOL_CREATE(nftId, walletAddress);
+        emit DEFIBASKET_CREATE(nftId, walletAddress);
 
         return nftId;
     }
@@ -223,9 +232,9 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
       * @notice Transfer deposited ETH and ERC20 tokens to the Wallet linked to the referenced NFT.
       *
       * @dev Transfer assets to the corresponding Wallet going through the following steps:
-      * 1. Transfer deposited ETH into the IndexPool contract to the Wallet contract.
+      * 1. Transfer deposited ETH into the DeFi Basket contract to the Wallet contract.
       * 2. Transfer approved ERC20 tokens from the user account to the Wallet contract.
-      * 3. Charge 0.1% fee for IndexPool
+      * 3. Charge 0.1% fee for DeFi Basket
       *
       * @param nftId NFT Id
       * @param inputs ERC20 token addresses and amounts that entered the contract and will go to Wallet
@@ -233,33 +242,33 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
       */
     function _depositToWallet(
         uint256 nftId,
-        IPDataTypes.TokenData calldata inputs,
+        DBDataTypes.TokenData calldata inputs,
         uint256 ethAmount
     ) internal {
-        // Pay 0.1% fee on ETH deposit to IndexPool
-        address indexpoolContractOwner = owner();
-        uint256 indexpoolFee = ethAmount / 1000;
-        payable(indexpoolContractOwner).call{value: indexpoolFee}("");
+        // Pay 0.1% fee on ETH deposit to DeFi Basket
+        address defibasketContractOwner = owner();
+        uint256 defibasketFee = ethAmount / 1000;
+        payable(defibasketContractOwner).call{value: defibasketFee}("");
 
         // Transfer 99.9% of ETH deposit to Wallet
         address walletAddress = walletOf(nftId);
-        payable(walletAddress).call{value: ethAmount - indexpoolFee}("");
+        payable(walletAddress).call{value: ethAmount - defibasketFee}("");
 
-        // For each ERC20: Charge 0.1% IndexPool fee and transfer tokens to Wallet
+        // For each ERC20: Charge 0.1% DeFi Basket fee and transfer tokens to Wallet
         for (uint16 i = 0; i < inputs.tokens.length; i++) {
-            // Pay 0.1% fee on ERC20 deposit to IndexPool
-            indexpoolFee = inputs.amounts[i] / 1000;
-            IERC20(inputs.tokens[i]).safeTransferFrom(ownerOf(nftId), indexpoolContractOwner, indexpoolFee);
+            // Pay 0.1% fee on ERC20 deposit to DeFi Basket
+            defibasketFee = inputs.amounts[i] / 1000;
+            IERC20(inputs.tokens[i]).safeTransferFrom(ownerOf(nftId), defibasketContractOwner, defibasketFee);
 
             // Transfer 99.9% of ERC20 token to Wallet
-            IERC20(inputs.tokens[i]).safeTransferFrom(ownerOf(nftId), walletAddress, inputs.amounts[i] - indexpoolFee);
+            IERC20(inputs.tokens[i]).safeTransferFrom(ownerOf(nftId), walletAddress, inputs.amounts[i] - defibasketFee);
         }
     }
 
     /**
-      * @notice This is how IndexPool communicates with other protocols.
+      * @notice This is how DeFi Basket communicates with other protocols.
       *
-      * @dev This is where the magic happens. Bridges interact with delegate calls to enable IndexPool to interact with
+      * @dev This is where the magic happens. Bridges interact with delegate calls to enable DeFi Basket to interact with
       * a wide and expanding variety of protocols.
       *
       * @param nftId NFT Id
@@ -272,7 +281,7 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
         bytes[] calldata _bridgeEncodedCalls
     ) internal {
         address walletAddress = walletOf(nftId);
-        TestWallet wallet = TestWallet(payable(walletAddress));
+        Wallet wallet = Wallet(payable(walletAddress));
         wallet.useBridges(_bridgeAddresses, _bridgeEncodedCalls);
     }
 
@@ -285,16 +294,16 @@ contract TestIndexPool is IIndexPool, ERC721, Ownable {
       */
     function _withdrawFromWallet(
         uint256 nftId,
-        IPDataTypes.TokenData calldata outputs,
+        DBDataTypes.TokenData calldata outputs,
         uint256 outputEthPercentage
     ) internal {
         uint256[] memory outputAmounts;
         uint256 outputEth;
 
-        TestWallet wallet = TestWallet(payable(walletOf(nftId)));
+        Wallet wallet = Wallet(payable(walletOf(nftId)));
         (outputAmounts, outputEth) = wallet.withdraw(outputs, outputEthPercentage, ownerOf(nftId));
 
-        emit INDEXPOOL_WITHDRAW(outputAmounts, outputEth);
+        emit DEFIBASKET_WITHDRAW(outputAmounts, outputEth);
     }
 
     // Art related

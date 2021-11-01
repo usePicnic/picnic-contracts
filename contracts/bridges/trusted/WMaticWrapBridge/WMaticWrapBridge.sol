@@ -8,7 +8,7 @@ import "../../interfaces/IWMaticWrap.sol";
 
 /**
  * @title QuickswapSwapBridge
- * @author IndexPool
+ * @author DeFi Basket
  *
  * @notice Swaps using the Quickswap contract in Polygon.
  *
@@ -28,7 +28,7 @@ contract WMaticWrapBridge is IWMaticWrap {
       * @param percentageIn Percentage of MATIC to be wrapped into WMATIC
       */
     function wrap(uint256 percentageIn) external override {
-        emit INDEXPOOL_WMATIC_WRAP(address(this).balance * percentageIn / 100000);
+        emit DEFIBASKET_WMATIC_WRAP(address(this).balance * percentageIn / 100000);
         wmatic.deposit{value : address(this).balance * percentageIn / 100000}();
     }
 
@@ -40,7 +40,7 @@ contract WMaticWrapBridge is IWMaticWrap {
       * @param percentageOut Percentage of WMATIC to be unwrapped into MATIC
       */
     function unwrap(uint256 percentageOut) external override {
-        emit INDEXPOOL_WMATIC_UNWRAP(IERC20(wMaticAddress).balanceOf(address(this)) * percentageOut / 100000);
+        emit DEFIBASKET_WMATIC_UNWRAP(IERC20(wMaticAddress).balanceOf(address(this)) * percentageOut / 100000);
         wmatic.withdraw(IERC20(wMaticAddress).balanceOf(address(this)) * percentageOut / 100000);
     }
 }

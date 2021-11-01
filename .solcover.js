@@ -1,5 +1,5 @@
 module.exports = {
-    skipFiles: ['tests/TestIndexPool.sol',
+    skipFiles: ['tests/TestDeFiBasket.sol',
                 'tests/TestWallet.sol',
                 'tests/UnsafeBridge.sol']
 };

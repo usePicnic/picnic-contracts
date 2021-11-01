@@ -16,7 +16,7 @@ const deployLogic = async ({ networkName, contractName, interfaceName , filePath
         await client.connect();
 
         let mongoContract = await client
-            .db('indexpool')
+            .db('defibasket')
             .collection('contracts')
             .findOne(
                 {
@@ -53,7 +53,7 @@ const deployLogic = async ({ networkName, contractName, interfaceName , filePath
         }
     
         await client
-            .db('indexpool')
+            .db('defibasket')
             .collection('contracts')
             .insertOne(insertData);
         

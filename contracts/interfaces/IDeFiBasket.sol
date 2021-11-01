@@ -2,33 +2,33 @@
 
 pragma solidity ^0.8.6;
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "../libraries/IPDataTypes.sol";
+import "../libraries/DBDataTypes.sol";
 
-interface IIndexPool is IERC721 {
+interface IDeFiBasket is IERC721 {
     // Events
-    event INDEXPOOL_CREATE(
+    event DEFIBASKET_CREATE(
         uint256 nftId,
         address wallet
     );
 
-    event INDEXPOOL_DEPOSIT();
+    event DEFIBASKET_DEPOSIT();
 
-    event INDEXPOOL_EDIT();
+    event DEFIBASKET_EDIT();
 
-    event INDEXPOOL_WITHDRAW(
+    event DEFIBASKET_WITHDRAW(
         uint256[] outputAmounts,
         uint256 ethAmount
     );
 
     function createPortfolio(
-        IPDataTypes.TokenData calldata inputs,
+        DBDataTypes.TokenData calldata inputs,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) payable external;
 
     function depositPortfolio(
         uint256 nftId,
-        IPDataTypes.TokenData calldata inputs,
+        DBDataTypes.TokenData calldata inputs,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls
     ) payable external;
@@ -41,7 +41,7 @@ interface IIndexPool is IERC721 {
 
     function withdrawPortfolio(
         uint256 nftId,
-        IPDataTypes.TokenData calldata outputs,
+        DBDataTypes.TokenData calldata outputs,
         uint256 outputEthPercentage,
         address[] calldata _bridgeAddresses,
         bytes[] calldata _bridgeEncodedCalls

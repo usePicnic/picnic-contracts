@@ -13,7 +13,7 @@ const weiToString = (wei) => {
 
 const getDeployedAddress = async (contractName, client) => {
     return (await client
-        .db('indexpool')
+        .db('defibasket')
         .collection('contracts')
         .findOne(
             {

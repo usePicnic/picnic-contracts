@@ -3,12 +3,12 @@ import {ethers} from "hardhat";
 import { getFirstEvent } from "./utils";
 import constants from "../constants";
 
-describe("IndexPool", function () {
+describe("DeFi Basket", function () {
     let owner;
     let other;
     let provider;
-    let IndexPool;
-    let indexpool;
+    let DeFiBasket;
+    let defibasket;
     let uniswapV2SwapBridge;
     let uniswapV2Router02;
     let wmaticBridge;
@@ -20,8 +20,8 @@ describe("IndexPool", function () {
         [owner, other] = await ethers.getSigners();
         provider = await ethers.getDefaultProvider();
 
-        IndexPool = await ethers.getContractFactory("IndexPool");
-        indexpool = await IndexPool.deploy();
+        DeFiBasket = await ethers.getContractFactory("DeFiBasket");
+        defibasket = await DeFiBasket.deploy();
 
         let UniswapV2SwapBridge = await ethers.getContractFactory("QuickswapSwapBridge");
         uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
@@ -39,7 +39,7 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio (just holds ether)
-            let tx = await indexpool.createPortfolio(
+            let tx = await defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
@@ -50,7 +50,7 @@ describe("IndexPool", function () {
             tx.wait();
 
             // Wallet ETH balance should be above 0
-            let walletAddress = await indexpool.walletOf(0);
+            let walletAddress = await defibasket.walletOf(0);
             let walletBalance = await ethers.provider.getBalance(walletAddress);
             expect(walletBalance).to.be.above(0);
         })
@@ -74,14 +74,14 @@ describe("IndexPool", function () {
             // Get DAI balance
             let dai = (await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"]));
             let daiBalance = await dai.balanceOf(owner.address);
-            await dai.approve(indexpool.address, daiBalance);
+            await dai.approve(defibasket.address, daiBalance);
 
             // Set bridges addresses and encoded calls
             var _bridgeAddresses = [];
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio (just holds ether)
-            let tx = await indexpool.createPortfolio(
+            let tx = await defibasket.createPortfolio(
                 {'tokens': [TOKENS['DAI']], 'amounts': [daiBalance]},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
@@ -91,7 +91,7 @@ describe("IndexPool", function () {
             tx.wait();
 
             // Wallet DAI balance should be above 0
-            let walletAddress = await indexpool.walletOf(0);
+            let walletAddress = await defibasket.walletOf(0);
             let walletDaiBalance = await dai.balanceOf(walletAddress);
             expect(walletDaiBalance).to.be.above(0);
         })
@@ -101,12 +101,12 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio
-            await expect(indexpool.createPortfolio(
+            await expect(defibasket.createPortfolio(
                 {'tokens': [TOKENS['DAI'], TOKENS['QUICK']], 'amounts': [100]},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
                 {value: ethers.utils.parseEther("1")} // overrides
-            )).to.be.revertedWith("INDEXPOOL: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS");
+            )).to.be.revertedWith("DEFIBASKET: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS");
         })
 
         it("Rejects ERC20 amounts equal to zero", async function () {
@@ -115,12 +115,12 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio
-            await expect(indexpool.createPortfolio(
+            await expect(defibasket.createPortfolio(
                 {'tokens': [TOKENS['DAI']], 'amounts': [0]},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
                 {value: ethers.utils.parseEther("1")} // overrides
-            )).to.be.revertedWith("INDEXPOOL WALLET: ERC20 TOKEN AMOUNTS NEED TO BE > 0");
+            )).to.be.revertedWith("DEFIBASKET WALLET: ERC20 TOKEN AMOUNTS NEED TO BE > 0");
         })
 
         it("Rejects no ETH amounts along with empty ERC20 amounts", async function () {
@@ -129,11 +129,11 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio
-            await expect(indexpool.createPortfolio(
+            await expect(defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls
-            )).to.be.revertedWith("INDEXPOOL: AN AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED");
+            )).to.be.revertedWith("DEFIBASKET: AN AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED");
         })
 
         it("Rejects different bridges and calls sizes", async function () {
@@ -142,12 +142,12 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio
-            await expect(indexpool.createPortfolio(
+            await expect(defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
                 {value: ethers.utils.parseEther("1")}
-            )).to.be.revertedWith("INDEXPOOL: BRIDGE ENCODED CALLS AND ADDRESSES MUST HAVE THE SAME LENGTH");
+            )).to.be.revertedWith("DEFIBASKET: BRIDGE ENCODED CALLS AND ADDRESSES MUST HAVE THE SAME LENGTH");
         })
     });
 
@@ -158,7 +158,7 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio (just holds ether)
-            let tx = await indexpool.createPortfolio(
+            let tx = await defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
@@ -170,11 +170,11 @@ describe("IndexPool", function () {
             // Code above was tested elsewhere
 
             // Wallet ETH balance should be above 0
-            let walletAddress = await indexpool.walletOf(0);
+            let walletAddress = await defibasket.walletOf(0);
             let previousWalletBalance = await ethers.provider.getBalance(walletAddress);
 
             // Deposit in a portfolio
-            await indexpool.depositPortfolio(
+            await defibasket.depositPortfolio(
                 0, // NFT ID - NFT created just above
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
@@ -193,7 +193,7 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio (just holds ether)
-            await indexpool.createPortfolio(
+            await defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
@@ -219,10 +219,10 @@ describe("IndexPool", function () {
             // Get DAI balance
             let dai = (await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"]));
             let daiBalance = await dai.balanceOf(owner.address);
-            await dai.approve(indexpool.address, daiBalance);
+            await dai.approve(defibasket.address, daiBalance);
 
             // Deposit in a portfolio
-            let tx = await indexpool.depositPortfolio(
+            let tx = await defibasket.depositPortfolio(
                 0, // NFT ID - NFT created just above
                 {'tokens': [TOKENS['DAI']], 'amounts': [daiBalance]},
                 _bridgeAddresses,
@@ -233,7 +233,7 @@ describe("IndexPool", function () {
             tx.wait();
 
             // Wallet DAI balance should be above 0
-            let walletAddress = await indexpool.walletOf(0);
+            let walletAddress = await defibasket.walletOf(0);
             let walletDaiBalance = await dai.balanceOf(walletAddress);
             expect(walletDaiBalance).to.be.above(0);
         })
@@ -244,22 +244,22 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio (just holds ether)
-            let tx = await indexpool.createPortfolio(
+            let tx = await defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
                 {value: ethers.utils.parseEther("1")} // overrides
             );
 
-            let otherIndexPool = indexpool.connect(other);
+            let otherDeFiBasket = defibasket.connect(other);
 
-            await expect(otherIndexPool.depositPortfolio(
+            await expect(otherDeFiBasket.depositPortfolio(
                 0,
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
                 {value: ethers.utils.parseEther("1")} // overrides
-            )).to.be.revertedWith("INDEXPOOL: ONLY NFT OWNER CAN CALL THIS FUNCTION");
+            )).to.be.revertedWith("DEFIBASKET: ONLY NFT OWNER CAN CALL THIS FUNCTION");
         })
 
         it("Rejects mismatch in array size for input tokens and amounts", async function () {
@@ -268,7 +268,7 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio (just holds ether)
-            let tx = await indexpool.createPortfolio(
+            let tx = await defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
@@ -276,13 +276,13 @@ describe("IndexPool", function () {
             );
 
             // Create a portfolio
-            await expect(indexpool.depositPortfolio(
+            await expect(defibasket.depositPortfolio(
                 0,
                 {'tokens': [TOKENS['DAI'], TOKENS['QUICK']], 'amounts': [100]},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
                 {value: ethers.utils.parseEther("1")} // overrides
-            )).to.be.revertedWith("INDEXPOOL: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS");
+            )).to.be.revertedWith("DEFIBASKET: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS");
         })
 
         it("Rejects ERC20 amounts equal to zero", async function () {
@@ -291,7 +291,7 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio (just holds ether)
-            let tx = await indexpool.createPortfolio(
+            let tx = await defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
@@ -299,13 +299,13 @@ describe("IndexPool", function () {
             );
 
             // Create a portfolio
-            await expect(indexpool.depositPortfolio(
+            await expect(defibasket.depositPortfolio(
                 0,
                 {'tokens': [TOKENS['DAI']], 'amounts': [0]},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
                 {value: ethers.utils.parseEther("1")} // overrides
-            )).to.be.revertedWith("INDEXPOOL WALLET: ERC20 TOKEN AMOUNTS NEED TO BE > 0");
+            )).to.be.revertedWith("DEFIBASKET WALLET: ERC20 TOKEN AMOUNTS NEED TO BE > 0");
         })
 
         it("Rejects no ETH amounts along with empty ERC20 amounts", async function () {
@@ -314,7 +314,7 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio (just holds ether)
-            let tx = await indexpool.createPortfolio(
+            let tx = await defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
@@ -322,12 +322,12 @@ describe("IndexPool", function () {
             );
 
             // Create a portfolio
-            await expect(indexpool.depositPortfolio(
+            await expect(defibasket.depositPortfolio(
                 0,
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
-            )).to.be.revertedWith("INDEXPOOL: AN AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED");
+            )).to.be.revertedWith("DEFIBASKET: AN AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED");
         })
 
         it("Rejects different bridges and calls sizes", async function () {
@@ -336,7 +336,7 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio (just holds ether)
-            let tx = await indexpool.createPortfolio(
+            let tx = await defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
@@ -347,13 +347,13 @@ describe("IndexPool", function () {
             _bridgeAddresses = [uniswapV2Router02.address];
 
             // Create a portfolio
-            await expect(indexpool.depositPortfolio(
+            await expect(defibasket.depositPortfolio(
                 0,
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
                 {value: ethers.utils.parseEther("1")} // overrides
-            )).to.be.revertedWith("INDEXPOOL: BRIDGE ENCODED CALLS AND ADDRESSES MUST HAVE THE SAME LENGTH");
+            )).to.be.revertedWith("DEFIBASKET: BRIDGE ENCODED CALLS AND ADDRESSES MUST HAVE THE SAME LENGTH");
         })
     });
 
@@ -364,7 +364,7 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio (just holds ether)
-            let tx = await indexpool.createPortfolio(
+            let tx = await defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
@@ -405,13 +405,13 @@ describe("IndexPool", function () {
             ];
 
             // Deposit in a portfolio
-            await indexpool.editPortfolio(
+            await defibasket.editPortfolio(
                 0, // NFT ID - NFT created just above
                 _bridgeAddresses,
                 _bridgeEncodedCalls
             );
 
-            let walletAddress = await indexpool.walletOf(0);
+            let walletAddress = await defibasket.walletOf(0);
 
             // Wallet DAI amount should be 0
             let dai = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", TOKENS["DAI"])
@@ -425,20 +425,20 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio (just holds ether)
-            let tx = await indexpool.createPortfolio(
+            let tx = await defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
                 {value: ethers.utils.parseEther("1")} // overrides
             );
 
-            let otherIndexPool = indexpool.connect(other);
+            let otherDeFiBasket = defibasket.connect(other);
 
-            await expect(otherIndexPool.editPortfolio(
+            await expect(otherDeFiBasket.editPortfolio(
                 0,
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
-            )).to.be.revertedWith("INDEXPOOL: ONLY NFT OWNER CAN CALL THIS FUNCTION");
+            )).to.be.revertedWith("DEFIBASKET: ONLY NFT OWNER CAN CALL THIS FUNCTION");
         })
 
         it("Rejects different bridges and calls sizes", async function () {
@@ -447,7 +447,7 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio (just holds ether)
-            let tx = await indexpool.createPortfolio(
+            let tx = await defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
@@ -458,11 +458,11 @@ describe("IndexPool", function () {
             _bridgeAddresses = [uniswapV2Router02.address];
 
             // Create a portfolio
-            await expect(indexpool.editPortfolio(
+            await expect(defibasket.editPortfolio(
                 0,
                 _bridgeAddresses,
                 _bridgeEncodedCalls
-            )).to.be.revertedWith("INDEXPOOL: BRIDGE ENCODED CALLS AND ADDRESSES MUST HAVE THE SAME LENGTH");
+            )).to.be.revertedWith("DEFIBASKET: BRIDGE ENCODED CALLS AND ADDRESSES MUST HAVE THE SAME LENGTH");
         })
     });
 
@@ -473,7 +473,7 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio (just holds ether)
-            await indexpool.createPortfolio(
+            await defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
@@ -485,7 +485,7 @@ describe("IndexPool", function () {
             let previousBalance = await owner.getBalance()
 
             // Withdraw from portfolio
-            await indexpool.withdrawPortfolio(
+            await defibasket.withdrawPortfolio(
                 0, // NFT ID - NFT created just above
                 {'tokens': [], 'amounts': []},
                 100000, // Withdraw percentage
@@ -532,7 +532,7 @@ describe("IndexPool", function () {
             ];
 
             // Create a portfolio (just holds ether)
-            await indexpool.createPortfolio(
+            await defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
@@ -545,7 +545,7 @@ describe("IndexPool", function () {
             let previousDaiBalance = await dai.balanceOf(owner.address);
 
             // Withdraw from portfolio
-            await indexpool.withdrawPortfolio(
+            await defibasket.withdrawPortfolio(
                 0, // NFT ID - NFT created just above
                 {'tokens': [TOKENS['DAI']], 'amounts': [100000]}, // outputs
                 0, // Withdraw percentage
@@ -566,22 +566,22 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio (just holds ether)
-            let tx = await indexpool.createPortfolio(
+            let tx = await defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
                 {value: ethers.utils.parseEther("1")} // overrides
             );
 
-            let otherIndexPool = indexpool.connect(other);
+            let otherDeFiBasket = defibasket.connect(other);
 
-            await expect(otherIndexPool.withdrawPortfolio(
+            await expect(otherDeFiBasket.withdrawPortfolio(
                 0, // NFT ID - NFT created just above
                 {'tokens': [], 'amounts': []},
                 100000, // Withdraw percentage
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
-            )).to.be.revertedWith("INDEXPOOL: ONLY NFT OWNER CAN CALL THIS FUNCTION");
+            )).to.be.revertedWith("DEFIBASKET: ONLY NFT OWNER CAN CALL THIS FUNCTION");
         })
 
         it("Rejects mismatch in array size for output tokens and amounts", async function () {
@@ -590,7 +590,7 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio (just holds ether)
-            let tx = await indexpool.createPortfolio(
+            let tx = await defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
@@ -598,13 +598,13 @@ describe("IndexPool", function () {
             );
 
             // Create a portfolio
-            await expect(indexpool.withdrawPortfolio(
+            await expect(defibasket.withdrawPortfolio(
                 0, // NFT ID - NFT created just above
                 {'tokens': [TOKENS['DAI'], TOKENS['QUICK']], 'amounts': [100]},
                 100000, // Withdraw percentage
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
-            )).to.be.revertedWith("INDEXPOOL: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS");
+            )).to.be.revertedWith("DEFIBASKET: MISMATCH IN LENGTH BETWEEN TOKENS AND AMOUNTS");
         })
 
         it("Rejects ERC20 amounts equal to zero", async function () {
@@ -613,7 +613,7 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio (just holds ether)
-            let tx = await indexpool.createPortfolio(
+            let tx = await defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
@@ -621,13 +621,13 @@ describe("IndexPool", function () {
             );
 
             // Create a portfolio
-            await expect(indexpool.withdrawPortfolio(
+            await expect(defibasket.withdrawPortfolio(
                 0, // NFT ID - NFT created just above
                 {'tokens': [TOKENS['DAI']], 'amounts': [0]},
                 100000, // Withdraw percentage
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
-            )).to.be.revertedWith("INDEXPOOL WALLET: ERC20 TOKEN AMOUNTS NEED TO BE > 0");
+            )).to.be.revertedWith("DEFIBASKET WALLET: ERC20 TOKEN AMOUNTS NEED TO BE > 0");
         })
 
         it("Rejects no ETH amounts along with empty ERC20 amounts", async function () {
@@ -636,7 +636,7 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio (just holds ether)
-            let tx = await indexpool.createPortfolio(
+            let tx = await defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
@@ -644,13 +644,13 @@ describe("IndexPool", function () {
             );
 
             // Create a portfolio
-            await expect(indexpool.withdrawPortfolio(
+            await expect(defibasket.withdrawPortfolio(
                 0, // NFT ID - NFT created just above
                 {'tokens': [], 'amounts': []},
                 0, // Withdraw percentage
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
-            )).to.be.revertedWith("INDEXPOOL: AN AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED");
+            )).to.be.revertedWith("DEFIBASKET: AN AMOUNT IN ETHER OR ERC20 TOKENS IS NEEDED");
         })
 
         it("Rejects different bridges and calls sizes", async function () {
@@ -659,7 +659,7 @@ describe("IndexPool", function () {
             var _bridgeEncodedCalls = [];
 
             // Create a portfolio (just holds ether)
-            let tx = await indexpool.createPortfolio(
+            let tx = await defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
@@ -670,31 +670,31 @@ describe("IndexPool", function () {
             _bridgeAddresses = [uniswapV2Router02.address];
 
             // Create a portfolio
-            await expect(indexpool.withdrawPortfolio(
+            await expect(defibasket.withdrawPortfolio(
                 0,
                 {'tokens': [], 'amounts': []},
                 100000, // Withdraw percentage
                 _bridgeAddresses,
                 _bridgeEncodedCalls
-            )).to.be.revertedWith("INDEXPOOL: BRIDGE ENCODED CALLS AND ADDRESSES MUST HAVE THE SAME LENGTH");
+            )).to.be.revertedWith("DEFIBASKET: BRIDGE ENCODED CALLS AND ADDRESSES MUST HAVE THE SAME LENGTH");
         })
     });
     describe("NFT URI", function () {
         it("Sets and reads Base URI", async function () {
-            await indexpool.createPortfolio(
+            await defibasket.createPortfolio(
                 {'tokens': [], 'amounts': []},
                 [],
                 [],
                 {value: ethers.utils.parseEther("1")} // overrides
             );
 
-            await indexpool.setBaseURI('indexpool-test/');
+            await defibasket.setBaseURI('defibasket-test/');
 
-            expect(await indexpool.tokenURI(0)).to.be.equal('indexpool-test/0');
+            expect(await defibasket.tokenURI(0)).to.be.equal('defibasket-test/0');
         })
     })
     // describe("Events", function () {
-    //     it("Emits INDEXPOOL_MINT_NFT", async function () {
+    //     it("Emits DEFIBASKET_MINT_NFT", async function () {
     //         // Set bridges addresses and encoded calls
     //         var _bridgeAddresses = [];
     //         var _bridgeEncodedCalls = [];
@@ -707,7 +707,7 @@ describe("IndexPool", function () {
     //             {value: ethers.utils.parseEther("1")} // overrides
     //         );
     //
-    //         var event = await getFirstEvent({ address: indexpool.address }, IndexPool, 'INDEXPOOL_MINT_NFT');
+    //         var event = await getFirstEvent({ address: indexpool.address }, IndexPool, 'DEFIBASKET_MINT_NFT');
     //
     //         // First NFT created has ID 0
     //         expect(event.args.nftId).to.be.equal(0);
@@ -715,7 +715,7 @@ describe("IndexPool", function () {
     //         expect(event.args.nftOwner).to.eql(await indexpool.ownerOf(0));
     //     })
     //
-    //     it("Emits INDEXPOOL_DEPOSIT", async function () {
+    //     it("Emits DEFIBASKET_DEPOSIT", async function () {
     //         // Buy DAI on Uniswap
     //         var overrides = {value: ethers.utils.parseEther("1")};
     //         let blockNumber = await provider.getBlockNumber();
@@ -749,7 +749,7 @@ describe("IndexPool", function () {
     //             {value: ethers.utils.parseEther("1")} // overrides
     //         );
     //
-    //         var event = await getFirstEvent({ address: indexpool.address }, IndexPool, 'INDEXPOOL_DEPOSIT');
+    //         var event = await getFirstEvent({ address: indexpool.address }, IndexPool, 'DEFIBASKET_DEPOSIT');
     //
     //         // First NFT created has ID 0
     //         expect(event.args.nftId).to.be.equal(0);
@@ -764,7 +764,7 @@ describe("IndexPool", function () {
     //         expect(event.args.ethAmount).to.be.equal(ethers.utils.parseEther("1"));
     //     })
     //
-    //     it("Emits INDEXPOOL_WITHDRAW", async function () {
+    //     it("Emits DEFIBASKET_WITHDRAW", async function () {
     //
     //         // Set bridges addresses
     //         var _bridgeAddresses = [
@@ -816,7 +816,7 @@ describe("IndexPool", function () {
     //             [], // _encodedBridgeCalls
     //         );
     //
-    //         var event = await getFirstEvent({ address: indexpool.address }, IndexPool, 'INDEXPOOL_WITHDRAW');
+    //         var event = await getFirstEvent({ address: indexpool.address }, IndexPool, 'DEFIBASKET_WITHDRAW');
     //
     //         // First NFT created has ID 0
     //         expect(event.args.nftId).to.be.equal(0);

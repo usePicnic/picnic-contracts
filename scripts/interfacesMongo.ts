@@ -10,8 +10,8 @@ function bridgeNameToFilePath(interfaceName : string) : string{
 
 const interfacesToDeploy = [
     {
-        interfaceName: "IIndexPool",
-        filePath: "./artifacts/contracts/interfaces/IIndexPool.sol/IIndexPool.json"
+        interfaceName: "IDeFiBasket",
+        filePath: "./artifacts/contracts/interfaces/IDeFiBasket.sol/IDeFiBasket.json"
     },
     {
         interfaceName: "IAaveV2Deposit",
@@ -55,7 +55,7 @@ async function main() {
             const contract = JSON.parse(contractFile)
 
             await client
-                .db('indexpool')
+                .db('defibasket')
                 .collection('interfaces')
                 .updateOne(
                     {name: interfacesToDeploy[i].interfaceName},
