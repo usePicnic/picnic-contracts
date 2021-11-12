@@ -4,7 +4,7 @@ import {ethers} from "hardhat";
 
 const getDeployedAddress = async (contractName, client) => {
     return (await client
-        .db('defibasket')
+        .db(process.env.MONGODB_DATABASE_NAME)
         .collection('contracts')
         .findOne(
             {

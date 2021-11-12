@@ -22,7 +22,8 @@ const contractsToDeploy = [
     {
         contractName: "DeFiBasket",
         interfaceName: "IDeFiBasket",
-        filePath: "./artifacts/contracts/DeFiBasket.sol/DeFiBasket.json"},
+        filePath: "./artifacts/contracts/DeFiBasket.sol/DeFiBasket.json"
+    },
     {
         contractName: "AaveV2DepositBridge",
         interfaceName: "IAaveV2Deposit",
@@ -112,7 +113,7 @@ async function main() {
             console.log(`Setting network blockNumber to ${startBlockNumber}`)
 
             await client
-                .db('defibasket')
+                .db(process.env.MONGODB_DATABASE_NAME)
                 .collection('networks')
                 .updateOne(
                     {

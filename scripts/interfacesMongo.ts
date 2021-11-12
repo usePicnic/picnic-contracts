@@ -55,7 +55,7 @@ async function main() {
             const contract = JSON.parse(contractFile)
 
             await client
-                .db('defibasket')
+                .db(process.env.MONGODB_DATABASE_NAME)
                 .collection('interfaces')
                 .updateOne(
                     {name: interfacesToDeploy[i].interfaceName},

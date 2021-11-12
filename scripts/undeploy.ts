@@ -39,7 +39,7 @@ async function main() {
     // TODO should we create a backup of what is being undeployed?
     //  ... set active to false and change name to not conflict with unique index
     await client
-        .db('defibasket')
+        .db(process.env.MONGODB_DATABASE_NAME)
         .collection('contracts')
         .deleteMany(
             {
@@ -48,7 +48,7 @@ async function main() {
         );
 
     await client
-        .db('defibasket')
+        .db(process.env.MONGODB_DATABASE_NAME)
         .collection('transactions')
         .deleteMany(
             {
@@ -57,7 +57,7 @@ async function main() {
         );
 
     await client
-        .db('defibasket')
+        .db(process.env.MONGODB_DATABASE_NAME)
         .collection('portfolios')
         .deleteMany(
             {
