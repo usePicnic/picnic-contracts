@@ -33,8 +33,8 @@ as a development environment for compiling, testing, and deploying our contracts
 
  - **Pedro Guerra Brandão**
  [@pgbrandao](https://github.com/pgbrandao)
- [`pgbrandao@gmail.com`](mailto:pgbrandao@gmail.com)
+ [`pgbrandao@gmail.com`](mailto:pedro@defibasket.org)
 
  - **João Alexandre Vaz Ferreira**
  [@joaoavf](https://github.com/joaoavf)
- [`joao.avf@gmail.com`](mailto:joao.avf@gmail.com)
+ [`joao.avf@gmail.com`](mailto:joao@defibasket.org)
