@@ -34,8 +34,8 @@ and their interfaces are explained in our [documentation for developers](https:/
 
  - **Pedro Guerra Brandão**
  [@pgbrandao](https://github.com/pgbrandao)
- [`pgbrandao@gmail.com`](mailto:pedro@defibasket.org)
+ [`pedro@defibasket.org`](mailto:pedro@defibasket.org)
 
  - **João Alexandre Vaz Ferreira**
  [@joaoavf](https://github.com/joaoavf)
- [`joao.avf@gmail.com`](mailto:joao@defibasket.org)
+ [`joao@defibasket.org`](mailto:joao@defibasket.org)
