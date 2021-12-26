@@ -8,7 +8,7 @@ import "../../interfaces/IUniswapV2Swap.sol";
 
 /**
  * @title SushiSwapBridge
- * @author IndexPool
+ * @author DeFi Basket
  *
  * @notice Swaps using the Sushi contract in Polygon.
  *
@@ -21,7 +21,7 @@ contract SushiSwapBridge is IUniswapV2Swap {
     /**
       * @notice Swaps from ERC20 token to ERC20 token.
       *
-      * @dev Wraps the swap and generate the necessary events to communicate with IndexPool's UI and back-end.
+      * @dev Wraps the swap and generate the necessary events to communicate with DeFi Basket's UI and back-end.
       *
       * @param amountInPercentage Percentage of the balance of the input ERC20 token that will be swapped
       * @param amountOutMin Minimum amount of the output token required to execute swap
@@ -50,6 +50,6 @@ contract SushiSwapBridge is IUniswapV2Swap {
             block.timestamp + 100000
         );
 
-        emit INDEXPOOL_UNISWAPV2_SWAP(amounts);
+        emit DEFIBASKET_UNISWAPV2_SWAP(amounts);
     }
 }
