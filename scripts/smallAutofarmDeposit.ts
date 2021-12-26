@@ -13,7 +13,7 @@ const weiToString = (wei) => {
 
 const getDeployedAddress = async (contractName, client) => {
     return (await client
-        .db('indexpool')
+        .db(process.env.MONGODB_DATABASE_NAME)
         .collection('contracts')
         .findOne(
             {
@@ -29,8 +29,8 @@ async function main() {
     const client = new MongoClient(process.env.MONGODB_URI);
     await client.connect();
 
-    let indexPool = await ethers.getContractAt("IndexPool",
-        await getDeployedAddress("IndexPool", client));
+    let defibasket = await ethers.getContractAt("DeFiBasket",
+        await getDeployedAddress("DeFiBasket", client));
 
     let uniswapV2SwapBridge = await ethers.getContractAt("QuickswapSwapBridge",
         await getDeployedAddress("QuickswapSwapBridge", client));
@@ -102,7 +102,7 @@ async function main() {
     let startingNonce = await deployer.getTransactionCount();
 
     let overrides = {value: ethers.utils.parseEther("0.000001"), gasLimit:2000000, nonce:startingNonce};
-    await indexPool.createPortfolio(
+    await defibasket.createPortfolio(
         {'tokens': [], 'amounts': []},
         _bridgeAddresses,
         _bridgeEncodedCalls,

@@ -3,11 +3,11 @@
 pragma solidity ^0.8.6;
 
 interface IWMaticWrap {
-    event INDEXPOOL_WMATIC_WRAP (
+    event DEFIBASKET_WMATIC_WRAP (
         uint256 amountIn
     );
 
-    event INDEXPOOL_WMATIC_UNWRAP (
+    event DEFIBASKET_WMATIC_UNWRAP (
         uint256 amountOut
     );
 

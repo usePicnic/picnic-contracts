@@ -1,5 +1,5 @@
 {
-  "name": "indexpool-contracts",
+  "name": "defibasket-contracts",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/indexpool/indexpool-contracts.git"
+    "url": "git+https://github.com/defibasket/defibasket-contracts.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/indexpool/indexpool-contracts/issues"
+    "url": "https://github.com/defibasket/defibasket-contracts/issues"
   },
-  "homepage": "https://indexpool.org",
+  "homepage": "https://defibasket.org",
   "devDependencies": {
     "@aave/protocol-v2": "^1.0.1",
     "@nomiclabs/hardhat-ethers": "^2.0.2",

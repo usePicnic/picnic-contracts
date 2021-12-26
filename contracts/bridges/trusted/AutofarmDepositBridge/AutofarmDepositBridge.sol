@@ -8,7 +8,7 @@ import "../../interfaces/IAutofarmDeposit.sol";
 
 /**
  * @title AutofarmDepositBridge
- * @author IndexPool
+ * @author DeFi Basket
  *
  * @notice Deposits, withdraws and harvest rewards from AutofarmV2_CrossChain contract in Polygon.
  *
@@ -28,7 +28,7 @@ contract AutofarmDepositBridge is IAutofarmDeposit {
     /**
       * @notice Deposits into the Autofarm protocol.
       *
-      * @dev Wraps the Autofarm deposit and generate the necessary events to communicate with IndexPool's UI and back-end.
+      * @dev Wraps the Autofarm deposit and generate the necessary events to communicate with DeFi Basket's UI and back-end.
       *
       * @param percentageIn Percentage of the balance of the asset that will be deposited
       */
@@ -44,13 +44,13 @@ contract AutofarmDepositBridge is IAutofarmDeposit {
 
         autofarm.deposit(poolId, amountIn);
 
-        emit INDEXPOOL_AUTOFARM_DEPOSIT(vaultAddress, address(assetIn), amountIn);
+        emit DEFIBASKET_AUTOFARM_DEPOSIT(vaultAddress, address(assetIn), amountIn);
     }
 
     /**
       * @notice Withdraws from the Autofarm protocol.
       *
-      * @dev Wraps the Autofarm withdraw and generate the necessary events to communicate with IndexPool's UI and
+      * @dev Wraps the Autofarm withdraw and generate the necessary events to communicate with DeFi Basket's UI and
       * back-end. A harvest is withdraw where percentageOut == 0.
       *
       * @param poolId Autofarm pool id
@@ -69,6 +69,6 @@ contract AutofarmDepositBridge is IAutofarmDeposit {
         uint256 wMaticReward = IERC20(wMaticAddress).balanceOf(address(this)) - wMaticBalance;
         uint256 pAutoReward = IERC20(pAutoAddress).balanceOf(address(this)) - pAutoBalance;
 
-        emit INDEXPOOL_AUTOFARM_WITHDRAW(vaultAddress, address(assetOut), amountOut, wMaticReward, pAutoReward);
+        emit DEFIBASKET_AUTOFARM_WITHDRAW(vaultAddress, address(assetOut), amountOut, wMaticReward, pAutoReward);
     }
 }

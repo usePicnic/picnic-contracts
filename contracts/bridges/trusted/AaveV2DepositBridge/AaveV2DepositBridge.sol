@@ -9,7 +9,7 @@ import "../../interfaces/IAaveV2Deposit.sol";
 
 /**
  * @title AaveV2DepositBridge
- * @author IndexPool
+ * @author DeFi Basket
  *
  * @notice Deposits, withdraws and harvest rewards from Aave's LendingPool contract in Polygon.
  *
@@ -31,7 +31,7 @@ contract AaveV2DepositBridge is IAaveV2Deposit {
     /**
       * @notice Deposits into the Aave protocol.
       *
-      * @dev Wraps the Aave deposit and generate the necessary events to communicate with IndexPool's UI and back-end.
+      * @dev Wraps the Aave deposit and generate the necessary events to communicate with DeFi Basket's UI and back-end.
       *
       * @param assetIn Address of the asset to be deposited into the Aave protocol
       * @param percentageIn Percentage of the balance of the asset that will be deposited
@@ -49,13 +49,13 @@ contract AaveV2DepositBridge is IAaveV2Deposit {
 
         address assetOut = _aaveLendingPool.getReserveData(assetIn).aTokenAddress;
 
-        emit INDEXPOOL_AAVEV2_DEPOSIT(assetOut, amount);
+        emit DEFIBASKET_AAVEV2_DEPOSIT(assetOut, amount);
     }
 
     /**
       * @notice Withdraws from the Aave protocol.
       *
-      * @dev Wraps the Aave withdrawal and generates the necessary events to communicate with IndexPool's UI and back-end.
+      * @dev Wraps the Aave withdrawal and generates the necessary events to communicate with DeFi Basket's UI and back-end.
       * To perform a harvest invoke withdraw with percentageOut set to 0.
       *
       * @param assetOut Address of the asset to be withdrawn from the Aave protocol
@@ -80,6 +80,6 @@ contract AaveV2DepositBridge is IAaveV2Deposit {
         uint256 claimedReward = distributor.claimRewards(assets, amountToClaim, address(this));
         address claimedAsset = distributor.REWARD_TOKEN();
 
-        emit INDEXPOOL_AAVEV2_WITHDRAW(assetIn, amount, claimedAsset, claimedReward);
+        emit DEFIBASKET_AAVEV2_WITHDRAW(assetIn, amount, claimedAsset, claimedReward);
     }
 }

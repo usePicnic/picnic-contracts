@@ -3,7 +3,7 @@
 pragma solidity ^0.8.6;
 
 interface IUniswapV2Swap {
-    event INDEXPOOL_UNISWAPV2_SWAP(
+    event DEFIBASKET_UNISWAPV2_SWAP(
         uint256[] amounts
     );
 

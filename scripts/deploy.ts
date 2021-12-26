@@ -20,9 +20,10 @@ function bridgeNameToFilePath(bridgeName : string) : string{
 
 const contractsToDeploy = [
     {
-        contractName: "IndexPool",
-        interfaceName: "IIndexPool",
-        filePath: "./artifacts/contracts/IndexPool.sol/IndexPool.json"},
+        contractName: "DeFiBasket",
+        interfaceName: "IDeFiBasket",
+        filePath: "./artifacts/contracts/DeFiBasket.sol/DeFiBasket.json"
+    },
     {
         contractName: "AaveV2DepositBridge",
         interfaceName: "IAaveV2Deposit",
@@ -112,7 +113,7 @@ async function main() {
             console.log(`Setting network blockNumber to ${startBlockNumber}`)
 
             await client
-                .db('indexpool')
+                .db(process.env.MONGODB_DATABASE_NAME)
                 .collection('networks')
                 .updateOne(
                     {

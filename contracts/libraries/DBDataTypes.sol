@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.6;
 
-library IPDataTypes {
+library DBDataTypes {
     struct TokenData {
         address[] tokens;
         uint256[] amounts;

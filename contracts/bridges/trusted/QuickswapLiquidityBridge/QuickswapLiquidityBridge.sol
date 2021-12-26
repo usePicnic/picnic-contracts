@@ -10,7 +10,7 @@ import "hardhat/console.sol";
 
 /**
  * @title QuickswapLiquidityBridge
- * @author IndexPool
+ * @author DeFi Basket
  *
  * @notice Swaps using the Quickswap contract in Polygon.
  *
@@ -31,7 +31,7 @@ contract QuickswapLiquidityBridge is IUniswapV2Liquidity {
     /**
       * @notice Adds liquidity from 2 ERC20 tokens
       *
-      * @dev Wraps add liquidity and generate the necessary events to communicate with IndexPool's UI and back-end.
+      * @dev Wraps add liquidity and generate the necessary events to communicate with DeFi Basket's UI and back-end.
       *
       * @param tokens List of two - token that will have liquidity added to pool
       * @param percentages List of two - percentages of the balance of ERC20 tokens that will be added to the pool
@@ -75,13 +75,13 @@ contract QuickswapLiquidityBridge is IUniswapV2Liquidity {
 
         address assetOut = _uniswapFactory.getPair(tokens[0], tokens[1]);
 
-        emit INDEXPOOL_UNISWAPV2_ADD_LIQUIDITY(amountTokensArray, assetOut, routerOutputs[2]);
+        emit DEFIBASKET_UNISWAPV2_ADD_LIQUIDITY(amountTokensArray, assetOut, routerOutputs[2]);
     }
 
     /**
       * @notice Removes liquidity from 2 ERC20 tokens
       *
-      * @dev Wraps remove liquidity and generate the necessary events to communicate with IndexPool's UI and
+      * @dev Wraps remove liquidity and generate the necessary events to communicate with DeFi Basket's UI and
       * back-end.
       *
       * @param tokens List of two - token that will have liquidity removed from pool
@@ -112,7 +112,7 @@ contract QuickswapLiquidityBridge is IUniswapV2Liquidity {
             block.timestamp + 100000  // uint deadline
         );
 
-        emit INDEXPOOL_UNISWAPV2_REMOVE_LIQUIDITY(amountTokensArray, lpToken, liquidity);
+        emit DEFIBASKET_UNISWAPV2_REMOVE_LIQUIDITY(amountTokensArray, lpToken, liquidity);
     }
 }
 

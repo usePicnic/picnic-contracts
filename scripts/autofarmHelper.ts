@@ -13,7 +13,7 @@ const weiToString = (wei) => {
 
 const getDeployedAddress = async (contractName, client) => {
     return (await client
-        .db('indexpool')
+        .db(process.env.MONGODB_DATABASE_NAME)
         .collection('contracts')
         .findOne(
             {

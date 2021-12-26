@@ -88,7 +88,7 @@ describe("AutofarmDepositBridge", function () {
                 ),
             ];
 
-            // Transfer money to wallet (similar as IndexPool contract would have done)
+            // Transfer money to wallet (similar as DeFi Basket contract would have done)
             const transactionHash = await owner.sendTransaction({
                 to: wallet.address,
                 value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
@@ -168,7 +168,7 @@ describe("AutofarmDepositBridge", function () {
                 ),
             ];
 
-            // Transfer money to wallet (similar as IndexPool contract would have done)
+            // Transfer money to wallet (similar as DeFi Basket contract would have done)
             const transactionHash = await owner.sendTransaction({
                 to: wallet.address,
                 value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether

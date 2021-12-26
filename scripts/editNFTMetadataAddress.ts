@@ -4,7 +4,7 @@ import {ethers} from "hardhat";
 
 const getDeployedAddress = async (contractName, client) => {
     return (await client
-        .db('indexpool')
+        .db(process.env.MONGODB_DATABASE_NAME)
         .collection('contracts')
         .findOne(
             {
@@ -23,15 +23,15 @@ async function main() {
     let nonce = await deployer.getTransactionCount();
     console.log('Starting nonce:', nonce);
 
-    let indexPool = await ethers.getContractAt("IndexPool",
-        await getDeployedAddress("IndexPool", client));
+    let defibasket = await ethers.getContractAt("DeFiBasket",
+        await getDeployedAddress("DeFiBasket", client));
 
-    console.log('Initial URI:', await indexPool.tokenURI(0));
+    console.log('Initial URI:', await defibasket.tokenURI(0));
 
-    let tx = await indexPool.setBaseURI("https://dev.indexpool.org/api/get-nft-metadata/", {'nonce': nonce});
+    let tx = await defibasket.setBaseURI("https://dev.defibasket.org/api/get-nft-metadata/", {'nonce': nonce});
     await tx.wait();
 
-    console.log('End URI:',await indexPool.tokenURI(0));
+    console.log('End URI:',await defibasket.tokenURI(0));
 }
 
 main()

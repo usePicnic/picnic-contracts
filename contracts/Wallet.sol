@@ -3,12 +3,12 @@
 pragma solidity ^0.8.6;
 
 import "./interfaces/IWallet.sol";
-import "./libraries/IPDataTypes.sol";
+import "./libraries/DBDataTypes.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /**
  * @title Wallet
- * @author IndexPool
+ * @author DeFi Basket
  *
  * @notice Wallet holds assets for an NFT and interacts with bridges to integrate with other DeFi protocols.
  *
@@ -19,13 +19,13 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 contract Wallet is IWallet {
     using SafeERC20 for IERC20;
 
-    address immutable _indexpoolAddress;
+    address immutable _defibasketAddress;
 
-    // Wallet only talks with IndexPool contract
-    modifier indexpoolOnly() {
+    // Wallet only talks with DeFi Basket contract
+    modifier defibasketOnly() {
         require(
-            _indexpoolAddress == msg.sender,
-            "WALLET: ONLY THE INDEXPOOL CONTRACT CAN CALL THIS FUNCTION"
+            _defibasketAddress == msg.sender,
+            "WALLET: ONLY THE DEFIBASKET CONTRACT CAN CALL THIS FUNCTION"
         );
         _;
     }
@@ -38,7 +38,7 @@ contract Wallet is IWallet {
     }
 
     constructor() {
-        _indexpoolAddress = msg.sender;
+        _defibasketAddress = msg.sender;
     }
 
     /**
@@ -54,7 +54,7 @@ contract Wallet is IWallet {
     function useBridges(
         address[] calldata bridgeAddresses,
         bytes[] calldata bridgeEncodedCalls
-    ) external override indexpoolOnly {
+    ) external override defibasketOnly {
         bool isSuccess;
         bytes memory result;
 
@@ -62,7 +62,7 @@ contract Wallet is IWallet {
             (isSuccess, result) = bridgeAddresses[i].delegatecall(bridgeEncodedCalls[i]);
 
             // Assembly code was the only way we found to display clean revert error messages from delegate calls
-            if (isSuccess == false) {
+            if (!isSuccess) {
                 assembly {
                     let ptr := mload(0x40)
                     let size := returndatasize()
@@ -83,10 +83,10 @@ contract Wallet is IWallet {
       * @param nftOwner NFT owner address
       */
     function withdraw(
-        IPDataTypes.TokenData calldata outputs,
+        DBDataTypes.TokenData calldata outputs,
         uint256 outputEthPercentage,
         address nftOwner
-    ) external indexpoolOnly override returns (uint256[] memory, uint256)
+    ) external defibasketOnly override returns (uint256[] memory, uint256)
     {
         // Withdraws ERC20 tokens
         uint256[] memory outputTokenAmounts = new uint256[](outputs.tokens.length);
