@@ -49,6 +49,7 @@ interface IVault {
         bool toInternalBalance;
     }
 
+    function getPoolTokens(bytes32 poolId) external view returns (address[] memory tokens, uint256[] memory balances);
 
 }
 
