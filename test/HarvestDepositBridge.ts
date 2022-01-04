@@ -44,7 +44,7 @@ describe("HarvestDeposit", function () {
 
     describe("Actions", function () {
 
-        it("Deposit in IFARM-QUICK pool", async function () {
+        it("Deposit in IFARM-QUICK pool then withdraw", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
                 wmaticBridge.address,
@@ -113,11 +113,27 @@ describe("HarvestDeposit", function () {
             let pbfToken = await ethers.getContractAt(
                 "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
                 POOLS["IFARM-QUICK"])
-            let lpTokenBalance = await pbfToken.balanceOf(wallet.address);
-            expect(lpTokenBalance).to.be.gt(0);
-        });        
+            let pbfTokenBalance = await pbfToken.balanceOf(wallet.address);
+            expect(pbfTokenBalance).to.be.gt(0);
 
-        it("Deposit in USDC-ETH pool", async function () {
+            // Withdraw to wallet
+            await wallet.useBridges(
+                [harvest.address],
+                [harvest.interface.encodeFunctionData(
+                    "withdraw",
+                    [
+                        VAULTS["IFARM-QUICK"],
+                        POOLS["IFARM-QUICK"],
+                        100_000,
+                    ]
+                )]
+            );
+            pbfTokenBalance = await pbfToken.balanceOf(wallet.address);
+            expect(pbfTokenBalance).to.be.eq(0);
+
+        });             
+
+        it("Deposit in USDC-ETH pool then withdraw", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
                 wmaticBridge.address,
@@ -186,11 +202,26 @@ describe("HarvestDeposit", function () {
             let pbfToken = await ethers.getContractAt(
                 "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
                 POOLS["USDC-ETH"])
-            let lpTokenBalance = await pbfToken.balanceOf(wallet.address);
-            expect(lpTokenBalance).to.be.gt(0);
+            let pbfTokenBalance = await pbfToken.balanceOf(wallet.address);
+            expect(pbfTokenBalance).to.be.gt(0);
+
+            // Withdraw to wallet
+            await wallet.useBridges(
+                [harvest.address],
+                [harvest.interface.encodeFunctionData(
+                    "withdraw",
+                    [
+                        VAULTS["USDC-ETH"],
+                        POOLS["USDC-ETH"],
+                        100_000,
+                    ]
+                )]
+            );
+            pbfTokenBalance = await pbfToken.balanceOf(wallet.address);
+            expect(pbfTokenBalance).to.be.eq(0);            
         });
 
-        it("Deposit in WETH pool", async function () {
+        it("Deposit in WETH pool then withdraw", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
                 wmaticBridge.address,
@@ -243,9 +274,25 @@ describe("HarvestDeposit", function () {
                 POOLS["WETH"])
             let pbfTokenBalance = await pbfToken.balanceOf(wallet.address);
             expect(pbfTokenBalance).to.be.gt(0);
+
+            // Withdraw to wallet
+            await wallet.useBridges(
+                [harvest.address],
+                [harvest.interface.encodeFunctionData(
+                    "withdraw",
+                    [
+                        VAULTS["WETH"],
+                        POOLS["WETH"],
+                        100_000,
+                    ]
+                )]
+            );
+            pbfTokenBalance = await pbfToken.balanceOf(wallet.address);
+            expect(pbfTokenBalance).to.be.eq(0);     
+
         });        
 
-        it("Deposit in USDC pool", async function () {
+        it("Deposit in USDC pool then withdraw", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
                 wmaticBridge.address,
@@ -298,9 +345,25 @@ describe("HarvestDeposit", function () {
                 POOLS["USDC"])
             let pbfTokenBalance = await pbfToken.balanceOf(wallet.address);
             expect(pbfTokenBalance).to.be.gt(0);
+
+            // Withdraw to wallet
+            await wallet.useBridges(
+                [harvest.address],
+                [harvest.interface.encodeFunctionData(
+                    "withdraw",
+                    [
+                        VAULTS["USDC"],
+                        POOLS["USDC"],
+                        100_000,
+                    ]
+                )]
+            );
+            pbfTokenBalance = await pbfToken.balanceOf(wallet.address);
+            expect(pbfTokenBalance).to.be.eq(0);           
+                  
         });
 
-        it("Deposit in DAI pool", async function () {
+        it("Deposit in DAI pool then withdraw", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
                 wmaticBridge.address,
@@ -353,6 +416,22 @@ describe("HarvestDeposit", function () {
                 POOLS["DAI"])
             let pbfTokenBalance = await pbfToken.balanceOf(wallet.address);
             expect(pbfTokenBalance).to.be.gt(0);
+
+            // Withdraw to wallet
+            await wallet.useBridges(
+                [harvest.address],
+                [harvest.interface.encodeFunctionData(
+                    "withdraw",
+                    [
+                        VAULTS["DAI"],
+                        POOLS["DAI"],
+                        100_000,
+                    ]
+                )]
+            );
+            pbfTokenBalance = await pbfToken.balanceOf(wallet.address);
+            expect(pbfTokenBalance).to.be.eq(0);       
+
         });                
 
     });

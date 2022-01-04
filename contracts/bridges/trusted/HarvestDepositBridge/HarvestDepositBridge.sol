@@ -71,31 +71,31 @@ contract HarvestDepositBridge is IHarvestDeposit {
         
         IHarvestPool pool = IHarvestPool(poolAddress);
         IHarvestVault vault = IHarvestVault(vaultAddress);          
-        IERC20 assetInVault = IERC20(vault.underlying());              
+        IERC20 assetInVault = IERC20(vault.underlying());            
                 
         // Compute balance of reward tokens before exit is called 
-        address[] memory rewardTokens = new address[](pool.rewardTokensLength());
-        uint256[] memory rewardBalances = new uint256[](pool.rewardTokensLength());
-        uint256[] memory rewardBalancesOut = new uint256[](pool.rewardTokensLength());
+        uint256 rewardTokensLength = pool.rewardTokensLength();
+        address[] memory rewardTokens = new address[](rewardTokensLength);        
+        uint256[] memory rewardBalances = new uint256[](rewardTokensLength);
+        uint256[] memory rewardBalancesOut = new uint256[](rewardTokensLength);
 
-        rewardTokens = pool.rewardTokens();
-        for(uint256 i = 0; i < rewardTokens.length; i++) {
+        for(uint256 i = 0; i < rewardTokensLength; i++) {
+          rewardTokens[i] = pool.rewardTokens(i);
           rewardBalances[i] = IERC20(rewardTokens[i]).balanceOf(address(this));            
         }
 
         // Returns the staked fASSET to the Wallet in addition to any accumulated FARM rewards
         pool.exit();
 
-        IERC20 vaultToken = IERC20(vaultAddress);
-        
         // Burn fASSET and withdraw corresponding asset from Vault 
+        IERC20 vaultToken = IERC20(vaultAddress);
         uint256 assetBalanceBefore = assetInVault.balanceOf(address(this));
         uint256 fAssetAmountOut = vaultToken.balanceOf(address(this)) * percentageOut / 100000;
         vault.withdraw(fAssetAmountOut);       
         uint256 assetAmountOut = assetInVault.balanceOf(address(this)) - assetBalanceBefore;
 
         // Compute total rewards for each reward token
-        for(uint256 i = 0; i < rewardTokens.length; i++) {
+        for(uint256 i = 0; i < rewardTokensLength; i++) {
           rewardBalancesOut[i] = IERC20(rewardTokens[i]).balanceOf(address(this)) - rewardBalances[i];            
         }
 
@@ -117,19 +117,20 @@ contract HarvestDepositBridge is IHarvestDeposit {
         IHarvestPool pool = IHarvestPool(poolAddress);
                 
         // Compute balance of reward tokens before exit is called 
-        address[] memory rewardTokens = new address[](pool.rewardTokensLength());
-        uint256[] memory rewardBalances = new uint256[](pool.rewardTokensLength());
-        uint256[] memory rewardBalancesOut = new uint256[](pool.rewardTokensLength());
-
-        rewardTokens = pool.rewardTokens();
-        for(uint256 i = 0; i < rewardTokens.length; i++) {
+        uint256 rewardTokensLength = pool.rewardTokensLength();
+        address[] memory rewardTokens = new address[](rewardTokensLength);
+        uint256[] memory rewardBalances = new uint256[](rewardTokensLength);
+        uint256[] memory rewardBalancesOut = new uint256[](rewardTokensLength);
+        
+        for(uint256 i = 0; i < rewardTokensLength; i++) {
+          rewardTokens[i] = pool.rewardTokens(i);
           rewardBalances[i] = IERC20(rewardTokens[i]).balanceOf(address(this));            
         }
         
         pool.getAllRewards();
 
         // Compute total rewards for each reward token
-        for(uint256 i = 0; i < rewardTokens.length; i++) {
+        for(uint256 i = 0; i < rewardTokensLength; i++) {
           rewardBalancesOut[i] = IERC20(rewardTokens[i]).balanceOf(address(this)) - rewardBalances[i];            
         }
 
