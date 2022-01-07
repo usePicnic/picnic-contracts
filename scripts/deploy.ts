@@ -40,6 +40,16 @@ const contractsToDeploy = [
         filePath: bridgeNameToFilePath("QuickswapLiquidityBridge")
     },
     {
+        contractName: "SushiSwapBridge",
+        interfaceName: "IUniswapV2Swap",
+        filePath: bridgeNameToFilePath("QuickswapSwapBridge")
+    },
+    {
+        contractName: "SushiLiquidityBridge",
+        interfaceName: "IUniswapV2Liquidity",
+        filePath: bridgeNameToFilePath("QuickswapLiquidityBridge")
+    },
+    {
         contractName: "AutofarmDepositBridge",
         interfaceName: "IAutofarmDeposit",
         filePath: bridgeNameToFilePath("AutofarmDepositBridge")
