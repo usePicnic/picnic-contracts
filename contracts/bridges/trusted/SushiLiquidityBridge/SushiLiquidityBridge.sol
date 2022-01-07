@@ -21,8 +21,8 @@ import "../../interfaces/IUniswapV2Liquidity.sol";
  */
 contract SushiLiquidityBridge is IUniswapV2Liquidity {
 
-    address constant routerAddress = 0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506;
-    address constant factoryAddress = 0xc35DADB65012eC5796536bD9864eD8773aBc74C4;
+    address constant public routerAddress = 0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506;
+    address constant public factoryAddress = 0xc35DADB65012eC5796536bD9864eD8773aBc74C4;
     IUniswapV2Router02 constant _uniswapRouter = IUniswapV2Router02(routerAddress);
     IUniswapV2Factory constant _uniswapFactory = IUniswapV2Factory(factoryAddress);
 

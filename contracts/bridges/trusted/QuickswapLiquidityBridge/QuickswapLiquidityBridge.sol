@@ -22,8 +22,8 @@ import "hardhat/console.sol";
  */
 contract QuickswapLiquidityBridge is IUniswapV2Liquidity {
 
-    address constant routerAddress = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
-    address constant factoryAddress = 0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32;
+    address constant public routerAddress = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
+    address constant public factoryAddress = 0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32;
     IUniswapV2Router02 constant _uniswapRouter = IUniswapV2Router02(routerAddress);
     IUniswapV2Factory constant _uniswapFactory = IUniswapV2Factory(factoryAddress);
 
