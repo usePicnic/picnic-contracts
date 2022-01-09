@@ -42,12 +42,12 @@ const contractsToDeploy = [
     {
         contractName: "SushiSwapBridge",
         interfaceName: "IUniswapV2Swap",
-        filePath: bridgeNameToFilePath("QuickswapSwapBridge")
+        filePath: bridgeNameToFilePath("SushiSwapBridge")
     },
     {
         contractName: "SushiLiquidityBridge",
         interfaceName: "IUniswapV2Liquidity",
-        filePath: bridgeNameToFilePath("QuickswapLiquidityBridge")
+        filePath: bridgeNameToFilePath("SushiLiquidityBridge")
     },
     {
         contractName: "AutofarmDepositBridge",
@@ -59,6 +59,11 @@ const contractsToDeploy = [
         interfaceName: "IWMaticWrap",
         filePath: bridgeNameToFilePath("WMaticWrapBridge")
     },
+    {
+        contractName: "BalancerLiquidityBridge",
+        interfaceName: "IBalancerLiquidity",
+        filePath: bridgeNameToFilePath("BalancerLiquidityBridge")
+    },    
 ]
 
 async function main() {
