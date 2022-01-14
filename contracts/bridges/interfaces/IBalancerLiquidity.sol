@@ -16,7 +16,8 @@ interface IBalancerLiquidity {
     function addLiquidity(
         address poolAddress,
         address[] calldata tokens,
-        uint256[] calldata percentages
+        uint256[] calldata percentages,
+        uint256 minimumBPTout
     ) external;
 
     function removeLiquidity(

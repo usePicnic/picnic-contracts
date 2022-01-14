@@ -33,11 +33,13 @@ contract BalancerLiquidityBridge is IBalancerLiquidity {
       * @param poolAddress The address of the pool that Wallet will join
       * @param tokens Tokens that will have liquidity added to pool. Should be sorted numerically or Balancer function will revert.
       * @param percentages Percentages of the balance of ERC20 tokens that will be added to the pool.
+      * @param minimumBPTout Minimum amount of BPT that will be withdrawn from the pool.
       */
     function addLiquidity(
         address poolAddress, 
         address[] memory tokens,
-        uint256[] calldata percentages
+        uint256[] calldata percentages,
+        uint256 minimumBPTout
     ) external override {
 
         // Calculate amountsIn array
@@ -57,13 +59,13 @@ contract BalancerLiquidityBridge is IBalancerLiquidity {
         bytes memory userData = abi.encode(
             IVault.JoinKind.EXACT_TOKENS_IN_FOR_BPT_OUT, 
             amountsIn, 
-            0 /* Minimum BPT out */
+            minimumBPTout
         );
         IVault.JoinPoolRequest memory request = IVault.JoinPoolRequest(
             tokens, 
             amountsIn, /* maxAmountsIn = amountsIn */
             userData, 
-            false /* TODO: Check how to handle this */
+            false 
         );
         
         bytes32 poolId = IBasePool(poolAddress).getPoolId();
@@ -118,7 +120,7 @@ contract BalancerLiquidityBridge is IBalancerLiquidity {
             tokens, 
             minAmountsOut, 
             userData, 
-            false /* TODO: Check how to handle this */
+            false 
         );
 
         _balancerVault.exitPool(poolId, address(this), payable(address(this)), request);       

@@ -2,8 +2,6 @@ import {expect} from "chai";
 import {ethers} from "hardhat";
 import constants from "../constants";
 
-// TODO this bridge is work in progress
-
 describe("BalancerLiquidityBridge", function () {
     let owner;
     let other;
@@ -91,6 +89,7 @@ describe("BalancerLiquidityBridge", function () {
                         "0x0d34e5dD4D8f043557145598E4e2dC286B35FD4f", // pool address
                         [TOKENS['USDC'], TOKENS['TUSD'], TOKENS['DAI'], TOKENS['USDT'],], // address[] tokens - should be sorted numerically
                         [100_000, 0, 100_000, 0], // uint256[] percentages
+                        1, // uint256 minimumBPTout
                     ],
                 ),
             ];
@@ -155,7 +154,8 @@ describe("BalancerLiquidityBridge", function () {
                     [
                         "0x0d34e5dD4D8f043557145598E4e2dC286B35FD4f", // pool address
                         [TOKENS['USDC'], TOKENS['TUSD'], TOKENS['DAI'], TOKENS['USDT'],], // address[] tokens - should be sorted numerically
-                        [100_000, 0, 100_000, 0], // uint256[] percentages
+                        [100_000, 0, 100_000, 0], // uint256[] percentages,
+                        1, // uint256 minimumBPTout
                     ],
                 ),
                 balancerLiquidityBridge.interface.encodeFunctionData(
