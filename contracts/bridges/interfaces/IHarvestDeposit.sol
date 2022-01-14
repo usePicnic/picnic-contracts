@@ -19,8 +19,8 @@ interface IHarvestDeposit {
         uint256[] rewardBalancesOut
     );
 
-    function deposit(address vaultAddress, address poolAddress, uint256 percentageIn) external;
-    function withdraw(address vaultAddress, address poolAddress, uint256 percentageOut) external;
+    function deposit(address poolAddress, uint256 percentageIn) external;
+    function withdraw(address poolAddress, uint256 percentageOut) external;
     function claimRewards(address poolAddress) external;
 }
 

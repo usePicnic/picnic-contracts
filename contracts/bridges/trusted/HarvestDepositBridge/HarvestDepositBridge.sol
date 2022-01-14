@@ -23,19 +23,16 @@ import "./interfaces/IHarvestPool.sol";
 contract HarvestDepositBridge is IHarvestDeposit {
 
     /**
-      * @notice Deposits into a Harvest vault.
+      * @notice Deposits into a Harvest vault and automatically stakes in the corresponding pool
       *
-      * @dev Wraps the Harvest vault deposit and generate the necessary events to communicate with DeFi Basket's UI and back-end.
+      * @dev Wraps the Harvest vault deposit and pool stake. Also generates the necessary events to communicate with DeFi Basket's UI and back-end.
       *
-      * @param vaultAddress The address of the Harvest vault proxy. Note that Harvest uses proxy upgradeable contracts.
       * @param poolAddress The address of the Harvest pool.
       * @param percentageIn Percentage of the balance of the asset that will be deposited
       */
-    function deposit(address vaultAddress, address poolAddress, uint256 percentageIn) external override {
-        require(
-          IHarvestPool(poolAddress).lpToken() == vaultAddress, /* lpToken returns the proxy (and not the implementation address) */
-          "The vault address must be the same as the pool's reward token"
-        ); 
+    function deposit(address poolAddress, uint256 percentageIn) external override {
+
+        address vaultAddress = IHarvestPool(poolAddress).lpToken(); /* lpToken returns the proxy (and not the implementation address) */        
         IHarvestVault vault = IHarvestVault(vaultAddress);
 
         IERC20 assetIn = IERC20(vault.underlying());        
@@ -59,18 +56,18 @@ contract HarvestDepositBridge is IHarvestDeposit {
     /**
       * @notice Withdraws from the Harvest vault.
       *
-      * @dev Wraps the Harvest withdraw and generate the necessary events to communicate with DeFi Basket's UI and
-      * back-end. 
+      * @dev Wraps the Harvest vault withdraw and the pool exit. Also generates the necessary events to communicate with DeFi Basket's UI and back-end.
       *
-      * @param vaultAddress The address of the Harvest vault proxy. Note that Harvest uses proxy upgradeable contracts.
       * @param poolAddress The address of the Harvest pool.
       * @param percentageOut Percentage of the balance of the asset that will be withdrawn
       *
       */
-    function withdraw(address vaultAddress, address poolAddress, uint256 percentageOut) external override {
+    function withdraw(address poolAddress, uint256 percentageOut) external override { 
+
+        address vaultAddress = IHarvestPool(poolAddress).lpToken(); /* lpToken returns the proxy (and not the implementation address) */        
+        IHarvestVault vault = IHarvestVault(vaultAddress);          
         
         IHarvestPool pool = IHarvestPool(poolAddress);
-        IHarvestVault vault = IHarvestVault(vaultAddress);          
         IERC20 assetInVault = IERC20(vault.underlying());            
                 
         // Compute balance of reward tokens before exit is called 
@@ -79,7 +76,7 @@ contract HarvestDepositBridge is IHarvestDeposit {
         uint256[] memory rewardBalances = new uint256[](rewardTokensLength);
         uint256[] memory rewardBalancesOut = new uint256[](rewardTokensLength);
 
-        for(uint256 i = 0; i < rewardTokensLength; i++) {
+        for(uint256 i = 0; i < rewardTokensLength; i++) { 
           rewardTokens[i] = pool.rewardTokens(i);
           rewardBalances[i] = IERC20(rewardTokens[i]).balanceOf(address(this));            
         }
@@ -112,7 +109,7 @@ contract HarvestDepositBridge is IHarvestDeposit {
       * @param poolAddress The address of the Harvest pool.
       *
       */    
-    function claimRewards(address poolAddress) external override {
+    function claimRewards(address poolAddress) external override { 
 
         IHarvestPool pool = IHarvestPool(poolAddress);
                 

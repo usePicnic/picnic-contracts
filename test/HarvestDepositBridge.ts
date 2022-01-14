@@ -14,7 +14,6 @@ describe("HarvestDeposit", function () {
     let wallet;
 
     const TOKENS = constants['POLYGON']['TOKENS'];
-    const VAULTS = constants['POLYGON']['HARVEST_VAULTS'];
     const POOLS = constants['POLYGON']['HARVEST_POOLS'];
 
     beforeEach(async function () {
@@ -89,7 +88,6 @@ describe("HarvestDeposit", function () {
                 harvest.interface.encodeFunctionData(
                     "deposit",
                     [
-                       VAULTS["IFARM-QUICK"], // vault address (proxy)
                        POOLS["IFARM-QUICK"], // pool address
                        100_000, // percentage in
                     ],
@@ -122,7 +120,6 @@ describe("HarvestDeposit", function () {
                 [harvest.interface.encodeFunctionData(
                     "withdraw",
                     [
-                        VAULTS["IFARM-QUICK"],
                         POOLS["IFARM-QUICK"],
                         100_000,
                     ]
@@ -178,7 +175,6 @@ describe("HarvestDeposit", function () {
                 harvest.interface.encodeFunctionData(
                     "deposit",
                     [
-                       VAULTS["USDC-ETH"], // vault address (proxy)
                        POOLS["USDC-ETH"], // pool address
                        100_000, // percentage in
                     ],
@@ -211,7 +207,6 @@ describe("HarvestDeposit", function () {
                 [harvest.interface.encodeFunctionData(
                     "withdraw",
                     [
-                        VAULTS["USDC-ETH"],
                         POOLS["USDC-ETH"],
                         100_000,
                     ]
@@ -248,7 +243,6 @@ describe("HarvestDeposit", function () {
                 harvest.interface.encodeFunctionData(
                     "deposit",
                     [
-                       VAULTS["WETH"], // vault address (proxy)
                        POOLS["WETH"], // pool address
                        100000, // percentage in
                     ],
@@ -281,7 +275,6 @@ describe("HarvestDeposit", function () {
                 [harvest.interface.encodeFunctionData(
                     "withdraw",
                     [
-                        VAULTS["WETH"],
                         POOLS["WETH"],
                         100_000,
                     ]
@@ -319,7 +312,6 @@ describe("HarvestDeposit", function () {
                 harvest.interface.encodeFunctionData(
                     "deposit",
                     [
-                       VAULTS["USDC"], // vault address (proxy)
                        POOLS["USDC"], // pool address
                        100000, // percentage in
                     ],
@@ -352,7 +344,6 @@ describe("HarvestDeposit", function () {
                 [harvest.interface.encodeFunctionData(
                     "withdraw",
                     [
-                        VAULTS["USDC"],
                         POOLS["USDC"],
                         100_000,
                     ]
@@ -390,7 +381,6 @@ describe("HarvestDeposit", function () {
                 harvest.interface.encodeFunctionData(
                     "deposit",
                     [
-                       VAULTS["DAI"], // vault address (proxy)
                        POOLS["DAI"], // pool address
                        100000, // percentage in
                     ],
@@ -423,7 +413,6 @@ describe("HarvestDeposit", function () {
                 [harvest.interface.encodeFunctionData(
                     "withdraw",
                     [
-                        VAULTS["DAI"],
                         POOLS["DAI"],
                         100_000,
                     ]
