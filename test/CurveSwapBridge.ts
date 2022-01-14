@@ -37,7 +37,7 @@ describe("CurveSwapBridge", function () {
     });
 
     describe("Actions", function () {
-        it("Trade MATIC for USDC", async function () {
+        it("Trade WETH for USDC", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
                 wmaticBridge.address,
@@ -67,6 +67,7 @@ describe("CurveSwapBridge", function () {
             let fromTokenIdx = data_0x.orders[0].fillData.fromTokenIdx;
             let toTokenIdx = data_0x.orders[0].fillData.toTokenIdx;
             let tokenInAddress = data_0x.orders[0].fillData.pool.tokens[fromTokenIdx];
+            let tokenOutAddress = data_0x.orders[0].fillData.pool.tokens[toTokenIdx];
             
             // Set encoded calls
             var _bridgeEncodedCalls = [ 
@@ -92,6 +93,7 @@ describe("CurveSwapBridge", function () {
                         poolAddress,
                         exchangeFunctionSelector,
                         tokenInAddress,
+                        tokenOutAddress,
                         fromTokenIdx,
                         toTokenIdx,
                     ],

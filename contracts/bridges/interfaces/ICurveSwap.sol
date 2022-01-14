@@ -4,7 +4,7 @@ pragma solidity ^0.8.6;
 
 interface ICurveSwap {
     event DEFIBASKET_CURVE_SWAP(
-        uint256 amounts
+        uint256 receivedAmount
     );
 
     function swapTokenToToken(
@@ -13,6 +13,7 @@ interface ICurveSwap {
         address poolAddress,
         bytes4 exchangeFunctionSelector,
         address tokenInAddress,
+        address tokenOutAddress,
         int128 fromTokenIdx,
         int128 toTokenIdx
     ) external;

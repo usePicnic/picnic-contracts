@@ -30,6 +30,7 @@ contract CurveSwapBridge is ICurveSwap {
       * @param poolAddress Address of the pool that will be used to swap
       * @param exchangeFunctionSelector Selector of the function that will be called to swap
       * @param tokenInAddress Address of the input ERC20 token that will be swapped
+      * @param tokenOutAddress Address of the output ERC20 token that will be received
       * @param fromTokenIdx Pool's index of the input ERC20 token that will be swapped
       * @param toTokenIdx Pool's index of the output ERC20 token that will be received
       */
@@ -39,6 +40,7 @@ contract CurveSwapBridge is ICurveSwap {
         address poolAddress,
         bytes4 exchangeFunctionSelector,
         address tokenInAddress,
+        address tokenOutAddress,
         int128 fromTokenIdx,
         int128 toTokenIdx        
     ) external override {
@@ -61,20 +63,21 @@ contract CurveSwapBridge is ICurveSwap {
         console.logAddress(poolAddress);
         console.logBytes(data);
 
-        (bool success, bytes memory returnData) = address(poolAddress).call(data);        
-        if (success) {
-            console.log("Sucessful transaction");
+        // Some older versions of Curve lending pools may not return the amount received, thus we compute the balance of token 
+        // before and after the swap to emit the event.
+        uint256 balanceBefore = IERC20(tokenOutAddress).balanceOf(address(this));
 
-            // Some older versions of Curve lending pools may not return the amount received.
-            if(returnData.length > 0){
-                uint256 amounts = abi.decode(returnData, (uint256));
-                emit DEFIBASKET_CURVE_SWAP(amounts);
-            }else{
-                // TODO
+        (bool isSuccess, bytes memory result) = address(poolAddress).call(data);        
+        if (!isSuccess) {
+            assembly {
+                let ptr := mload(0x40)
+                let size := returndatasize()
+                returndatacopy(ptr, 0, size)
+                revert(ptr, size)
             }
-        }else{
-            revert();
         }
-                        
+
+        uint256 receivedAmount = IERC20(tokenOutAddress).balanceOf(address(this)) - balanceBefore;
+        emit DEFIBASKET_CURVE_SWAP(receivedAmount);                        
     }
 }
