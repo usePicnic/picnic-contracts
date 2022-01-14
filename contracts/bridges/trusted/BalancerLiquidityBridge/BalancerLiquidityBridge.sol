@@ -55,7 +55,6 @@ contract BalancerLiquidityBridge is IBalancerLiquidity {
         }         
                       
         // See https://dev.balancer.fi/resources/joins-and-exits/pool-joins#userdata for more information
-        // TODO: Check if minimum BPT out is acceptable
         bytes memory userData = abi.encode(
             IVault.JoinKind.EXACT_TOKENS_IN_FOR_BPT_OUT, 
             amountsIn, 
