@@ -3,7 +3,7 @@
 pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./interfaces/ISwap.sol";
+import "./interfaces/IVault.sol";
 import "../interfaces/IBalancerSwap.sol";
 import "hardhat/console.sol";
 
@@ -22,7 +22,7 @@ import "hardhat/console.sol";
 contract BalancerSwapBridge is IBalancerSwap {
 
     address constant balancerV2Address = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;    
-    ISwap constant _balancerVault = ISwap(balancerV2Address);    
+    IVault constant _balancerVault = IVault(balancerV2Address);    
 
     /**
       * @notice Swaps from ERC20 token to ERC20 token using Balancer pools.
@@ -52,16 +52,16 @@ contract BalancerSwapBridge is IBalancerSwap {
         IERC20(assetIn).approve(balancerV2Address, 0);
         IERC20(assetIn).approve(balancerV2Address, amountIn);
 
-        ISwap.SingleSwap memory singleSwap = ISwap.SingleSwap(
+        IVault.SingleSwap memory singleSwap = IVault.SingleSwap(
             poolId,
-            ISwap.SwapKind.GIVEN_IN,
+            IVault.SwapKind.GIVEN_IN,
             assetIn,
             assetOut,
             amountIn,
             userData
         );
 
-        ISwap.FundManagement memory funds = ISwap.FundManagement(
+        IVault.FundManagement memory funds = IVault.FundManagement(
             address(this),          // sender
             false,                  // fromInternalBalance 
             payable(address(this)), // recipient
