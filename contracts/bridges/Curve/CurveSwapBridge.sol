@@ -67,7 +67,7 @@ contract CurveSwapBridge is ICurveSwap {
         // before and after the swap to emit the event.
         uint256 balanceBefore = IERC20(tokenOutAddress).balanceOf(address(this));
 
-        (bool isSuccess, bytes memory result) = address(poolAddress).call(data);        
+        (bool isSuccess, ) = address(poolAddress).call(data);        
         if (!isSuccess) {
             assembly {
                 let ptr := mload(0x40)
