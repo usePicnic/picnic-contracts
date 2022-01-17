@@ -5,24 +5,25 @@ pragma solidity ^0.8.6;
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
-import "../../interfaces/IUniswapV2Liquidity.sol";
+import "../interfaces/IUniswapV2Liquidity.sol";
+import "hardhat/console.sol";
 
 /**
- * @title SushiLiquidityBridge
+ * @title QuickswapLiquidityBridge
  * @author DeFi Basket
  *
- * @notice Swaps using the Sushi contract in Polygon.
+ * @notice Swaps using the Quickswap contract in Polygon.
  *
- * @dev This contract adds or removes liquidity from Sushi through 2 functions:
+ * @dev This contract adds or removes liquidity from Quickswap through 2 functions:
  *
  * 1. addLiquidity works with 2 ERC20 tokens
  * 2. removeLiquidity works with 2 ERC20 tokens
  *
  */
-contract SushiLiquidityBridge is IUniswapV2Liquidity {
+contract QuickswapLiquidityBridge is IUniswapV2Liquidity {
 
-    address constant public routerAddress = 0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506;
-    address constant public factoryAddress = 0xc35DADB65012eC5796536bD9864eD8773aBc74C4;
+    address constant public routerAddress = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
+    address constant public factoryAddress = 0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32;
     IUniswapV2Router02 constant _uniswapRouter = IUniswapV2Router02(routerAddress);
     IUniswapV2Factory constant _uniswapFactory = IUniswapV2Factory(factoryAddress);
 
@@ -114,3 +115,8 @@ contract SushiLiquidityBridge is IUniswapV2Liquidity {
         emit DEFIBASKET_UNISWAPV2_REMOVE_LIQUIDITY(amountTokensArray, lpToken, liquidity);
     }
 }
+
+
+
+
+

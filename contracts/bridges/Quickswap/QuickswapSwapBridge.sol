@@ -4,20 +4,20 @@ pragma solidity ^0.8.6;
 
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
-import "../../interfaces/IUniswapV2Swap.sol";
+import "../interfaces/IUniswapV2Swap.sol";
 
 /**
- * @title SushiSwapBridge
+ * @title QuickswapSwapBridge
  * @author DeFi Basket
  *
- * @notice Swaps using the Sushi contract in Polygon.
+ * @notice Swaps using the Quickswap contract in Polygon.
  *
  * @dev This contract swaps ERC20 tokens to ERC20 tokens. Please notice that there are no payable functions.
  *
  */
 
-contract SushiSwapBridge is IUniswapV2Swap {
-    address constant routerAddress = 0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506;
+contract QuickswapSwapBridge is IUniswapV2Swap {
+    address constant routerAddress = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
     /**
       * @notice Swaps from ERC20 token to ERC20 token.
       *

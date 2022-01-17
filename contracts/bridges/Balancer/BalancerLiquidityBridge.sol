@@ -5,7 +5,7 @@ pragma solidity ^0.8.6;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IVault.sol";
 import "./interfaces/IBasePool.sol";
-import "../../interfaces/IBalancerLiquidity.sol";
+import "../interfaces/IBalancerLiquidity.sol";
 import "hardhat/console.sol";
 
 /**

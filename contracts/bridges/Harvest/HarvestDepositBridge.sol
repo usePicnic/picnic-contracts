@@ -3,9 +3,9 @@
 pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../../interfaces/IHarvestDeposit.sol";
 import "./interfaces/IHarvestVault.sol";
 import "./interfaces/IHarvestPool.sol";
+import "../interfaces/IHarvestDeposit.sol";
 
 /**
  * @title HarvestDepositBridge

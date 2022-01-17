@@ -4,7 +4,7 @@ pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/ICurveBasePool.sol";
-import "../../interfaces/ICurveSwap.sol";
+import "../interfaces/ICurveSwap.sol";
 import "hardhat/console.sol";
 
 /**

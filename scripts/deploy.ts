@@ -14,8 +14,8 @@ const weiToString = (wei) => {
         .toNumber() / Math.pow(10, 4);
 }
 
-function bridgeNameToFilePath(bridgeName : string) : string{
-    return `./artifacts/contracts/bridges/trusted/${bridgeName}/${bridgeName}.sol/${bridgeName}.json`;
+function bridgeNameToFilePath(protocolName: string, bridgeName : string) : string{
+    return `./artifacts/contracts/bridges/${protocolName}/${bridgeName}.sol/${bridgeName}.json`;
 }
 
 const contractsToDeploy = [
@@ -27,42 +27,42 @@ const contractsToDeploy = [
     {
         contractName: "AaveV2DepositBridge",
         interfaceName: "IAaveV2Deposit",
-        filePath: bridgeNameToFilePath("AaveV2DepositBridge")
+        filePath: bridgeNameToFilePath("AaveV2", "AaveV2DepositBridge")
     },
     {
         contractName: "QuickswapSwapBridge",
         interfaceName: "IUniswapV2Swap",
-        filePath: bridgeNameToFilePath("QuickswapSwapBridge")
+        filePath: bridgeNameToFilePath("Quickswap", "QuickswapSwapBridge")
     },
     {
         contractName: "QuickswapLiquidityBridge",
         interfaceName: "IUniswapV2Liquidity",
-        filePath: bridgeNameToFilePath("QuickswapLiquidityBridge")
+        filePath: bridgeNameToFilePath("Quickswap", "QuickswapLiquidityBridge")
     },
     {
         contractName: "SushiSwapBridge",
         interfaceName: "IUniswapV2Swap",
-        filePath: bridgeNameToFilePath("SushiSwapBridge")
+        filePath: bridgeNameToFilePath("Sushiswap", "SushiSwapBridge")
     },
     {
         contractName: "SushiLiquidityBridge",
         interfaceName: "IUniswapV2Liquidity",
-        filePath: bridgeNameToFilePath("SushiLiquidityBridge")
+        filePath: bridgeNameToFilePath("Sushiswap", "SushiLiquidityBridge")
     },
     {
         contractName: "AutofarmDepositBridge",
         interfaceName: "IAutofarmDeposit",
-        filePath: bridgeNameToFilePath("AutofarmDepositBridge")
+        filePath: bridgeNameToFilePath("Autofarm", "AutofarmDepositBridge")
     },
     {
         contractName: "WMaticWrapBridge",
         interfaceName: "IWMaticWrap",
-        filePath: bridgeNameToFilePath("WMaticWrapBridge")
+        filePath: bridgeNameToFilePath("WMatic", "WMaticWrapBridge")
     },
     {
         contractName: "BalancerLiquidityBridge",
         interfaceName: "IBalancerLiquidity",
-        filePath: bridgeNameToFilePath("BalancerLiquidityBridge")
+        filePath: bridgeNameToFilePath("Balancer", "BalancerLiquidityBridge")
     },    
 ]
 

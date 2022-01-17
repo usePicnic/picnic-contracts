@@ -5,7 +5,7 @@ pragma solidity ^0.8.6;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/ILendingPool.sol";
 import "./interfaces/IAaveIncentivesController.sol";
-import "../../interfaces/IAaveV2Deposit.sol";
+import "../interfaces/IAaveV2Deposit.sol";
 
 /**
  * @title AaveV2DepositBridge

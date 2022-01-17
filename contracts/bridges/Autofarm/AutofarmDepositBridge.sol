@@ -4,7 +4,7 @@ pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IAutofarmV2_CrossChain.sol";
-import "../../interfaces/IAutofarmDeposit.sol";
+import "../interfaces/IAutofarmDeposit.sol";
 
 /**
  * @title AutofarmDepositBridge
