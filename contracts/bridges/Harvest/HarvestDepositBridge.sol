@@ -59,7 +59,7 @@ contract HarvestDepositBridge is IHarvestDeposit {
       * @dev Wraps the Harvest vault withdraw and the pool exit. Also generates the necessary events to communicate with DeFi Basket's UI and back-end.
       *
       * @param poolAddress The address of the Harvest pool.
-      * @param percentageOut Percentage of the balance of the asset that will be withdrawn
+      * @param percentageOut Percentage of fAsset that will be withdrawn
       *
       */
     function withdraw(address poolAddress, uint256 percentageOut) external override { 
