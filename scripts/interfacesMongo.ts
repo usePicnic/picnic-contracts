@@ -1,5 +1,3 @@
-import {ethers} from "hardhat";
-import {BigNumber} from "ethers";
 import {MongoClient} from 'mongodb';
 import {readFileSync} from "fs";
 const hre = require("hardhat");
@@ -7,6 +5,8 @@ const hre = require("hardhat");
 function bridgeNameToFilePath(interfaceName : string) : string{
     return `./artifacts/contracts/bridges/interfaces/${interfaceName}.sol/${interfaceName}.json`;
 }
+
+// TODO rewrite this so we have a single deploy file
 
 const interfacesToDeploy = [
     {
@@ -32,6 +32,10 @@ const interfacesToDeploy = [
     {
         interfaceName: "IAutofarmDeposit",
         filePath: bridgeNameToFilePath("IAutofarmDeposit")
+    },
+    {
+        interfaceName: "IBalancerLiquidity",
+        filePath: bridgeNameToFilePath("IBalancerLiquidity")
     }
 ]
 
