@@ -76,7 +76,7 @@ contract BalancerLiquidityBridge is IBalancerLiquidity {
         uint256 liquidity = IERC20(poolAddress).balanceOf(address(this));
 
         // Emit event        
-        emit DEFIBASKET_BALANCER_DEPOSIT(poolId, amountsIn, liquidity); 
+        emit DEFIBASKET_BALANCER_ADD_LIQUIDITY(poolId, amountsIn, liquidity);
     }
 
     /**
@@ -116,7 +116,7 @@ contract BalancerLiquidityBridge is IBalancerLiquidity {
             liquidity
         );
         IVault.ExitPoolRequest memory request = IVault.ExitPoolRequest(
-            tokens, 
+            tokens,
             minAmountsOut, 
             userData, 
             false 
@@ -128,12 +128,12 @@ contract BalancerLiquidityBridge is IBalancerLiquidity {
         }                
 
         // Emit event        
-        emit DEFIBASKET_BALANCER_WITHDRAW(
+        emit DEFIBASKET_BALANCER_REMOVE_LIQUIDITY(
             poolId,
-            tokenBalances,
+            tokens,
+            tokenAmountsOut,
             liquidity
-        ); 
-
+        );
     }
 }
 
