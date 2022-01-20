@@ -101,7 +101,7 @@ contract BalancerLiquidityBridge is IBalancerLiquidity {
         console.log(liquidity);
         // Get pool tokens
         bytes32 poolId = IBasePool(poolAddress).getPoolId();
-        (address[] memory tokens, ) = _balancerVault.getPoolTokens(poolId);
+        (address[] memory tokens, , ) = _balancerVault.getPoolTokens(poolId);
 
         // Compute token balances for emitting difference after exit in the withdraw event
         uint256[] memory tokenBalances = new uint256[](tokens.length);

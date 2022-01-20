@@ -7,6 +7,8 @@ pragma solidity ^0.8.6;
 */
 interface IVault {
 
+    function getPoolTokens(bytes32 poolId) external view returns (address[] memory tokens, uint256[] memory balances, uint256 lastChangeBlock);
+
     /* Join/Exit interface */
     
     enum JoinKind { 
@@ -49,9 +51,7 @@ interface IVault {
         uint256[] minAmountsOut;
         bytes userData;
         bool toInternalBalance;
-    }
-
-    function getPoolTokens(bytes32 poolId) external view returns (address[] memory tokens, uint256[] memory balances);
+    }   
 
     /* Swap interface */
 
