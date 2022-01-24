@@ -14,7 +14,7 @@ const weiToString = (wei) => {
         .toNumber() / Math.pow(10, 4);
 }
 
-function bridgeNameToFilePath(protocolName: string, bridgeName : string) : string{
+function bridgeNameToFilePath(protocolName: string, bridgeName: string): string {
     return `./artifacts/contracts/bridges/${protocolName}/${bridgeName}.sol/${bridgeName}.json`;
 }
 
@@ -63,7 +63,27 @@ const contractsToDeploy = [
         contractName: "BalancerLiquidityBridge",
         interfaceName: "IBalancerLiquidity",
         filePath: bridgeNameToFilePath("Balancer", "BalancerLiquidityBridge")
-    },    
+    },
+    {
+        contractName: "ApeSwapBridge",
+        interfaceName: "IUniswapV2Swap",
+        filePath: bridgeNameToFilePath("ApeSwap", "ApeSwapBridge")
+    },
+    {
+        contractName: "ApeLiquidityBridge",
+        interfaceName: "IUniswapV2Liquidity",
+        filePath: bridgeNameToFilePath("ApeSwap", "ApeLiquidityBridge")
+    },
+    {
+        contractName: "DinoSwapBridge",
+        interfaceName: "IUniswapV2Swap",
+        filePath: bridgeNameToFilePath("DinoSwap", "DinoSwapBridge")
+    },
+    {
+        contractName: "DinoLiquidityBridge",
+        interfaceName: "IUniswapV2Liquidity",
+        filePath: bridgeNameToFilePath("DinoSwap", "DinoLiquidityBridge")
+    },
 ]
 
 async function main() {
