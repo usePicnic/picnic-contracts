@@ -37,7 +37,7 @@ contract BalancerLiquidityBridge is IBalancerLiquidity {
       */
     function addLiquidity(
         address poolAddress, 
-        address[] memory tokens,
+        address[] calldata tokens,
         uint256[] calldata percentages,
         uint256 minimumBPTout
     ) external override {
