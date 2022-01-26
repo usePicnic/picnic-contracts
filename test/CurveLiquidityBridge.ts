@@ -1,6 +1,7 @@
 import {expect} from "chai";
 import {ethers} from "hardhat";
 import constants from "../constants";
+import fetch from 'node-fetch';
 
 describe("CurveLiquidityBridge", function () {
     let owner;
@@ -10,6 +11,8 @@ describe("CurveLiquidityBridge", function () {
     let wallet;
     let curveLiquidityBridge;
     let wmaticBridge;
+    let DefiBasket;
+    let defiBasket;
 
     const ADDRESSES = constants['POLYGON'];
     const TOKENS = constants['POLYGON']['TOKENS'];
@@ -18,6 +21,9 @@ describe("CurveLiquidityBridge", function () {
     beforeEach(async function () {
         // Get 2 signers to enable to test for permission rights
         [owner, other] = await ethers.getSigners();
+
+        DefiBasket = await ethers.getContractFactory("DeFiBasket");
+        defiBasket = await DefiBasket.deploy();
 
         // Instantiate Uniswap bridge
         UniswapV2SwapBridge = await ethers.getContractFactory("QuickswapSwapBridge");
@@ -35,7 +41,7 @@ describe("CurveLiquidityBridge", function () {
     });
 
     describe("Actions", function () {
-        it("Add Liquidity to am3CRV pool", async function () {
+        it("Add Liquidity to am3CRV pool then remove it", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
                 wmaticBridge.address,
@@ -64,9 +70,9 @@ describe("CurveLiquidityBridge", function () {
                 uniswapV2SwapBridge.interface.encodeFunctionData(
                     "swapTokenToToken",
                     [
-                        66_000,
+                        50_000,
                         1,
-                        [TOKENS['WMAIN'], TOKENS['TUSD']]
+                        [TOKENS['WMAIN'], TOKENS['USDT']]
                     ],
                 ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
@@ -80,8 +86,8 @@ describe("CurveLiquidityBridge", function () {
                 curveLiquidityBridge.interface.encodeFunctionData(
                     "addLiquidity",
                     [
-                        POOLS["am3CRV"], // pool address
-                        [TOKENS['USDC'], TOKENS['TUSD'], TOKENS['DAI'], TOKENS['USDT'],], // address[] tokens - should be sorted numerically
+                        POOLS["am3CRV"], // address (of pool)
+                        [TOKENS['DAI'], TOKENS['USDC'], TOKENS['USDT']], // address[] tokens - should be sorted according to pool order
                         [100_000, 100_000, 100_000], // uint256[] percentages
                         1, // uint256 minimumLPout
                     ],
@@ -91,11 +97,11 @@ describe("CurveLiquidityBridge", function () {
             // Transfer money to wallet (similar as DeFi Basket contract would have done)
             const transactionHash = await owner.sendTransaction({
                 to: wallet.address,
-                value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
+                value: ethers.utils.parseEther("0.05"), // Sends exactly 1 ether
             });
             await transactionHash.wait();
 
-            // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
+            // Execute bridge calls (buys DAI, USDC, USDT, then deposits in am3CRV and stakes the LP token)
             await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
@@ -104,10 +110,30 @@ describe("CurveLiquidityBridge", function () {
             // Wallet LP token amount should be greater than 0
             let lpToken = await ethers.getContractAt(
                 "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-                "0x0d34e5dD4D8f043557145598E4e2dC286B35FD4f")
+                "0x19793b454d3afc7b454f206ffe95ade26ca6912c")
             let lpTokenBalance = await lpToken.balanceOf(wallet.address);
             expect(lpTokenBalance).to.be.above(0);
-        });
 
+            // Execute remove liquidity call
+            _bridgeAddresses = [
+                curveLiquidityBridge.address,
+            ];
+            _bridgeEncodedCalls = [
+                curveLiquidityBridge.interface.encodeFunctionData(
+                    "removeLiquidity",
+                    [
+                        POOLS["am3CRV"], // address (of pool)
+                        100_000, // uint256 percentage out
+                        [1,1,1], // uint256[] minAmountsOut
+                    ],
+                )                      
+            ];
+            await wallet.useBridges(
+                _bridgeAddresses,
+                _bridgeEncodedCalls,
+            );            
+
+        });
+        
     });
 });

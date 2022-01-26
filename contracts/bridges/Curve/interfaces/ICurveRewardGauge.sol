@@ -5,8 +5,13 @@ pragma solidity ^0.8.6;
 interface ICurveRewardGauge {
 
     function deposit(
-        uint256 amount, // amount to deposit in reward gauge
+        uint256 amount,     // amount to deposit in reward gauge
         address receiver  // address to deposit for
+    ) external;
+
+    function withdraw(
+        uint256 amount,     // amount to withdraw from reward gauge
+        bool claim_rewards  // whether to claim rewards
     ) external;
 
 }
