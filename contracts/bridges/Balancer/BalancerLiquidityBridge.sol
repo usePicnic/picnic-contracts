@@ -44,10 +44,10 @@ contract BalancerLiquidityBridge is IBalancerLiquidity {
 
         // Calculate amountsIn array
         // See https://dev.balancer.fi/resources/joins-and-exits/pool-joins#token-ordering for more information
-        uint8 numTokens = uint8(tokens.length);
+        uint256 numTokens = uint256(tokens.length);
 
         uint256[] memory amountsIn = new uint256[](numTokens);
-        for (uint8 i = 0; i < numTokens; i++) { 
+        for (uint256 i = 0; i < numTokens; i++) { 
             amountsIn[i] = IERC20(tokens[i]).balanceOf(address(this)) * percentages[i] / 100_000;
             // Approve 0 first as a few ERC20 tokens are requiring this pattern.
             IERC20(tokens[i]).approve(balancerV2Address, 0);
@@ -86,7 +86,7 @@ contract BalancerLiquidityBridge is IBalancerLiquidity {
       *
       * @param poolAddress The address of the pool that Wallet will exit
       * @param percentageOut Percentage of the balance of the asset that will be withdrawn
-      * @param minAmountsOut The lower limits for the tokens to receive. 
+      * @param minAmountsOut The lower bounds for receiving tokens. Its order should corresponds to the sorted order of the pool's tokens.
       */
     // TODO: Add function to claim rewards if exitPool don't claim by itself
     function removeLiquidity(
@@ -106,7 +106,7 @@ contract BalancerLiquidityBridge is IBalancerLiquidity {
         // Compute token balances for emitting difference after exit in the withdraw event
         uint256[] memory tokenBalances = new uint256[](tokens.length);
         uint256[] memory tokenAmountsOut = new uint256[](tokens.length);
-        for(uint8 i = 0; i < tokens.length; i++) {
+        for(uint256 i = 0; i < tokens.length; i++) {
             tokenBalances[i] = IERC20(tokens[i]).balanceOf(address(this));
         }
 
@@ -123,7 +123,7 @@ contract BalancerLiquidityBridge is IBalancerLiquidity {
         );
 
         _balancerVault.exitPool(poolId, address(this), payable(address(this)), request);       
-        for(uint8 i = 0; i < tokens.length; i++) {
+        for(uint256 i = 0; i < tokens.length; i++) {
             tokenAmountsOut[i] = IERC20(tokens[i]).balanceOf(address(this)) - tokenBalances[i];
         }                
 
