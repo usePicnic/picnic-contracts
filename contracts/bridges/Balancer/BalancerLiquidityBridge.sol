@@ -5,6 +5,7 @@ pragma solidity ^0.8.6;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IVault.sol";
 import "./interfaces/IBasePool.sol";
+import "./interfaces/IMerkleOrchard.sol";
 import "../interfaces/IBalancerLiquidity.sol";
 
 /**
@@ -22,7 +23,9 @@ import "../interfaces/IBalancerLiquidity.sol";
 contract BalancerLiquidityBridge is IBalancerLiquidity {
 
     address constant balancerV2Address = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;    
+    address constant balancerMerkleOrchard = 0x0F3e0c4218b7b0108a3643cFe9D3ec0d4F57c54e;
     IVault constant _balancerVault = IVault(balancerV2Address);    
+    IMerkleOrchard constant _balancerMerkleOrchard = IMerkleOrchard(balancerMerkleOrchard);
 
     /**
       * @notice Joins a balancer pool using multiple ERC20 tokens
@@ -132,6 +135,16 @@ contract BalancerLiquidityBridge is IBalancerLiquidity {
             tokenAmountsOut,
             liquidity
         );
+    }
+
+    /**
+      * @notice Wraps claimDistributions function from Balancer's Merkle Orchard
+      *
+      * @param claims an array of the claim structs that describes the claim being made. See https://docs.balancer.fi/products/merkle-orchard/claiming-tokens/ for more information.
+      * @param tokens an array of the set of all tokens being claimed, referenced by tokenIndex. Tokens can be in any order so long as they are indexed correctly. 
+    */
+    function claimRewards(IMerkleOrchard.Claim[] calldata claims, address[] calldata tokens) external {
+        _balancerMerkleOrchard.claimDistributions(address(this), claims, tokens);
     }
     
     /**
