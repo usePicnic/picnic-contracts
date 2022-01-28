@@ -76,7 +76,7 @@ contract HarvestDepositBridge is IHarvestDeposit {
         uint256[] memory rewardBalances = new uint256[](rewardTokensLength);
         uint256[] memory rewardBalancesOut = new uint256[](rewardTokensLength);
 
-        for(uint256 i = 0; i < rewardTokensLength; i++) { 
+        for(uint256 i = 0; i < rewardTokensLength; i = unchecked_inc(i)) { 
           rewardTokens[i] = pool.rewardTokens(i);
           rewardBalances[i] = IERC20(rewardTokens[i]).balanceOf(address(this));            
         }
@@ -92,7 +92,7 @@ contract HarvestDepositBridge is IHarvestDeposit {
         uint256 assetAmountOut = assetInVault.balanceOf(address(this)) - assetBalanceBefore;
 
         // Compute total rewards for each reward token
-        for(uint256 i = 0; i < rewardTokensLength; i++) {
+        for(uint256 i = 0; i < rewardTokensLength; i = unchecked_inc(i)) {
           rewardBalancesOut[i] = IERC20(rewardTokens[i]).balanceOf(address(this)) - rewardBalances[i];            
         }
 
@@ -119,7 +119,7 @@ contract HarvestDepositBridge is IHarvestDeposit {
         uint256[] memory rewardBalances = new uint256[](rewardTokensLength);
         uint256[] memory rewardBalancesOut = new uint256[](rewardTokensLength);
         
-        for(uint256 i = 0; i < rewardTokensLength; i++) {
+        for(uint256 i = 0; i < rewardTokensLength; i = unchecked_inc(i)) {
           rewardTokens[i] = pool.rewardTokens(i);
           rewardBalances[i] = IERC20(rewardTokens[i]).balanceOf(address(this));            
         }
@@ -127,13 +127,22 @@ contract HarvestDepositBridge is IHarvestDeposit {
         pool.getAllRewards();
 
         // Compute total rewards for each reward token
-        for(uint256 i = 0; i < rewardTokensLength; i++) {
+        for(uint256 i = 0; i < rewardTokensLength; i = unchecked_inc(i)) {
           rewardBalancesOut[i] = IERC20(rewardTokens[i]).balanceOf(address(this)) - rewardBalances[i];            
         }
 
         emit DEFIBASKET_HARVEST_CLAIM(rewardTokens, rewardBalancesOut);        
-
-
     }
+
+    /**
+      * @notice Increment integer without checking for overflow - only use in loops where you know the value won't overflow
+      *
+      * @param i Integer to be incremented
+    */
+    function unchecked_inc(uint256 i) internal pure returns (uint256) {
+        unchecked {
+            return i + 1;
+        }
+    }    
     
 }

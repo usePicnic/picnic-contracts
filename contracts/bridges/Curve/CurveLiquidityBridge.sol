@@ -61,7 +61,7 @@ contract CurveLiquidityBridge is ICurveLiquidity {
         address[8] memory poolTokens = poolRegistry.get_underlying_coins(poolAddress);
 
         uint256[] memory amountsIn = new uint256[](numTokens);    
-        for (uint256 i = 0; i < numTokens; i++) {  
+        for (uint256 i = 0; i < numTokens; i = unchecked_inc(i)) {  
             require(tokens[i] == poolTokens[i], "Tokens must be in the same order as the array returned by underlying_coins (or coins)");
 
             amountsIn[i] = IERC20(tokens[i]).balanceOf(address(this)) * percentages[i] / 100_000;
@@ -133,7 +133,7 @@ contract CurveLiquidityBridge is ICurveLiquidity {
 
         // Get pool tokens - TODO: Check if necessary for communication with backend
         address[] memory tokens = new address[](numTokens);
-        for(uint256 i = 0; i < numTokens; i++) {
+        for(uint256 i = 0; i < numTokens; i = unchecked_inc(i)) {
             tokens[i] = ICurveBasePool(poolAddress).underlying_coins(i);
         }        
         uint256[] memory amountsOut = new uint256[](numTokens);
@@ -207,6 +207,17 @@ contract CurveLiquidityBridge is ICurveLiquidity {
             liquidity
         );                   
 
+    }
+
+    /**
+      * @notice Increment integer without checking for overflow - only use in loops where you know the value won't overflow
+      *
+      * @param i Integer to be incremented
+    */
+    function unchecked_inc(uint256 i) internal pure returns (uint256) {
+        unchecked {
+            return i + 1;
+        }
     }
 
 }

@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IVault.sol";
 import "./interfaces/IBasePool.sol";
 import "../interfaces/IBalancerLiquidity.sol";
-import "hardhat/console.sol";
 
 /**
  * @title BalancerLiquidityBridge
@@ -47,7 +46,7 @@ contract BalancerLiquidityBridge is IBalancerLiquidity {
         uint256 numTokens = uint256(tokens.length);
 
         uint256[] memory amountsIn = new uint256[](numTokens);
-        for (uint256 i = 0; i < numTokens; i++) { 
+        for (uint256 i = 0; i < numTokens; i = unchecked_inc(i)) { 
             amountsIn[i] = IERC20(tokens[i]).balanceOf(address(this)) * percentages[i] / 100_000;
             // Approve 0 first as a few ERC20 tokens are requiring this pattern.
             IERC20(tokens[i]).approve(balancerV2Address, 0);
@@ -88,7 +87,6 @@ contract BalancerLiquidityBridge is IBalancerLiquidity {
       * @param percentageOut Percentage of the balance of the asset that will be withdrawn
       * @param minAmountsOut The lower bounds for receiving tokens. Its order should corresponds to the sorted order of the pool's tokens.
       */
-    // TODO: Add function to claim rewards if exitPool don't claim by itself
     function removeLiquidity(
         address poolAddress,
         uint256 percentageOut,
@@ -98,15 +96,15 @@ contract BalancerLiquidityBridge is IBalancerLiquidity {
         // Get LP token amount
         uint256 liquidity = IERC20(poolAddress).balanceOf(address(this)) * percentageOut / 100000;
 
-        console.log(liquidity);
         // Get pool tokens
         bytes32 poolId = IBasePool(poolAddress).getPoolId();
         (address[] memory tokens, , ) = _balancerVault.getPoolTokens(poolId);
+        uint256 numTokens = tokens.length;
 
         // Compute token balances for emitting difference after exit in the withdraw event
-        uint256[] memory tokenBalances = new uint256[](tokens.length);
-        uint256[] memory tokenAmountsOut = new uint256[](tokens.length);
-        for(uint256 i = 0; i < tokens.length; i++) {
+        uint256[] memory tokenBalances = new uint256[](numTokens);
+        uint256[] memory tokenAmountsOut = new uint256[](numTokens);
+        for(uint256 i = 0; i < numTokens; i = unchecked_inc(i)) {
             tokenBalances[i] = IERC20(tokens[i]).balanceOf(address(this));
         }
 
@@ -123,7 +121,7 @@ contract BalancerLiquidityBridge is IBalancerLiquidity {
         );
 
         _balancerVault.exitPool(poolId, address(this), payable(address(this)), request);       
-        for(uint256 i = 0; i < tokens.length; i++) {
+        for(uint256 i = 0; i < numTokens; i = unchecked_inc(i)) {
             tokenAmountsOut[i] = IERC20(tokens[i]).balanceOf(address(this)) - tokenBalances[i];
         }                
 
@@ -134,6 +132,17 @@ contract BalancerLiquidityBridge is IBalancerLiquidity {
             tokenAmountsOut,
             liquidity
         );
+    }
+    
+    /**
+      * @notice Increment integer without checking for overflow - only use in loops where you know the value won't overflow
+      *
+      * @param i Integer to be incremented
+    */
+    function unchecked_inc(uint256 i) internal pure returns (uint256) {
+        unchecked {
+            return i + 1;
+        }
     }
 }
 
