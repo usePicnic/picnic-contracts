@@ -53,6 +53,9 @@ const POLYGON = {
     },
     "CURVE_POOLS": {
         "am3CRV": "0x445fe580ef8d70ff569ab36e80c647af338db351"
+    },
+    "TETU_VAULTS": { /* Proxy addresses */
+        "USDC": "0xee3b4ce32a6229ae15903cda0a5da92e739685f7"
     }
 }
 
