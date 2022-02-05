@@ -41,7 +41,7 @@ describe("CurveLiquidityBridge", function () {
     });
 
     describe("Actions", function () {
-        it("Add Liquidity to am3CRV pool then remove it", async function () {
+        it("Add Liquidity to am3CRV pool, stake LP token, then unstake and remove liquidity", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
                 wmaticBridge.address,
@@ -110,10 +110,38 @@ describe("CurveLiquidityBridge", function () {
             // Wallet LP token amount should be greater than 0
             let lpToken = await ethers.getContractAt(
                 "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-                "0x19793b454d3afc7b454f206ffe95ade26ca6912c")
+                "0xE7a24EF0C5e95Ffb0f6684b813A78F2a3AD7D171")
             let lpTokenBalance = await lpToken.balanceOf(wallet.address);
             expect(lpTokenBalance).to.be.above(0);
 
+            // Stake 50% of LP token
+            _bridgeAddresses = [
+                curveLiquidityBridge.address,
+            ];
+            _bridgeEncodedCalls = [
+                curveLiquidityBridge.interface.encodeFunctionData(
+                    "stakeInRewardGauge",
+                    [
+                        POOLS["am3CRV"], // address (of pool)
+                        50_000, // uint256 amount to stake
+                    ],
+                )                      
+            ];
+
+            // Unstake all LP token
+            _bridgeAddresses = [
+                curveLiquidityBridge.address,
+            ];
+            _bridgeEncodedCalls = [
+                curveLiquidityBridge.interface.encodeFunctionData(
+                    "withdrawFromRewardGauge",
+                    [
+                        POOLS["am3CRV"], // address (of pool)
+                        100_000, // uint256 amount to stake
+                    ],
+                )                      
+            ];
+            
             // Execute remove liquidity call
             _bridgeAddresses = [
                 curveLiquidityBridge.address,

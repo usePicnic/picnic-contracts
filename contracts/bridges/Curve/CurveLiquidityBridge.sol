@@ -23,23 +23,12 @@ contract CurveLiquidityBridge is ICurveLiquidity {
     address constant curveAddressRegistry = 0x0000000022D53366457F9d5E68Ec105046FC4383;    
     ICurveAddressRegistry constant _addressRegistry = ICurveAddressRegistry(curveAddressRegistry);
 
-      /**
-      * @notice Checks Curve's registry for the associated gauge to a pool
-      *
-      * @param poolAddress The address of the pool to be check in registry
-      */
-    function getAssociatedGauge(address poolAddress) internal view returns (address gaugeAddress) {
-        address registry = _addressRegistry.get_registry();
-        ICurvePoolsRegistry poolRegistry = ICurvePoolsRegistry(registry);
-        address[10] memory liqGauge = poolRegistry.get_gauges(poolAddress);
-        gaugeAddress = liqGauge[0];
-    }    
-
     /**
       * @notice Joins a Curve pool using multiple ERC20 tokens and stake the received LP token
       *
       * @dev Wraps add_liquidity and generate the necessary events to communicate with DeFi Basket's UI and back-end.
-      *      Note: could be optimized if we remove `tokens` argument 
+      *      Note: This function does not automatically stake the LP token.
+      *      Note: This function could be optimized if we remove `tokens` argument 
       *
       * @param poolAddress The address of the pool that Wallet will join
       * @param tokens Tokens that will be added to pool. Should be sorted according to the Curve's pool order, otherwise function will revert 
@@ -96,18 +85,10 @@ contract CurveLiquidityBridge is ICurveLiquidity {
         }else{
             revert("Unsupported number of tokens");
         }     
-                
-        // Stake LP token
-        address LPtokenAddress = ICurveBasePool(poolAddress).lp_token();
-        address gaugeAddress = getAssociatedGauge(poolAddress);
-
-        IERC20(LPtokenAddress).approve(gaugeAddress, LPTokenReceived);
-        ICurveRewardGauge(gaugeAddress).deposit(LPTokenReceived, address(this));
-                                      
+                                                      
         // Emit event        
         emit DEFIBASKET_CURVE_DEPOSIT(LPTokenReceived); 
-    }
-
+    }  
 
     /**
       * @notice Unstake LP token from a Curve pool and withdraw assets
@@ -126,10 +107,8 @@ contract CurveLiquidityBridge is ICurveLiquidity {
 
         uint256 numTokens = minAmountsOut.length;
 
-        // Unstake LP token and get rewards. Note that liquidity should be equal to amount staked
-        address gaugeAddress = getAssociatedGauge(poolAddress);
-        uint256 liquidity = IERC20(gaugeAddress).balanceOf(address(this)) * percentageOut / 100000; 
-        ICurveRewardGauge(gaugeAddress).withdraw(liquidity, true);
+        address LPtokenAddress = ICurveBasePool(poolAddress).lp_token();
+        uint256 liquidity = IERC20(LPtokenAddress).balanceOf(address(this)) * percentageOut / 100_000; 
 
         // Get pool tokens - TODO: Check if necessary for communication with backend
         address[] memory tokens = new address[](numTokens);
@@ -139,7 +118,6 @@ contract CurveLiquidityBridge is ICurveLiquidity {
         uint256[] memory amountsOut = new uint256[](numTokens);
 
         // Call the correct remove_liquidity interface according to tokens array size
-        // TODO: Maybe we should overload the events to make the code cleaner
         if(numTokens == 2){            
             uint256[2] memory min_amts = [minAmountsOut[0], minAmountsOut[1]];
             uint256[2] memory tokensAmountsOut = ICurveBasePool(poolAddress).remove_liquidity(liquidity, min_amts);     
@@ -206,8 +184,81 @@ contract CurveLiquidityBridge is ICurveLiquidity {
             amountsOut,
             liquidity
         );                   
-
     }
+
+    /**
+      * @notice Stake the LP token associated to a pool in its corresponding reward gauge
+      *
+      * @dev Wraps ICurveRewardGauge's deposit and generate the necessary events to communicate with DeFi Basket's UI and back-end.
+      *
+      * @param poolAddress The address of the pool associated to the reward gauge
+      * @param percentageToStake Percentages of the balance of ERC20 tokens that will be staked. 
+      */
+    function stakeInRewardGauge(
+        address poolAddress,
+        uint256 percentageToStake
+    ) external override {
+                
+        address LPtokenAddress = ICurveBasePool(poolAddress).lp_token();
+        address gaugeAddress = getAssociatedGauge(poolAddress);
+
+        uint256 stakeAmountIn = IERC20(gaugeAddress).balanceOf(address(this)) * percentageToStake / 100_000;         
+
+        IERC20(LPtokenAddress).approve(gaugeAddress, stakeAmountIn);
+        ICurveRewardGauge(gaugeAddress).deposit(stakeAmountIn, address(this));
+
+        emit DEFIBASKET_CURVE_STAKE(stakeAmountIn);
+    }
+
+    /**
+      * @notice Unstake the LP token associated to a pool in its corresponding reward gauge
+      *
+      * @dev Wraps ICurveRewardGauge's withdraw and generate the necessary events to communicate with DeFi Basket's UI and back-end.
+      *
+      * @param poolAddress The address of the pool associated to the reward gauge
+      * @param percentageOut Percentages of the balance of ERC20 tokens that will be unstaked. 
+      */
+    function withdrawFromRewardGauge(
+        address poolAddress,
+        uint256 percentageOut
+    ) external override {                       
+
+        address gaugeAddress = getAssociatedGauge(poolAddress);
+
+        address[] memory rewardsTokens;
+        uint256[] memory rewardsGain;
+        uint256 maxRewards = 0;
+        for(uint256 i = 0; i < 8; i = unchecked_inc(i)){
+            if(ICurveRewardGauge(gaugeAddress).reward_tokens(i) == address(0)){
+                maxRewards = i;
+                break;
+            }
+            rewardsTokens[i] = ICurveRewardGauge(gaugeAddress).reward_tokens(i);
+            rewardsGain[i] = IERC20(rewardsTokens[i]).balanceOf(address(this));
+        }
+
+        
+        uint256 stakeAmountOut = IERC20(gaugeAddress).balanceOf(address(this)) * percentageOut / 100_000; 
+        ICurveRewardGauge(gaugeAddress).withdraw(stakeAmountOut, true);
+
+        for(uint256 i = 0; i < maxRewards; i = unchecked_inc(i)){
+            rewardsGain[i] = IERC20(rewardsTokens[i]).balanceOf(address(this)) - rewardsGain[i];
+        }
+
+        emit DEFIBASKET_CURVE_UNSTAKE(stakeAmountOut, rewardsTokens, rewardsGain);
+    }    
+
+    /**
+    * @notice Checks Curve's registry for the associated gauge to a pool
+    *
+    * @param poolAddress The address of the pool to be check in registry
+    */
+    function getAssociatedGauge(address poolAddress) internal view returns (address gaugeAddress) {
+        address registry = _addressRegistry.get_registry();
+        ICurvePoolsRegistry poolRegistry = ICurvePoolsRegistry(registry);
+        address[10] memory liqGauge = poolRegistry.get_gauges(poolAddress);
+        gaugeAddress = liqGauge[0];
+    }        
 
     /**
       * @notice Increment integer without checking for overflow - only use in loops where you know the value won't overflow

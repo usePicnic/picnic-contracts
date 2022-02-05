@@ -14,4 +14,8 @@ interface ICurveRewardGauge {
         bool claim_rewards  // whether to claim rewards
     ) external;
 
+    function reward_tokens(
+        uint256 index     // index of reward to claim (Max: 8)
+    ) external returns(address);
+
 }
