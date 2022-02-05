@@ -2,6 +2,8 @@ import { ethers, tenderly } from "hardhat";
 import { readFileSync } from "fs";
 import { MongoClient } from 'mongodb';
 
+const hre = require("hardhat");
+
 type DeployLogicProps = {
     networkName: string,
     contractName: string,
@@ -63,6 +65,10 @@ const deployLogic = async ({ networkName, contractName, interfaceName , filePath
             name: contractName,
             address: deployedContract.address
         });        
+
+        await hre.run("verify:verify", {
+            address: deployedContract.address
+        });
     
         return Promise.resolve(true);
     } finally {
