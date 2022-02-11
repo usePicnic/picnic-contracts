@@ -4,7 +4,8 @@ pragma solidity ^0.8.6;
 
 interface ICurveSwap {
     event DEFIBASKET_CURVE_SWAP(
-        uint256 receivedAmount
+        uint256 amountIn,
+        uint256 amountOut
     );
 
     function swapTokenToToken(
