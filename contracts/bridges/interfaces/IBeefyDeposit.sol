@@ -4,6 +4,7 @@ pragma solidity ^0.8.6;
 
 interface IBeefyDeposit {
     event DEFIBASKET_BEEFY_DEPOSIT(
+        address assetIn,
         uint256 amountIn,
         uint256 mooTokenReceived
     );

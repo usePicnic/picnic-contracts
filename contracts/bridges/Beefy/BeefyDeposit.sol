@@ -34,12 +34,13 @@ contract BeefyDepositBridge is IBeefyDeposit {
         IBeefyVaultV6 vault = IBeefyVaultV6(vaultAddress);
         IERC20 mooToken = IERC20(vaultAddress);
 
-        IERC20 assetIn = IERC20(vault.want());        
-        uint256 amountIn = assetIn.balanceOf(address(this)) * percentageIn / 100000;
+        address assetIn = vault.want();
+        IERC20 assetInContract = IERC20(assetIn);
+        uint256 amountIn = assetInContract.balanceOf(address(this)) * percentageIn / 100000;
 
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
-        assetIn.approve(vaultAddress, 0);
-        assetIn.approve(vaultAddress, amountIn);
+        assetInContract.approve(vaultAddress, 0);
+        assetInContract.approve(vaultAddress, amountIn);
 
         // Compute balance of mooToken before deposit
         uint256 mooTokenBalanceBefore = mooToken.balanceOf(address(this));
@@ -47,7 +48,7 @@ contract BeefyDepositBridge is IBeefyDeposit {
         vault.deposit(amountIn);
         uint256 mooTokenReceived = mooToken.balanceOf(address(this)) - mooTokenBalanceBefore;
 
-        emit DEFIBASKET_BEEFY_DEPOSIT(amountIn, mooTokenReceived);
+        emit DEFIBASKET_BEEFY_DEPOSIT(assetIn, amountIn, mooTokenReceived);
     }
 
     /**
