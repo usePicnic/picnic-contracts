@@ -60,6 +60,11 @@ const contractsToDeploy = [
         filePath: bridgeNameToFilePath("WMatic", "WMaticWrapBridge")
     },
     {
+        contractName: "BalancerSwapBridge",
+        interfaceName: "IBalancerSwap",
+        filePath: bridgeNameToFilePath("Balancer", "BalancerSwapBridge")
+    },
+    {
         contractName: "BalancerLiquidityBridge",
         interfaceName: "IBalancerLiquidity",
         filePath: bridgeNameToFilePath("Balancer", "BalancerLiquidityBridge")
