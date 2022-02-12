@@ -77,7 +77,7 @@ contract CurveSwapBridge is ICurveSwap {
             }
         }
 
-        uint256 receivedAmount = IERC20(tokenOutAddress).balanceOf(address(this)) - balanceBefore;
-        emit DEFIBASKET_CURVE_SWAP(receivedAmount);                        
+        uint256 amountOut = IERC20(tokenOutAddress).balanceOf(address(this)) - balanceBefore;
+        emit DEFIBASKET_CURVE_SWAP(amountIn, amountOut);                        
     }
 }
