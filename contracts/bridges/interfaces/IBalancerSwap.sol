@@ -3,6 +3,7 @@ pragma solidity ^0.8.6;
 
 interface IBalancerSwap {
     event DEFIBASKET_BALANCER_SWAP(
+        uint256 amountIn,
         uint256 amountOut
     );
 

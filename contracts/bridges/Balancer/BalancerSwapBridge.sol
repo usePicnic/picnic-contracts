@@ -89,7 +89,7 @@ contract BalancerSwapBridge is IBalancerSwap {
             block.timestamp + 100000
         );
 
-        emit DEFIBASKET_BALANCER_SWAP(amountOut);
+        emit DEFIBASKET_BALANCER_SWAP(amountIn, amountOut);
     }   
 
 }
