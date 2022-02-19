@@ -89,6 +89,16 @@ const contractsToDeploy = [
         interfaceName: "IUniswapV2Liquidity",
         filePath: bridgeNameToFilePath("DinoSwap", "DinoLiquidityBridge")
     },
+    {
+        contractName: "DfynSwapBridge",
+        interfaceName: "IUniswapV2Swap",
+        filePath: bridgeNameToFilePath("DinoSwap", "DinoSwapBridge")
+    },
+    {
+        contractName: "DfynLiquidityBridge",
+        interfaceName: "IUniswapV2Liquidity",
+        filePath: bridgeNameToFilePath("DinoSwap", "DinoLiquidityBridge")
+    },
 ]
 
 async function main() {
