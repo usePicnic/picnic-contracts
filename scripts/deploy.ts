@@ -92,12 +92,12 @@ const contractsToDeploy = [
     {
         contractName: "DfynSwapBridge",
         interfaceName: "IUniswapV2Swap",
-        filePath: bridgeNameToFilePath("DinoSwap", "DinoSwapBridge")
+        filePath: bridgeNameToFilePath("Dfyn", "DfynSwapBridge")
     },
     {
         contractName: "DfynLiquidityBridge",
         interfaceName: "IUniswapV2Liquidity",
-        filePath: bridgeNameToFilePath("DinoSwap", "DinoLiquidityBridge")
+        filePath: bridgeNameToFilePath("Dfyn", "DfynLiquidityBridge")
     },
 ]
 
