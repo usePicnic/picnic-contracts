@@ -50,7 +50,7 @@ contract HarvestDepositBridge is IHarvestDeposit {
         vaultToken.approve(poolAddress, vaultTokenBalance);                
         IHarvestPool(poolAddress).stake(vaultTokenBalance);
 
-        emit DEFIBASKET_HARVEST_DEPOSIT(amountIn);
+        emit DEFIBASKET_HARVEST_DEPOSIT(address(assetIn), amountIn, vaultTokenBalance);
     }
 
     /**
@@ -68,7 +68,7 @@ contract HarvestDepositBridge is IHarvestDeposit {
         IHarvestVault vault = IHarvestVault(vaultAddress);          
         
         IHarvestPool pool = IHarvestPool(poolAddress);
-        IERC20 assetInVault = IERC20(vault.underlying());            
+        IERC20 assetOut = IERC20(vault.underlying());
                 
         // Compute balance of reward tokens before exit is called 
         uint256 rewardTokensLength = pool.rewardTokensLength();
@@ -86,17 +86,17 @@ contract HarvestDepositBridge is IHarvestDeposit {
 
         // Burn fASSET and withdraw corresponding asset from Vault 
         IERC20 vaultToken = IERC20(vaultAddress);
-        uint256 assetBalanceBefore = assetInVault.balanceOf(address(this));
-        uint256 fAssetAmountOut = vaultToken.balanceOf(address(this)) * percentageOut / 100000;
-        vault.withdraw(fAssetAmountOut);       
-        uint256 assetAmountOut = assetInVault.balanceOf(address(this)) - assetBalanceBefore;
+        uint256 assetBalanceBefore = assetOut.balanceOf(address(this));
+        uint256 assetAmountIn = vaultToken.balanceOf(address(this)) * percentageOut / 100000;
+        vault.withdraw(assetAmountIn);
+        uint256 assetAmountOut = assetOut.balanceOf(address(this)) - assetBalanceBefore;
 
         // Compute total rewards for each reward token
         for(uint256 i = 0; i < rewardTokensLength; i = unchecked_inc(i)) {
           rewardBalancesOut[i] = IERC20(rewardTokens[i]).balanceOf(address(this)) - rewardBalances[i];            
         }
 
-        emit DEFIBASKET_HARVEST_WITHDRAW(fAssetAmountOut, assetAmountOut, rewardTokens, rewardBalancesOut);
+        emit DEFIBASKET_HARVEST_WITHDRAW(address(assetOut), assetAmountOut, assetAmountIn, rewardTokens, rewardBalancesOut);
     }
 
     

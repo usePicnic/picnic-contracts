@@ -4,12 +4,15 @@ pragma solidity ^0.8.6;
 
 interface IHarvestDeposit {
     event DEFIBASKET_HARVEST_DEPOSIT(
-        uint256 amountIn
+        address assetIn,
+        uint256 amountIn,
+        uint256 amountOut
     );
 
     event DEFIBASKET_HARVEST_WITHDRAW(
-        uint256 fAssetAmountOut,
+        address assetOut,
         uint256 assetAmountOut,
+        uint256 assetAmountIn,
         address[] rewardTokens,
         uint256[] rewardBalancesOut
     );
