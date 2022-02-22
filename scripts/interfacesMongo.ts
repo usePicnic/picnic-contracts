@@ -40,6 +40,10 @@ const interfacesToDeploy = [
     {
         interfaceName: "IBalancerSwap",
         filePath: bridgeNameToFilePath("IBalancerSwap")
+    },
+    {
+        interfaceName: "IHarvestDeposit",
+        filePath: bridgeNameToFilePath("IHarvestDeposit")
     }
 ]
 

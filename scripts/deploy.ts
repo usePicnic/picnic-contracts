@@ -99,6 +99,11 @@ const contractsToDeploy = [
         interfaceName: "IUniswapV2Liquidity",
         filePath: bridgeNameToFilePath("Dfyn", "DfynLiquidityBridge")
     },
+    {
+        contractName: "HarvestDepositBridge",
+        interfaceName: "IHarvestDeposit",
+        filePath: bridgeNameToFilePath("Harvest", "HarvestDepositBridge")
+    },
 ]
 
 async function main() {
