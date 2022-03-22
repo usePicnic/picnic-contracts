@@ -48,6 +48,10 @@ const interfacesToDeploy = [
     {
         interfaceName: "ICurveLiquidity",
         filePath: bridgeNameToFilePath("ICurveLiquidity")
+    },
+    {
+        interfaceName: "ICurveSwap",
+        filePath: bridgeNameToFilePath("ICurveSwap")
     }
 ]
 
