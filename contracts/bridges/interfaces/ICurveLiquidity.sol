@@ -3,8 +3,9 @@
 pragma solidity ^0.8.6;
 
 interface ICurveLiquidity {
-    event DEFIBASKET_CURVE_DEPOSIT(
-        uint256 LPTokenReceived
+    event DEFIBASKET_CURVE_ADD_LIQUIDITY(
+        uint256[] amountsIn,
+        uint256 liquidity
     );
 
     event DEFIBASKET_CURVE_REMOVE_LIQUIDITY(
@@ -28,7 +29,7 @@ interface ICurveLiquidity {
         address poolAddress, 
         address[] memory tokens,
         uint256[] calldata percentages,
-        uint256 minimumLPout
+        uint256 minAmountOut
     ) external;
 
     function removeLiquidity(
@@ -36,15 +37,4 @@ interface ICurveLiquidity {
         uint256 percentageOut,
         uint256[] calldata minAmountsOut
     ) external;     
-
-    function stakeInRewardGauge(
-        address poolAddress,
-        uint256 percentageToStake
-    ) external;
-
-    function withdrawFromRewardGauge(
-        address poolAddress,
-        uint256 percentageOut
-    ) external;
-
 }
