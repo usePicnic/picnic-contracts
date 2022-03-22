@@ -12,21 +12,11 @@ interface ICurveLiquidity {
         address[] tokens,
         uint256[] tokenAmountsOut,
         uint256 liquidity
-    );          
-
-    event DEFIBASKET_CURVE_STAKE(
-        uint256 stakeAmountIn
     );
-
-    event DEFIBASKET_CURVE_UNSTAKE(
-        uint256 stakeAmountOut,
-        address[] rewardsTokens,
-        uint256[] rewardsGain
-    );      
 
     // Note: function addLiquidity does not stakes the LP token
     function addLiquidity(
-        address poolAddress, 
+        address poolAddress,
         address[] memory tokens,
         uint256[] calldata percentages,
         uint256 minAmountOut
@@ -36,5 +26,5 @@ interface ICurveLiquidity {
         address poolAddress,
         uint256 percentageOut,
         uint256[] calldata minAmountsOut
-    ) external;     
+    ) external;
 }
