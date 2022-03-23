@@ -1,6 +1,6 @@
-import {MongoClient} from 'mongodb';
 import {readFileSync} from "fs";
 const hre = require("hardhat");
+const prompts = require("prompts");
 
 function bridgeNameToFilePath(interfaceName : string) : string{
     return `./artifacts/contracts/bridges/interfaces/${interfaceName}.sol/${interfaceName}.json`;
@@ -8,7 +8,7 @@ function bridgeNameToFilePath(interfaceName : string) : string{
 
 // TODO rewrite this so we have a single deploy file
 
-const interfacesToDeploy = [
+const interfaces = [
     {
         interfaceName: "IDeFiBasket",
         filePath: "./artifacts/contracts/interfaces/IDeFiBasket.sol/IDeFiBasket.json"
@@ -46,14 +46,6 @@ const interfacesToDeploy = [
         filePath: bridgeNameToFilePath("IHarvestDeposit")
     },
     {
-        interfaceName: "ICurveLiquidity",
-        filePath: bridgeNameToFilePath("ICurveLiquidity")
-    },
-    {
-        interfaceName: "ICurveSwap",
-        filePath: bridgeNameToFilePath("ICurveSwap")
-    },
-    {
         interfaceName: "IUniswapV3Swap",
         filePath: bridgeNameToFilePath("IUniswapV3Swap")
     }
@@ -63,38 +55,33 @@ async function main() {
     const networkName = hre.hardhatArguments.network;
 
     if (networkName === undefined) {
-        console.log('Please set a network before deploying :D');
+        console.log('Please set --network :D');
         return;
     }
 
-    const client = new MongoClient(process.env.MONGODB_URI);
-    try {
-        await client.connect();
-
-        for (let i = 0; i < interfacesToDeploy.length; i++){
-
-            const contractFile = readFileSync(
-                interfacesToDeploy[i].filePath,
-                'utf8')
-            const contract = JSON.parse(contractFile)
-
-            await client
-                .db(process.env.MONGODB_DATABASE_NAME)
-                .collection('interfaces')
-                .updateOne(
-                    {name: interfacesToDeploy[i].interfaceName},
-                    {"$set":{name: interfacesToDeploy[i].interfaceName,
-                        networkName: networkName,
-                        abi: contract.abi}},
-                    {upsert: true}
-                )
-        }
-
-    } finally {
-        await client.close();
-    }
+    const response = await prompts({
+        type: 'text',
+        name: 'interfaceName',
+        message: `Which interface name do you want to generate JSON for?`,
+    } )
 
 
+    const interfaceName = response.interfaceName;
+    
+    const selectedInterface = interfaces.filter(x => x.interfaceName === interfaceName)[0];
+
+    const contractFile = readFileSync(
+        selectedInterface.filePath,
+        'utf8')
+    const contract = JSON.parse(contractFile);
+
+    const obj = {
+        name: selectedInterface.interfaceName,
+        networkName: networkName,
+        abi: contract.abi,
+    };
+
+    console.log(JSON.stringify(obj, null, 2));
 }
 
 main()

@@ -1,6 +1,5 @@
 import { ethers, tenderly } from "hardhat";
 import { readFileSync } from "fs";
-import { MongoClient } from 'mongodb';
 
 const hre = require("hardhat");
 
@@ -13,68 +12,40 @@ type DeployLogicProps = {
 }
 
 const deployLogic = async ({ networkName, contractName, interfaceName , filePath, nonce } : DeployLogicProps):Promise<boolean> => {
-    const client = new MongoClient(process.env.MONGODB_URI);
-    try {
-        await client.connect();
+    console.log(`Deploying ${contractName}...`);
+    let contractInterface = await ethers.getContractFactory(contractName);
 
-        let mongoContract = await client
-            .db(process.env.MONGODB_DATABASE_NAME)
-            .collection('contracts')
-            .findOne(
-                {
-                    'name': contractName,
-                    'networkName': networkName
-                }
-            );        
+    const deployedContract = await contractInterface.deploy({'nonce': nonce});
 
-        if (mongoContract !== null && mongoContract !== undefined) {
-            console.log(`${contractName} is already deployed on ${networkName}. If you want to redeploy it, please undeploy it first.`)
-            return Promise.resolve(false);
-        }
-    
-        console.log(`Deploying ${contractName}...`);
-        let contractInterface = await ethers.getContractFactory(contractName);
-    
-        const deployedContract = await contractInterface.deploy({'nonce': nonce});
+    await deployedContract.deployed();
 
-        await deployedContract.deployed();
-    
-        console.log(`${contractName} contract deployed on ${networkName} at: ${deployedContract.address}`);
-    
-        const contractFile = readFileSync(
-            filePath,
-            'utf8')
-        const contract = JSON.parse(contractFile)
-    
-        let insertData = {
-            networkName: networkName,
-            name: contractName,
-            interfaceName: interfaceName,
-            address: deployedContract.address,
-            abi: contract['abi']
-        }
-    
-        await client
-            .db(process.env.MONGODB_DATABASE_NAME)
-            .collection('contracts')
-            .insertOne(insertData);
-        
-        console.log(`${contractName} on ${networkName} inserted into DB.`)
+    console.log(`${contractName} contract deployed on ${networkName} at: ${deployedContract.address}`);
 
-        await tenderly.verify({
-            name: contractName,
-            address: deployedContract.address
-        });        
+    const contractFile = readFileSync(
+        filePath,
+        'utf8')
+    const contract = JSON.parse(contractFile)
 
-        await hre.run("verify:verify", {
-            address: deployedContract.address
-        });
-    
-        return Promise.resolve(true);
-    } finally {
-        await client.close();
+    let insertData = {
+        networkName: networkName,
+        name: contractName,
+        interfaceName: interfaceName,
+        address: deployedContract.address,
+        abi: contract['abi']
     }
+    
+    const data = JSON.stringify(insertData, null, 2);
+    console.log(data);
+    await tenderly.verify({
+        name: contractName,
+        address: deployedContract.address
+    });        
 
+    await hre.run("verify:verify", {
+        address: deployedContract.address
+    });
+
+    return Promise.resolve(true);
 }
 
 export default deployLogic;
