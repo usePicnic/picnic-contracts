@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 pragma solidity ^0.8.6;
+pragma abicoder v2;
 
-import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
 import '@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol';
+import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
 import "../interfaces/IUniswapV3Swap.sol";
-import "hardhat/console.sol";
 
 contract UniswapV3SwapBridge is IUniswapV3Swap {
-    ISwapRouter swapRouter = ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
+    ISwapRouter constant swapRouter = ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
 
     function swapTokenToToken(
         bytes calldata encodedCall,

@@ -2,9 +2,8 @@ import {expect} from "chai";
 import {ethers} from "hardhat";
 import constants from "../constants";
 import fetch from 'node-fetch';
-import {BigNumber} from "ethers";
 
-describe("CurveSwapBridge", function () {
+describe("UniswapV3SwapBridge", function () {
     let owner;
     let other;
     let UniswapV3SwapBridge;
@@ -12,7 +11,6 @@ describe("CurveSwapBridge", function () {
     let wmaticBridge;
     let wallet;
 
-    const ADDRESSES = constants['POLYGON'];
     const TOKENS = constants['POLYGON']['TOKENS'];
 
     beforeEach(async function () {
@@ -47,7 +45,6 @@ describe("CurveSwapBridge", function () {
             let req_0x = await fetch(`https://polygon.api.0x.org/swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${sellAmount}&includedSources=Uniswap_V3`);
             let data_0x = await req_0x.json();
 
-            console.log(data_0x.orders[0].fillData)
             let tokenAddressPath = data_0x.orders[0].fillData.tokenAddressPath;
             let uniswapPath = data_0x.orders[0].fillData.uniswapPath;
 
