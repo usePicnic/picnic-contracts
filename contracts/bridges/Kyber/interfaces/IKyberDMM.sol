@@ -11,4 +11,22 @@ interface IKyberDMM {
         address to,
         uint256 deadline
     ) external returns (uint256[] memory amounts);
+
+    function addLiquidity(
+        address tokenA,
+        address tokenB,
+        address pool,
+        uint256 amountADesired,
+        uint256 amountBDesired,
+        uint256 amountAMin,
+        uint256 amountBMin,
+        uint256[2] calldata vReserveRatioBounds,
+        address to,
+        uint256 deadline
+    ) external
+    returns (
+        uint256 amountA,
+        uint256 amountB,
+        uint256 liquidity
+    );
 }
