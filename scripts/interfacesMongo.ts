@@ -52,6 +52,10 @@ const interfacesToDeploy = [
     {
         interfaceName: "ICurveSwap",
         filePath: bridgeNameToFilePath("ICurveSwap")
+    },
+    {
+        interfaceName: "IUniswapV3Swap",
+        filePath: bridgeNameToFilePath("IUniswapV3Swap")
     }
 ]
 

@@ -114,6 +114,11 @@ const contractsToDeploy = [
         interfaceName: "ICurveSwap",
         filePath: bridgeNameToFilePath("Curve", "CurveSwapBridge")
     },
+    {
+        contractName: "UniswapV3SwapBridge",
+        interfaceName: "IUniswapV3Swap",
+        filePath: bridgeNameToFilePath("UniswapV3", "UniswapV3SwapBridge")
+    },
 ]
 
 async function main() {
