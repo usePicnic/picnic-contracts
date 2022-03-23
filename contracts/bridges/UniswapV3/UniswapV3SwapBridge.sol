@@ -5,22 +5,22 @@ pragma solidity ^0.8.6;
 import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
 import '@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol';
 import "../interfaces/IUniswapV3Swap.sol";
+import "hardhat/console.sol";
 
 contract UniswapV3SwapBridge is IUniswapV3Swap {
-    address constant routerAddress = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
-    ISwapRouter swapRouter = ISwapRouter(routerAddress);
+    ISwapRouter swapRouter = ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
 
     function swapTokenToToken(
         bytes calldata encodedCall,
-        address[] calldata path,
+        address[] calldata tokenPath,
         uint256 amountInPercentage,
         uint256 minAmountOut)
     external override {
-        uint256 amountIn = IERC20(path[0]).balanceOf(address(this)) * amountInPercentage / 100000;
+        uint256 amountIn = IERC20(tokenPath[0]).balanceOf(address(this)) * amountInPercentage / 100000;
 
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
-        IERC20(path[0]).approve(routerAddress, 0);
-        IERC20(path[0]).approve(routerAddress, amountIn);
+        IERC20(tokenPath[0]).approve(address(swapRouter), 0);
+        IERC20(tokenPath[0]).approve(address(swapRouter), amountIn);
 
         ISwapRouter.ExactInputParams memory params = ISwapRouter.ExactInputParams({
             path : encodedCall,
