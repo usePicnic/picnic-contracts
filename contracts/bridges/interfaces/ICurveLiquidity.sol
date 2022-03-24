@@ -9,7 +9,6 @@ interface ICurveLiquidity {
     );
 
     event DEFIBASKET_CURVE_REMOVE_LIQUIDITY(
-        address[] tokens,
         uint256[] tokenAmountsOut,
         uint256 liquidity
     );

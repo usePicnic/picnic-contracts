@@ -41,7 +41,7 @@ describe("CurveLiquidityBridge", function () {
     });
 
     describe("Actions", function () {
-        it("Add Liquidity to am3CRV pool, stake LP token, then unstake and remove liquidity", async function () {
+        it("Add Liquidity to am3CRV pool and then remove liquidity", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
                 wmaticBridge.address,
@@ -113,34 +113,6 @@ describe("CurveLiquidityBridge", function () {
                 "0xE7a24EF0C5e95Ffb0f6684b813A78F2a3AD7D171")
             let lpTokenBalance = await lpToken.balanceOf(wallet.address);
             expect(lpTokenBalance).to.be.above(0);
-
-            // Stake 50% of LP token
-            _bridgeAddresses = [
-                curveLiquidityBridge.address,
-            ];
-            _bridgeEncodedCalls = [
-                curveLiquidityBridge.interface.encodeFunctionData(
-                    "stakeInRewardGauge",
-                    [
-                        POOLS["am3CRV"], // address (of pool)
-                        50_000, // uint256 amount to stake
-                    ],
-                )                      
-            ];
-
-            // Unstake all LP token
-            _bridgeAddresses = [
-                curveLiquidityBridge.address,
-            ];
-            _bridgeEncodedCalls = [
-                curveLiquidityBridge.interface.encodeFunctionData(
-                    "withdrawFromRewardGauge",
-                    [
-                        POOLS["am3CRV"], // address (of pool)
-                        100_000, // uint256 amount to stake
-                    ],
-                )                      
-            ];
             
             // Execute remove liquidity call
             _bridgeAddresses = [
@@ -159,8 +131,9 @@ describe("CurveLiquidityBridge", function () {
             await wallet.useBridges(
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
-            );            
-
+            );
+            lpTokenBalance = await lpToken.balanceOf(wallet.address);
+            expect(lpTokenBalance).to.be.equal(0);
         });
 
         it("Add and remove Liquidity to 4EUR", async function () {
@@ -222,6 +195,22 @@ describe("CurveLiquidityBridge", function () {
             let lpTokenBalance = await lpToken.balanceOf(wallet.address);
             expect(lpTokenBalance).to.be.above(0);
 
+            const removeCall = [curveLiquidityBridge.interface.encodeFunctionData(
+                "removeLiquidity",
+                [
+                    '0xAd326c253A84e9805559b73A08724e11E49ca651', // address (of pool)
+                    100_000, // uint256[] percentages
+                    [50, 50, 0, 0 ] // uint256 minAmounts
+                ],
+            )]
+
+            await wallet.useBridges(
+                [curveLiquidityBridge.address],
+                removeCall,
+            );
+
+            lpTokenBalance = await lpToken.balanceOf(wallet.address);
+            expect(lpTokenBalance).to.be.equal(0);
         });
         
     });

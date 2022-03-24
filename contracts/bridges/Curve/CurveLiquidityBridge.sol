@@ -15,12 +15,12 @@ import "../interfaces/ICurveLiquidity.sol";
  *
  * @notice Adds/remove liquidity from Curve pools
  *
- * @dev This contract adds or removes liquidity from Curve pools 
+ * @dev This contract adds or removes liquidity from Curve pools
  *
  */
 contract CurveLiquidityBridge is ICurveLiquidity {
 
-    address constant curveAddressRegistry = 0x0000000022D53366457F9d5E68Ec105046FC4383;    
+    address constant curveAddressRegistry = 0x0000000022D53366457F9d5E68Ec105046FC4383;
     ICurveAddressRegistry constant _addressRegistry = ICurveAddressRegistry(curveAddressRegistry);
 
     /**
@@ -28,58 +28,87 @@ contract CurveLiquidityBridge is ICurveLiquidity {
       *
       * @dev Wraps add_liquidity and generate the necessary events to communicate with DeFi Basket's UI and back-end.
       *      Note: This function does not automatically stake the LP token.
-      *      Note: This function could be optimized if we remove `tokens` argument 
+      *      Note: This function could be optimized if we remove `tokens` argument
       *
       * @param poolAddress The address of the pool that Wallet will join
-      * @param tokens Tokens that will be added to pool. Should be sorted according to the Curve's pool order, otherwise function will revert 
-      * @param percentages Percentages of the balance of ERC20 tokens that will be added to the pool. 
+      * @param tokens Tokens that will be added to pool. Should be sorted according to the Curve's pool order, otherwise function will revert
+      * @param percentages Percentages of the balance of ERC20 tokens that will be added to the pool.
       * @param minAmountOut Minimum amount of LP token that should be received from the pool
       */
     function addLiquidity(
-        address poolAddress, 
+        address poolAddress,
         address[] calldata tokens, /* Must be in the same order as the array returned by underlying_coins (or coins) */
         uint256[] calldata percentages,
         uint256 minAmountOut
     ) external override {
         uint256 numTokens = uint256(tokens.length);
         uint256[] memory amountsIn = new uint256[](numTokens);
-        for (uint256 i = 0; i < numTokens; i = unchecked_inc(i)) {  
+        for (uint256 i = 0; i < numTokens; i = unchecked_inc(i)) {
             amountsIn[i] = IERC20(tokens[i]).balanceOf(address(this)) * percentages[i] / 100_000;
             // Approve 0 first as a few ERC20 tokens are requiring this pattern.
             IERC20(tokens[i]).approve(poolAddress, 0);
             IERC20(tokens[i]).approve(poolAddress, amountsIn[i]);
-        }                
+        }
 
         // Call the correct add_liquidity function according to tokens array size
-        uint256 LPTokenReceived;
+        uint256 liquidity;
         if(numTokens == 2){
             uint256[2] memory amts = [amountsIn[0], amountsIn[1]];
-            LPTokenReceived = ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut);
-        }else if(numTokens == 3){    
+            try ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut, true) returns (uint256 LPTokenReceived) {
+                liquidity = LPTokenReceived;
+            } catch {
+                liquidity = ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut);
+            }
+        }else if(numTokens == 3){
             uint256[3] memory amts = [amountsIn[0], amountsIn[1], amountsIn[2]];
-            LPTokenReceived = ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut);
+            try ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut, true) returns (uint256 LPTokenReceived) {
+                liquidity = LPTokenReceived;
+            } catch {
+                liquidity = ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut);
+            }
+
         }else if(numTokens == 4){
             uint256[4] memory amts = [amountsIn[0], amountsIn[1], amountsIn[2], amountsIn[3]];
-            LPTokenReceived = ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut);
+            try ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut, true) returns (uint256 LPTokenReceived) {
+                liquidity = LPTokenReceived;
+            } catch {
+                liquidity = ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut);
+            }
         }else if(numTokens == 5){
             uint256[5] memory amts = [amountsIn[0], amountsIn[1], amountsIn[2], amountsIn[3], amountsIn[4]];
-            LPTokenReceived = ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut);
+            try ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut, true) returns (uint256 LPTokenReceived) {
+                liquidity = LPTokenReceived;
+            } catch {
+                liquidity = ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut);
+            }
         }else if(numTokens == 6){
             uint256[6] memory amts = [amountsIn[0], amountsIn[1], amountsIn[2], amountsIn[3], amountsIn[4], amountsIn[5]];
-            LPTokenReceived = ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut);
+            try ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut, true) returns (uint256 LPTokenReceived) {
+                liquidity = LPTokenReceived;
+            } catch {
+                liquidity = ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut);
+            }
         }else if(numTokens == 7){
             uint256[7] memory amts = [amountsIn[0], amountsIn[1], amountsIn[2], amountsIn[3], amountsIn[4], amountsIn[5], amountsIn[6]];
-            LPTokenReceived = ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut);
+            try ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut, true) returns (uint256 LPTokenReceived) {
+                liquidity = LPTokenReceived;
+            } catch {
+                liquidity = ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut);
+            }
         }else if(numTokens == 8){
             uint256[8] memory amts = [amountsIn[0], amountsIn[1], amountsIn[2], amountsIn[3], amountsIn[4], amountsIn[5], amountsIn[6], amountsIn[7]];
-            LPTokenReceived = ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut);
+            try ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut, true) returns (uint256 LPTokenReceived) {
+                liquidity = LPTokenReceived;
+            } catch {
+                liquidity = ICurveBasePool(poolAddress).add_liquidity(amts, minAmountOut);
+            }
         }else{
             revert("Unsupported number of tokens");
-        }     
-                                                      
+        }
+
         // Emit event        
-        emit DEFIBASKET_CURVE_ADD_LIQUIDITY(amountsIn, LPTokenReceived);
-    }  
+        emit DEFIBASKET_CURVE_ADD_LIQUIDITY(amountsIn, liquidity);
+    }
 
     /**
       * @notice Unstake LP token from a Curve pool and withdraw assets
@@ -94,87 +123,84 @@ contract CurveLiquidityBridge is ICurveLiquidity {
         address poolAddress,
         uint256 percentageOut,
         uint256[] calldata minAmountsOut
-    ) external override {   
-
+    ) external override {
         uint256 numTokens = minAmountsOut.length;
+        uint256 liquidity;
 
-        address LPtokenAddress = ICurveBasePool(poolAddress).lp_token();
-        uint256 liquidity = IERC20(LPtokenAddress).balanceOf(address(this)) * percentageOut / 100_000; 
+        try ICurveBasePool(poolAddress).lp_token() returns (address LPtokenAddress) {
+            liquidity = IERC20(LPtokenAddress).balanceOf(address(this)) * percentageOut / 100_000;
+        } catch {
+            liquidity = IERC20(poolAddress).balanceOf(address(this)) * percentageOut / 100_000;
+        }
 
-        // Get pool tokens - TODO: Check if necessary for communication with backend
-        address[] memory tokens = new address[](numTokens);
-        for(uint256 i = 0; i < numTokens; i = unchecked_inc(i)) {
-            tokens[i] = ICurveBasePool(poolAddress).underlying_coins(i);
-        }        
         uint256[] memory amountsOut = new uint256[](numTokens);
 
         // Call the correct remove_liquidity interface according to tokens array size
-        if(numTokens == 2){            
+        if(numTokens == 2){
             uint256[2] memory min_amts = [minAmountsOut[0], minAmountsOut[1]];
-            uint256[2] memory tokensAmountsOut = ICurveBasePool(poolAddress).remove_liquidity(liquidity, min_amts);     
+            uint256[2] memory tokensAmountsOut = ICurveBasePool(poolAddress).remove_liquidity(liquidity, min_amts);
             amountsOut[0] = tokensAmountsOut[0];
             amountsOut[1] = tokensAmountsOut[1];
-        }else if(numTokens == 3){    
+        }else if(numTokens == 3){
             uint256[3] memory min_amts = [minAmountsOut[0], minAmountsOut[1], minAmountsOut[2]];
             uint256[3] memory tokensAmountsOut = ICurveBasePool(poolAddress).remove_liquidity(liquidity, min_amts);
             amountsOut[0] = tokensAmountsOut[0];
             amountsOut[1] = tokensAmountsOut[1];
-            amountsOut[2] = tokensAmountsOut[2];                        
+            amountsOut[2] = tokensAmountsOut[2];
         }else if(numTokens == 4){
             uint256[4] memory min_amts = [minAmountsOut[0], minAmountsOut[1], minAmountsOut[2], minAmountsOut[3]];
             uint256[4] memory tokensAmountsOut = ICurveBasePool(poolAddress).remove_liquidity(liquidity, min_amts);
             amountsOut[0] = tokensAmountsOut[0];
             amountsOut[1] = tokensAmountsOut[1];
-            amountsOut[2] = tokensAmountsOut[2];          
-            amountsOut[3] = tokensAmountsOut[3];            
+            amountsOut[2] = tokensAmountsOut[2];
+            amountsOut[3] = tokensAmountsOut[3];
         }else if(numTokens == 5){
             uint256[5] memory min_amts = [minAmountsOut[0], minAmountsOut[1], minAmountsOut[2], minAmountsOut[3], minAmountsOut[4]];
             uint256[5] memory tokensAmountsOut = ICurveBasePool(poolAddress).remove_liquidity(liquidity, min_amts);
             amountsOut[0] = tokensAmountsOut[0];
             amountsOut[1] = tokensAmountsOut[1];
-            amountsOut[2] = tokensAmountsOut[2];          
-            amountsOut[3] = tokensAmountsOut[3];                        
+            amountsOut[2] = tokensAmountsOut[2];
+            amountsOut[3] = tokensAmountsOut[3];
             amountsOut[4] = tokensAmountsOut[4];
         }else if(numTokens == 6){
             uint256[6] memory min_amts = [minAmountsOut[0], minAmountsOut[1], minAmountsOut[2], minAmountsOut[3], minAmountsOut[4], minAmountsOut[5]];
             uint256[6] memory tokensAmountsOut = ICurveBasePool(poolAddress).remove_liquidity(liquidity, min_amts);
             amountsOut[0] = tokensAmountsOut[0];
             amountsOut[1] = tokensAmountsOut[1];
-            amountsOut[2] = tokensAmountsOut[2];          
-            amountsOut[3] = tokensAmountsOut[3];                        
-            amountsOut[4] = tokensAmountsOut[4];           
+            amountsOut[2] = tokensAmountsOut[2];
+            amountsOut[3] = tokensAmountsOut[3];
+            amountsOut[4] = tokensAmountsOut[4];
             amountsOut[5] = tokensAmountsOut[5];
         }else if(numTokens == 7){
             uint256[7] memory min_amts = [minAmountsOut[0], minAmountsOut[1], minAmountsOut[2], minAmountsOut[3], minAmountsOut[4], minAmountsOut[5], minAmountsOut[6]];
             uint256[7] memory tokensAmountsOut = ICurveBasePool(poolAddress).remove_liquidity(liquidity, min_amts);
             amountsOut[0] = tokensAmountsOut[0];
             amountsOut[1] = tokensAmountsOut[1];
-            amountsOut[2] = tokensAmountsOut[2];          
-            amountsOut[3] = tokensAmountsOut[3];                        
-            amountsOut[4] = tokensAmountsOut[4];           
-            amountsOut[5] = tokensAmountsOut[5];           
+            amountsOut[2] = tokensAmountsOut[2];
+            amountsOut[3] = tokensAmountsOut[3];
+            amountsOut[4] = tokensAmountsOut[4];
+            amountsOut[5] = tokensAmountsOut[5];
             amountsOut[6] = tokensAmountsOut[6];
         }else if(numTokens == 8){
             uint256[8] memory min_amts = [minAmountsOut[0], minAmountsOut[1], minAmountsOut[2], minAmountsOut[3], minAmountsOut[4], minAmountsOut[5], minAmountsOut[6], minAmountsOut[7]];
             uint256[8] memory tokensAmountsOut = ICurveBasePool(poolAddress).remove_liquidity(liquidity, min_amts);
             amountsOut[0] = tokensAmountsOut[0];
             amountsOut[1] = tokensAmountsOut[1];
-            amountsOut[2] = tokensAmountsOut[2];          
-            amountsOut[3] = tokensAmountsOut[3];                        
-            amountsOut[4] = tokensAmountsOut[4];           
-            amountsOut[5] = tokensAmountsOut[5];           
-            amountsOut[6] = tokensAmountsOut[6];           
-            amountsOut[7] = tokensAmountsOut[7];           
+            amountsOut[2] = tokensAmountsOut[2];
+            amountsOut[3] = tokensAmountsOut[3];
+            amountsOut[4] = tokensAmountsOut[4];
+            amountsOut[5] = tokensAmountsOut[5];
+            amountsOut[6] = tokensAmountsOut[6];
+            amountsOut[7] = tokensAmountsOut[7];
         }else{
             revert("Unsupported number of tokens");
-        }     
+        }
 
-        // Emit event        
+        // Emit event
         emit DEFIBASKET_CURVE_REMOVE_LIQUIDITY(
-            tokens,
             amountsOut,
             liquidity
-        );                   
+        );
     }
 
     /**
