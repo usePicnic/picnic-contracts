@@ -36,7 +36,8 @@ const POLYGON = {
         "FISH": "0x3a3Df212b7AA91Aa0402B9035b098891d276572B",
         "ELE": "0xAcD7B3D9c10e97d0efA418903C0c7669E702E4C0",
         "iFARM": "0xab0b2ddB9C7e440fAc8E140A89c0dbCBf2d7Bbff",
-        "CEL": "0xd85d1e945766fea5eda9103f918bd915fbca63e6", 
+        "CEL": "0xd85d1e945766fea5eda9103f918bd915fbca63e6",
+        "KNC": "0x1C954E8fe737F99f68Fa1CCda3e51ebDB291948C"
     },
     "HARVEST_VAULTS": { /* Proxy addresses */
         "IFARM-QUICK": "0x388Aaf7a534E96Ea97beCAb9Ff0914BB10EC18fE",  
