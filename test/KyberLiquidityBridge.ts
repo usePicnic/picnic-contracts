@@ -33,7 +33,7 @@ describe("KyberLiquidityBridge", function () {
     });
 
     describe("Actions", function () {
-        it("Add Liquidity with MATIC + KNC", async function () {
+        it("Add and Remove Liquidity with MATIC + KNC", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
                 wmaticBridge.address,
@@ -48,20 +48,9 @@ describe("KyberLiquidityBridge", function () {
             let req_0x = await fetch(`https://polygon.api.0x.org/swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${sellAmount}&includedSources=KyberDMM`);
             let data_0x = await req_0x.json();
 
-            console.log(data_0x.orders[0].fillData)
-
             let tokenAddressPath = data_0x.orders[0].fillData.tokenAddressPath;
             let poolsPath = data_0x.orders[0].fillData.poolsPath;
             let poolAddress = '0x37e6449b0e99befd2a708ea048d970f4ff4dc65d';
-
-
-            console.log( [
-                [buyToken, sellToken], // address[] tokens,
-                poolAddress,
-                [100_000, 100_000], // percentages
-                [1, 1],  // minAmounts,
-                [0, 0], // vReserveRatioBounds
-            ],)
 
             // Set encoded calls
             var _bridgeEncodedCalls = [
@@ -88,6 +77,15 @@ describe("KyberLiquidityBridge", function () {
                         [100_000, 100_000], // percentages
                         [1, 1],  // minAmounts,
                         [0, 0], // vReserveRatioBounds
+                    ],
+                ),
+                kyberLiquidityBridge.interface.encodeFunctionData(
+                    "removeLiquidity",
+                    [
+                        [buyToken, sellToken], // address[] tokens,
+                        poolAddress,
+                        100_000, // percentage
+                        [1, 1],  // minAmounts,
                     ],
                 ),
             ];

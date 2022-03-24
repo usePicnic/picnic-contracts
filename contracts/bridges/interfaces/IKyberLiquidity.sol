@@ -8,10 +8,11 @@ interface IKyberLiquidity {
         uint256 liquidity
     );
 
-//    event DEFIBASKET_KYBER_REMOVE_LIQUIDITY(
-//        uint256[] amountOut,
-//        uint256 liquidity
-//    );
+    event DEFIBASKET_KYBER_REMOVE_LIQUIDITY(
+        uint256[] amountOut,
+        address poolAddress,
+        uint256 liquidity
+    );
 
     function addLiquidity(
         address[] calldata tokens,
@@ -21,9 +22,10 @@ interface IKyberLiquidity {
         uint256[2] calldata vReserveRatioBounds
     )  external;
 
-//    function removeLiquidity(
-//        address[] calldata tokens,
-//        uint256 percentage,
-//        uint256[] calldata minAmounts
-//    ) external;
+    function removeLiquidity(
+        address[] calldata tokens,
+        address poolAddress,
+        uint256 percentage,
+        uint256[] calldata minAmounts
+    ) external;
 }

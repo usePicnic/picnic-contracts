@@ -83,30 +83,31 @@ contract KyberLiquidityBridge is IKyberLiquidity {
       * @param percentage Percentage of LP token to be removed from pool
       * @param minAmounts List of two - minimum amounts of the ERC20 tokens required to remove liquidity
       */
-//    function removeLiquidity(
-//        address[] calldata tokens,
-//        uint256 percentage,
-//        uint256[] calldata minAmounts
-//    ) external override {
-//        address lpToken = _uniswapFactory.getPair(tokens[0], tokens[1]);
-//        uint256 liquidity = IERC20(lpToken).balanceOf(address(this)) * percentage / 100000;
-//
-//        // Approve 0 first as a few ERC20 tokens are requiring this pattern.
-//        IERC20(lpToken).approve(routerAddress, 0);
-//        IERC20(lpToken).approve(routerAddress, liquidity);
-//
-//        uint[] memory amountTokensArray = new uint[](2);
-//        // [amountToken, amountETH, liquidity]
-//        (amountTokensArray[0], amountTokensArray[1]) =  _uniswapRouter.removeLiquidity(
-//            tokens[0], // tokenA
-//            tokens[1], // tokenB
-//            liquidity, // liquidity,
-//            minAmounts[0], // amountAMin
-//            minAmounts[1], // amountBMin
-//            address(this), // address to,
-//            block.timestamp + 100000  // uint deadline
-//        );
-//
-//        emit DEFIBASKET_UNISWAPV2_REMOVE_LIQUIDITY(amountTokensArray, lpToken, liquidity);
-//    }
+    function removeLiquidity(
+        address[] calldata tokens,
+        address poolAddress,
+        uint256 percentage,
+        uint256[] calldata minAmounts
+    ) external override {
+        uint256 liquidity = IERC20(poolAddress).balanceOf(address(this)) * percentage / 100000;
+
+        // Approve 0 first as a few ERC20 tokens are requiring this pattern.
+        IERC20(poolAddress).approve(address(router), 0);
+        IERC20(poolAddress).approve(address(router), liquidity);
+
+        uint[] memory amountTokensArray = new uint[](2);
+
+        (amountTokensArray[0], amountTokensArray[1])= router.removeLiquidity(
+            tokens[0], // tokenA
+            tokens[1], // tokenB
+            poolAddress, // pool
+            liquidity, // liquidity,
+            minAmounts[0], // amountAMin
+            minAmounts[1], // amountBMin
+            address(this), // address to,
+            block.timestamp + 100000  // uint deadline
+        );
+
+        emit DEFIBASKET_KYBER_REMOVE_LIQUIDITY(amountTokensArray, poolAddress, liquidity);
+    }
 }
