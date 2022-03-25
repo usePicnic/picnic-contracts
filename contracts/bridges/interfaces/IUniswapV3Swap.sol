@@ -10,7 +10,7 @@ interface IUniswapV3Swap {
 
     function swapTokenToToken(
         bytes calldata encodedCall,
-        address[] calldata path,
+        address[] calldata tokenPath,
         uint256 amountInPercentage,
         uint256 minAmountOut
     ) external;
