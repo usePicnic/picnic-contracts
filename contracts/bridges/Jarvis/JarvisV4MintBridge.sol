@@ -41,14 +41,14 @@ contract JarvisV4MintBridge is IJarvisV4Mint {
         IERC20(assetIn).approve(address(jarvis), amount);
 
 
-        uint256 feePercentage = 1000000000000000000000;
+        uint256 feePercentage = 2000000000000000;
 
         ISynthereumPoolOnChainPriceFeed.MintParams memory mintParams = ISynthereumPoolOnChainPriceFeed.MintParams(
             assetOut, // Derivative to use
             minAmountOut, // Minimum amount of synthetic tokens that a user wants to mint using collateral (anti-slippage)
             amount, // Amount of collateral that a user wants to spend for minting
             feePercentage, // Maximum amount of fees in percentage that user is willing to pay
-            block.timestamp, // Expiration time of the transaction
+            block.timestamp + 10000, // Expiration time of the transaction
             address(this) // Address to which send synthetic tokens minted
         );
 
