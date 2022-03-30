@@ -23,15 +23,15 @@ contract JarvisV4MintBridge is IJarvisV4Mint {
 
     ISynthereumPoolOnChainPriceFeed constant jarvis = ISynthereumPoolOnChainPriceFeed(0x6cA82a7E54053B102e7eC452788cC19204e831de);
 
-
-
     /**
       * @notice Mints jTokens using Jarvis from USDC.
       *
-      * @dev Wraps the Aave deposit and generate the necessary events to communicate with DeFi Basket's UI and back-end.
+      * @dev Interacts with SynthereumPoolOnChainPriceFeed to mint jTokens
       *
-      * @param assetIn Address of the asset to be deposited into the Aave protocol
-      * @param percentageIn Percentage of the balance of the asset that will be deposited
+      * @param assetIn Address of the asset to be converted to jTokens (USDC only)
+      * @param percentageIn Percentage of the balance of the asset that will be converted
+      * @param assetOut Derivative address for jToken
+      * @param minAmountOut Minimum amount of jTokens out (reduces slippage)
       */
     function mint(address assetIn, uint256 percentageIn, address assetOut, uint256 minAmountOut) external override {
         uint256 amount = IERC20(assetIn).balanceOf(address(this)) * percentageIn / 100000;
@@ -52,39 +52,48 @@ contract JarvisV4MintBridge is IJarvisV4Mint {
             address(this) // Address to which send synthetic tokens minted
         );
 
-        (uint256 amountOut, ) = jarvis.mint(mintParams);
+        (uint256 amountOut,) = jarvis.mint(mintParams);
 
         emit DEFIBASKET_JARVISV4_MINT(amount, amountOut);
     }
+    /**
+      * @notice Redeems USDC using Jarvis from jTokens.
+      *
+      * @dev Interacts with SynthereumPoolOnChainPriceFeed to redeem jTokens into USDC
+      *
+      * @param assetIn Address of the jToken
+      * @param derivativeAddress Derivative address for jToken
+      * @param percentageIn Percentage of the balance of the jToken that will be converted
+      * @param assetOut Address of collateral (USDC)
+      * @param minAmountOut Minimum amount of collateral out (reduces slippage)
+      */
+    function redeem(
+        address assetIn,
+        address derivativeAddress,
+        uint256 percentageIn,
+        address assetOut,
+        uint256 minAmountOut
+    ) external override {
 
-//    /**
-//      * @notice Withdraws from the Aave protocol.
-//      *
-//      * @dev Wraps the Aave withdrawal and generates the necessary events to communicate with DeFi Basket's UI and back-end.
-//      * To perform a harvest invoke withdraw with percentageOut set to 0.
-//      *
-//      * @param assetOut Address of the asset to be withdrawn from the Aave protocol
-//      * @param percentageOut Percentage of the balance of the asset that will be withdrawn
-//      */
-//    function withdraw(address assetOut, uint256 percentageOut) external override {
-//        IAaveIncentivesController distributor = IAaveIncentivesController(incentivesControllerAddress);
-//        ILendingPool _aaveLendingPool = ILendingPool(aaveLendingPoolAddress);
-//
-//        address assetIn = _aaveLendingPool.getReserveData(assetOut).aTokenAddress;
-//        uint256 amount = 0;
-//
-//        if (percentageOut > 0) {
-//            amount = IERC20(assetIn).balanceOf(address(this)) * percentageOut / 100000;
-//            _aaveLendingPool.withdraw(assetOut, amount, address(this));
-//        }
-//
-//        address[] memory assets = new address[](1);
-//        assets[0] = assetIn;
-//
-//        uint256 amountToClaim = distributor.getRewardsBalance(assets, address(this));
-//        uint256 claimedReward = distributor.claimRewards(assets, amountToClaim, address(this));
-//        address claimedAsset = distributor.REWARD_TOKEN();
-//
-//        emit DEFIBASKET_AAVEV2_WITHDRAW(assetIn, amount, claimedAsset, claimedReward);
-//    }
+        uint256 amount = IERC20(assetIn).balanceOf(address(this)) * percentageIn / 100000;
+
+        // Approve 0 first as a few ERC20 tokens are requiring this pattern.
+        IERC20(assetIn).approve(address(jarvis), 0);
+        IERC20(assetIn).approve(address(jarvis), amount);
+
+        uint256 feePercentage = 2000000000000000;
+
+        ISynthereumPoolOnChainPriceFeed.RedeemParams memory redeemParams = ISynthereumPoolOnChainPriceFeed.RedeemParams(
+            derivativeAddress, // Derivative to use
+            amount, // Amount of synthetic tokens that user wants to use for redeeming
+            minAmountOut, // Minimium amount of collateral that user wants to redeem (anti-slippage)
+            feePercentage, // Maximum amount of fees in percentage that user is willing to pay
+            block.timestamp + 10000, // Expiration time of the transaction
+            address(this) // Address to which send collateral tokens redeemed
+        );
+
+        (uint256 amountOut,) = jarvis.redeem(redeemParams);
+
+        emit DEFIBASKET_JARVISV4_REDEEM(amount, amountOut);
+    }
 }
