@@ -119,4 +119,84 @@ describe("JarvisV4Mint", function () {
         let usdcBalance = await usdc.balanceOf(wallet.address);
         expect(usdcBalance).to.be.above(0);
     });
+    it("Mints jEUR from USDC, then redeems", async function () {
+        // Wallet token amount should be 0
+        let token = await ethers.getContractAt(
+            "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+            TOKENS['jEUR']
+        );
+        let tokenBalance = await token.balanceOf(wallet.address);
+        expect(tokenBalance).to.be.equal(0);
+
+        // Set bridges addresses
+        var _bridgeAddresses = [
+            wmaticBridge.address,
+            uniswapV2SwapBridge.address,
+            jarvisV4MintBridge.address,
+        ];
+
+        // Set path
+        let pathUniswap = [TOKENS["WMAIN"], TOKENS['USDC']];
+
+        // Set encoded calls
+        var _bridgeEncodedCalls = [
+            wmaticBridge.interface.encodeFunctionData(
+                "wrap",
+                [
+                    100000
+                ],
+            ),
+            uniswapV2SwapBridge.interface.encodeFunctionData(
+                "swapTokenToToken",
+                [100000, 1, pathUniswap]
+            ),
+            jarvisV4MintBridge.interface.encodeFunctionData("mint", [
+                '0xCbbA8c0645ffb8aA6ec868f6F5858F2b0eAe34DA',
+                TOKENS['USDC'], // address assetIn,
+                100_000, // uint256 percentageIn,
+                '0x0Fa1A6b68bE5dD9132A09286a166d75480BE9165', // TOKENS['jEUR'],// address assetOut,
+                0, // uint256 minAmountOut
+            ]),
+        ];
+
+        // Transfer money to wallet (similar as DeFi Basket contract would have done)
+        const transactionHash = await owner.sendTransaction({
+            to: wallet.address,
+            value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
+        });
+        await transactionHash.wait();
+
+        // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
+        await wallet.useBridges(_bridgeAddresses, _bridgeEncodedCalls);
+
+        tokenBalance = await token.balanceOf(wallet.address);
+        expect(tokenBalance).to.be.above(0);
+
+        _bridgeAddresses = [
+            jarvisV4MintBridge.address,
+        ];
+
+        _bridgeEncodedCalls = [
+            jarvisV4MintBridge.interface.encodeFunctionData("redeem", [
+                '0xCbbA8c0645ffb8aA6ec868f6F5858F2b0eAe34DA',
+                TOKENS['jEUR'], // address assetIn,
+                '0x0Fa1A6b68bE5dD9132A09286a166d75480BE9165',
+                100_000, // uint256 percentageIn,
+                TOKENS['USDC'], // TOKENS['jEUR'],// address assetOut,
+                0, // uint256 minAmountOut
+            ]),
+        ]
+
+        await wallet.useBridges(_bridgeAddresses, _bridgeEncodedCalls);
+
+        tokenBalance = await token.balanceOf(wallet.address);
+        expect(tokenBalance).to.be.equal(0);
+
+        let usdc = await ethers.getContractAt(
+            "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+            TOKENS['USDC']
+        );
+        let usdcBalance = await usdc.balanceOf(wallet.address);
+        expect(usdcBalance).to.be.above(0);
+    });
 });
