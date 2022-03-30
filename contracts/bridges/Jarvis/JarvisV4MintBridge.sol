@@ -20,9 +20,6 @@ import "../interfaces/IJarvisV4Mint.sol";
  */
 
 contract JarvisV4MintBridge is IJarvisV4Mint {
-
-    ISynthereumPoolOnChainPriceFeed constant jarvis = ISynthereumPoolOnChainPriceFeed(0x6cA82a7E54053B102e7eC452788cC19204e831de);
-
     /**
       * @notice Mints jTokens using Jarvis from USDC.
       *
@@ -33,13 +30,20 @@ contract JarvisV4MintBridge is IJarvisV4Mint {
       * @param assetOut Derivative address for jToken
       * @param minAmountOut Minimum amount of jTokens out (reduces slippage)
       */
-    function mint(address assetIn, uint256 percentageIn, address assetOut, uint256 minAmountOut) external override {
+    function mint(
+        address synthereumAddress,
+        address assetIn,
+        uint256 percentageIn,
+        address assetOut,
+        uint256 minAmountOut
+    ) external override {
+        ISynthereumPoolOnChainPriceFeed jarvis = ISynthereumPoolOnChainPriceFeed(synthereumAddress);
+
         uint256 amount = IERC20(assetIn).balanceOf(address(this)) * percentageIn / 100000;
 
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
         IERC20(assetIn).approve(address(jarvis), 0);
         IERC20(assetIn).approve(address(jarvis), amount);
-
 
         uint256 feePercentage = 2000000000000000;
 
@@ -68,12 +72,14 @@ contract JarvisV4MintBridge is IJarvisV4Mint {
       * @param minAmountOut Minimum amount of collateral out (reduces slippage)
       */
     function redeem(
+        address synthereumAddress,
         address assetIn,
         address derivativeAddress,
         uint256 percentageIn,
         address assetOut,
         uint256 minAmountOut
     ) external override {
+        ISynthereumPoolOnChainPriceFeed jarvis = ISynthereumPoolOnChainPriceFeed(synthereumAddress);
 
         uint256 amount = IERC20(assetIn).balanceOf(address(this)) * percentageIn / 100000;
 

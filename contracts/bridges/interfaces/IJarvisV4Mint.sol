@@ -15,6 +15,7 @@ interface IJarvisV4Mint {
 
     // Note: function addLiquidity does not stakes the LP token
     function mint(
+        address synthereumAddress,
         address assetIn,
         uint256 percentageIn,
         address assetOut,
@@ -22,6 +23,7 @@ interface IJarvisV4Mint {
     external;
 
     function redeem(
+        address synthereumAddress,
         address assetIn,
         address derivativeAddress,
         uint256 percentageIn,

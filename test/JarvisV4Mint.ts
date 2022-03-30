@@ -71,6 +71,7 @@ describe("JarvisV4Mint", function () {
                 [100000, 1, pathUniswap]
             ),
             jarvisV4MintBridge.interface.encodeFunctionData("mint", [
+                '0x6cA82a7E54053B102e7eC452788cC19204e831de',
                 TOKENS['USDC'], // address assetIn,
                 100_000, // uint256 percentageIn,
                 '0x2076648e2d9d452d55f4252cba9b162a1850db48', // TOKENS['jEUR'],// address assetOut,
@@ -97,6 +98,7 @@ describe("JarvisV4Mint", function () {
 
         _bridgeEncodedCalls = [
             jarvisV4MintBridge.interface.encodeFunctionData("redeem", [
+                '0x6cA82a7E54053B102e7eC452788cC19204e831de',
                 TOKENS['jJPY'], // address assetIn,
                 '0x2076648e2d9d452d55f4252cba9b162a1850db48',
                 100_000, // uint256 percentageIn,
@@ -109,5 +111,12 @@ describe("JarvisV4Mint", function () {
 
         tokenBalance = await token.balanceOf(wallet.address);
         expect(tokenBalance).to.be.equal(0);
+
+        let usdc = await ethers.getContractAt(
+            "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+            TOKENS['USDC']
+        );
+        let usdcBalance = await usdc.balanceOf(wallet.address);
+        expect(usdcBalance).to.be.above(0);
     });
 });
