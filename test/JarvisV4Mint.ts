@@ -39,7 +39,7 @@ describe("JarvisV4Mint", function () {
         wallet = await Wallet.deploy();
 
     });
-    it("Mints jJPY from USDC", async function () {
+    it("Mints jJPY from USDC, then redeems", async function () {
         // Wallet token amount should be 0
         let token = await ethers.getContractAt(
             "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
@@ -90,5 +90,24 @@ describe("JarvisV4Mint", function () {
 
         tokenBalance = await token.balanceOf(wallet.address);
         expect(tokenBalance).to.be.above(0);
+
+        _bridgeAddresses = [
+            jarvisV4MintBridge.address,
+        ];
+
+        _bridgeEncodedCalls = [
+            jarvisV4MintBridge.interface.encodeFunctionData("redeem", [
+                TOKENS['jJPY'], // address assetIn,
+                '0x2076648e2d9d452d55f4252cba9b162a1850db48',
+                100_000, // uint256 percentageIn,
+                TOKENS['USDC'], // TOKENS['jEUR'],// address assetOut,
+                0, // uint256 minAmountOut
+            ]),
+        ]
+
+        await wallet.useBridges(_bridgeAddresses, _bridgeEncodedCalls);
+
+        tokenBalance = await token.balanceOf(wallet.address);
+        expect(tokenBalance).to.be.equal(0);
     });
 });
