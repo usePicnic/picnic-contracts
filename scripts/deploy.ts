@@ -119,9 +119,19 @@ const contractsToDeploy = [
         filePath: bridgeNameToFilePath("UniswapV3", "UniswapV3SwapBridge")
     },
     {
-        contractName: "UniswapV3SwapBridge",
-        interfaceName: "IUniswapV3Swap",
-        filePath: bridgeNameToFilePath("UniswapV3", "UniswapV3SwapBridge")
+        contractName: "KyberSwapBridge",
+        interfaceName: "IKyberSwap",
+        filePath: bridgeNameToFilePath("Kyber", "KyberSwapBridge")
+    },
+    {
+        contractName: "KyberLiquidityBridge",
+        interfaceName: "IKyberLiquidity",
+        filePath: bridgeNameToFilePath("Kyber", "KyberLiquidityBridge")
+    },
+    {
+        contractName: "JarvisV4MintBridge",
+        interfaceName: "IJarvisV4Mint",
+        filePath: bridgeNameToFilePath("Kyber", "KyberLiquidityBridge")
     },
 ]
 
