@@ -2,6 +2,7 @@ import {expect} from "chai";
 import {ethers} from "hardhat";
 import constants from "../constants";
 import fetch from 'node-fetch';
+import {BigNumber} from "ethers";
 
 describe("CurveLiquidityBridge", function () {
     let owner;
@@ -120,11 +121,13 @@ describe("CurveLiquidityBridge", function () {
             ];
             _bridgeEncodedCalls = [
                 curveLiquidityBridge.interface.encodeFunctionData(
-                    "removeLiquidity",
+                    "removeLiquidityOneToken",
                     [
                         POOLS["am3CRV"], // address (of pool)
+                        '0xE7a24EF0C5e95Ffb0f6684b813A78F2a3AD7D171',
+                        0,
                         100_000, // uint256 percentage out
-                        [1,1,1], // uint256[] minAmountsOut
+                        1, // uint256[] minAmountsOut
                     ],
                 )                      
             ];
@@ -196,11 +199,13 @@ describe("CurveLiquidityBridge", function () {
             expect(lpTokenBalance).to.be.above(0);
 
             const removeCall = [curveLiquidityBridge.interface.encodeFunctionData(
-                "removeLiquidity",
+                "removeLiquidityOneToken",
                 [
                     '0xAd326c253A84e9805559b73A08724e11E49ca651', // address (of pool)
+                    '0xAd326c253A84e9805559b73A08724e11E49ca651',
+                    0,
                     100_000, // uint256[] percentages
-                    [50, 50, 0, 0 ] // uint256 minAmounts
+                    1 // uint256 minAmounts
                 ],
             )]
 

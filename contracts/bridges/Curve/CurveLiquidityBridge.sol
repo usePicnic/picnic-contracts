@@ -106,7 +106,7 @@ contract CurveLiquidityBridge is ICurveLiquidity {
             revert("Unsupported number of tokens");
         }
 
-        // Emit event        
+        // Emit event
         emit DEFIBASKET_CURVE_ADD_LIQUIDITY(amountsIn, liquidity);
     }
 
@@ -121,17 +121,14 @@ contract CurveLiquidityBridge is ICurveLiquidity {
       */
     function removeLiquidity(
         address poolAddress,
+        address LPtokenAddress,
         uint256 percentageOut,
         uint256[] calldata minAmountsOut
     ) external override {
         uint256 numTokens = minAmountsOut.length;
         uint256 liquidity;
 
-        try ICurveBasePool(poolAddress).lp_token() returns (address LPtokenAddress) {
-            liquidity = IERC20(LPtokenAddress).balanceOf(address(this)) * percentageOut / 100_000;
-        } catch {
-            liquidity = IERC20(poolAddress).balanceOf(address(this)) * percentageOut / 100_000;
-        }
+        liquidity = IERC20(LPtokenAddress).balanceOf(address(this)) * percentageOut / 100_000;
 
         uint256[] memory amountsOut = new uint256[](numTokens);
 
@@ -214,6 +211,17 @@ contract CurveLiquidityBridge is ICurveLiquidity {
         }
     }
 
+    function removeLiquidityOneToken(
+        address poolAddress,
+        address LPTokenAddress,
+        int128 tokenIndex,
+        uint256 percentageOut,
+        uint256 minAmountOut
+    ) external override
+    {
+        uint256 liquidity = IERC20(LPTokenAddress).balanceOf(address(this)) * percentageOut / 100_000;
+        uint256 amountOut = ICurveBasePool(poolAddress).remove_liquidity_one_coin(liquidity, tokenIndex, minAmountOut);
+    }
 }
 
 

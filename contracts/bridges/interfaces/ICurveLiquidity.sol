@@ -13,7 +13,6 @@ interface ICurveLiquidity {
         uint256 liquidity
     );
 
-    // Note: function addLiquidity does not stakes the LP token
     function addLiquidity(
         address poolAddress,
         address[] memory tokens,
@@ -23,7 +22,16 @@ interface ICurveLiquidity {
 
     function removeLiquidity(
         address poolAddress,
+        address LPtokenAddress,
         uint256 percentageOut,
         uint256[] calldata minAmountsOut
+    ) external;
+
+    function removeLiquidityOneToken(
+        address poolAddress,
+        address LPTokenAddress,
+        int128 tokenIndex,
+        uint256 percentageOut,
+        uint256 minAmountOut
     ) external;
 }
