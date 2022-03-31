@@ -9,10 +9,10 @@ import "./interfaces/IKyberDMM.sol";
 import "../interfaces/IKyberLiquidity.sol";
 
 /**
- * @title KyberSwapBridge
+ * @title KyberLiquidityBridge
  * @author DeFi Basket
  *
- * @notice Swaps using the KyberSwap contract in Polygon.
+ * @notice Add/remove liquidity using the Kyber DMM contract in Polygon.
  *
  * @dev This contract swaps ERC20 tokens to ERC20 tokens. Please notice that there are no payable functions.
  *
