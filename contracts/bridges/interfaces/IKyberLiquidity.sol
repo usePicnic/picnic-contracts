@@ -14,6 +14,11 @@ interface IKyberLiquidity {
         uint256 liquidity
     );
 
+    event DEFIBASKET_KYBER_REMOVE_LIQUIDITY_ONE_COIN(
+        uint256 amountIn,
+        uint256 amountOut
+    );
+
     function addLiquidity(
         address[] calldata tokens,
         address poolAddress,
@@ -27,5 +32,13 @@ interface IKyberLiquidity {
         address poolAddress,
         uint256 percentage,
         uint256[] calldata minAmounts
+    ) external;
+
+    function removeLiquidityOneCoin(
+        address tokenIn,
+        address tokenOut,
+        address poolAddress,
+        uint256 percentage,
+        uint256 minAmount
     ) external;
 }

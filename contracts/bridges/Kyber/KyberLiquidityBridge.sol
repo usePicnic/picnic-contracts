@@ -7,6 +7,7 @@ import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
 import "../interfaces/IUniswapV2Swap.sol";
 import "./interfaces/IKyberDMM.sol";
 import "../interfaces/IKyberLiquidity.sol";
+import "./interfaces/ZapOut.sol";
 
 /**
  * @title KyberLiquidityBridge
@@ -20,6 +21,8 @@ import "../interfaces/IKyberLiquidity.sol";
 
 contract KyberLiquidityBridge is IKyberLiquidity {
     IKyberDMM constant router = IKyberDMM(0x546C79662E028B661dFB4767664d0273184E4dD1);
+    address constant zapOutAddress = 0x83D4908c1B4F9Ca423BEE264163BC1d50F251c31;
+    ZapOut constant zapOut = ZapOut(zapOutAddress);
 
     /**
       * @notice Adds liquidity from 2 ERC20 tokens
@@ -109,5 +112,31 @@ contract KyberLiquidityBridge is IKyberLiquidity {
         );
 
         emit DEFIBASKET_KYBER_REMOVE_LIQUIDITY(amountTokensArray, poolAddress, liquidity);
+    }
+
+    function removeLiquidityOneCoin(
+        address tokenIn,
+        address tokenOut,
+        address poolAddress,
+        uint256 percentage,
+        uint256 minAmount
+    ) external override {
+        uint256 liquidity = IERC20(poolAddress).balanceOf(address(this)) * percentage / 100000;
+
+        // Approve 0 first as a few ERC20 tokens are requiring this pattern.
+        IERC20(poolAddress).approve(zapOutAddress, 0);
+        IERC20(poolAddress).approve(zapOutAddress, liquidity);
+
+        uint256 amountOut = zapOut.zapOut(
+            tokenOut, // tokenOut
+            tokenIn, // tokenIn
+            liquidity, // liquidity,
+            poolAddress, // pool
+            address(this), // address to,
+            minAmount, // amountAMin
+            block.timestamp + 100000  // uint deadline
+        );
+
+        emit DEFIBASKET_KYBER_REMOVE_LIQUIDITY_ONE_COIN(liquidity, amountOut);
     }
 }
