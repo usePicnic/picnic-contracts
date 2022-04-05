@@ -13,6 +13,11 @@ interface ICurveLiquidity {
         uint256 liquidity
     );
 
+    event DEFIBASKET_CURVE_REMOVE_LIQUIDITY_ONE_COIN(
+        uint256 amountIn,
+        uint256 amountOut
+    );
+
     function addLiquidity(
         address poolAddress,
         address[] memory tokens,

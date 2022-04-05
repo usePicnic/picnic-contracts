@@ -221,6 +221,7 @@ contract CurveLiquidityBridge is ICurveLiquidity {
     {
         uint256 liquidity = IERC20(LPTokenAddress).balanceOf(address(this)) * percentageOut / 100_000;
         uint256 amountOut = ICurveBasePool(poolAddress).remove_liquidity_one_coin(liquidity, tokenIndex, minAmountOut);
+        emit DEFIBASKET_CURVE_REMOVE_LIQUIDITY_ONE_COIN(liquidity, amountOut);
     }
 }
 
