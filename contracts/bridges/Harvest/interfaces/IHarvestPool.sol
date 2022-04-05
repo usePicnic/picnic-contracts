@@ -9,6 +9,9 @@ interface IHarvestPool {
     function rewardTokensLength() external returns(uint256);    
     function getAllRewards() external; 
     function stake(uint256 amount) external;
+    function withdraw(uint256 amount) external;
+    function balanceOf(address) external returns (uint256);
+    function stakedBalanceOf(address) external returns (uint256);
     function exit() external;
 
 }

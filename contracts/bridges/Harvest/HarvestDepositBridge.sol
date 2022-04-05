@@ -3,6 +3,7 @@
 pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./interfaces/IHarvestVault.sol";
 import "./interfaces/IHarvestPool.sol";
 import "../interfaces/IHarvestDeposit.sol";
@@ -82,12 +83,15 @@ contract HarvestDepositBridge is IHarvestDeposit {
         }
 
         // Returns the staked fASSET to the Wallet in addition to any accumulated FARM rewards
-        pool.exit();
+        uint256 poolWithdrawalAmount = pool.balanceOf(address(this)) * percentageOut / 100000;
+
+        pool.withdraw(Math.min(poolWithdrawalAmount, pool.stakedBalanceOf(address(this))));
+        pool.getAllRewards();
 
         // Burn fASSET and withdraw corresponding asset from Vault 
         IERC20 vaultToken = IERC20(vaultAddress);
         uint256 assetBalanceBefore = assetOut.balanceOf(address(this));
-        uint256 assetAmountIn = vaultToken.balanceOf(address(this)) * percentageOut / 100000;
+        uint256 assetAmountIn = vaultToken.balanceOf(address(this));
         vault.withdraw(assetAmountIn);
         uint256 assetAmountOut = assetOut.balanceOf(address(this)) - assetBalanceBefore;
 
