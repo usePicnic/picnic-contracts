@@ -33,10 +33,11 @@ contract HarvestDepositBridge is IHarvestDeposit {
       */
     function deposit(address poolAddress, uint256 percentageIn) external override {
 
-        address vaultAddress = IHarvestPool(poolAddress).lpToken(); /* lpToken returns the proxy (and not the implementation address) */        
+        address vaultAddress = IHarvestPool(poolAddress).lpToken();
+        /* lpToken returns the proxy (and not the implementation address) */
         IHarvestVault vault = IHarvestVault(vaultAddress);
 
-        IERC20 assetIn = IERC20(vault.underlying());        
+        IERC20 assetIn = IERC20(vault.underlying());
         uint256 amountIn = assetIn.balanceOf(address(this)) * percentageIn / 100000;
 
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
@@ -48,7 +49,7 @@ contract HarvestDepositBridge is IHarvestDeposit {
         // Stake token in reward pool
         IERC20 vaultToken = IERC20(vaultAddress);
         uint256 vaultTokenBalance = vaultToken.balanceOf(address(this));
-        vaultToken.approve(poolAddress, vaultTokenBalance);                
+        vaultToken.approve(poolAddress, vaultTokenBalance);
         IHarvestPool(poolAddress).stake(vaultTokenBalance);
 
         emit DEFIBASKET_HARVEST_DEPOSIT(address(assetIn), amountIn, vaultTokenBalance);
@@ -63,23 +64,38 @@ contract HarvestDepositBridge is IHarvestDeposit {
       * @param percentageOut Percentage of fAsset that will be withdrawn
       *
       */
-    function withdraw(address poolAddress, uint256 percentageOut) external override { 
+    function withdraw(address poolAddress, uint256 percentageOut) external override {
 
-        address vaultAddress = IHarvestPool(poolAddress).lpToken(); /* lpToken returns the proxy (and not the implementation address) */        
-        IHarvestVault vault = IHarvestVault(vaultAddress);          
-        
+        address[] memory rewardTokens;
+        uint256[] memory rewardBalancesOut;
+        address assetOut;
+        uint256 amountIn;
+        uint256 amountOut;
+
+        try IHarvestPool(poolAddress).lpToken() returns (address vaultAddress){
+            (rewardTokens, rewardBalancesOut) = _withdrawPool(poolAddress, percentageOut);
+            (amountIn, assetOut, amountOut) = _withdrawVault(vaultAddress, 100_000);
+        }
+        catch{
+            // Burn fASSET and withdraw corresponding asset from Vault
+            _withdrawVault(poolAddress, percentageOut);
+        }
+
+        emit DEFIBASKET_HARVEST_WITHDRAW(assetOut, amountOut, amountIn, rewardTokens, rewardBalancesOut);
+    }
+
+    function _withdrawPool(address poolAddress, uint256 percentageOut) internal returns (address[] memory, uint256[] memory) {
         IHarvestPool pool = IHarvestPool(poolAddress);
-        IERC20 assetOut = IERC20(vault.underlying());
-                
-        // Compute balance of reward tokens before exit is called 
+
+        // Compute balance of reward tokens before exit is called
         uint256 rewardTokensLength = pool.rewardTokensLength();
-        address[] memory rewardTokens = new address[](rewardTokensLength);        
+        address[] memory rewardTokens = new address[](rewardTokensLength);
         uint256[] memory rewardBalances = new uint256[](rewardTokensLength);
         uint256[] memory rewardBalancesOut = new uint256[](rewardTokensLength);
 
-        for(uint256 i = 0; i < rewardTokensLength; i = unchecked_inc(i)) { 
-          rewardTokens[i] = pool.rewardTokens(i);
-          rewardBalances[i] = IERC20(rewardTokens[i]).balanceOf(address(this));            
+        for (uint256 i = 0; i < rewardTokensLength; i = unchecked_inc(i)) {
+            rewardTokens[i] = pool.rewardTokens(i);
+            rewardBalances[i] = IERC20(rewardTokens[i]).balanceOf(address(this));
         }
 
         // Returns the staked fASSET to the Wallet in addition to any accumulated FARM rewards
@@ -88,22 +104,27 @@ contract HarvestDepositBridge is IHarvestDeposit {
         pool.withdraw(Math.min(poolWithdrawalAmount, pool.stakedBalanceOf(address(this))));
         pool.getAllRewards();
 
-        // Burn fASSET and withdraw corresponding asset from Vault 
-        IERC20 vaultToken = IERC20(vaultAddress);
+        // Compute total rewards for each reward token
+        for (uint256 i = 0; i < rewardTokensLength; i = unchecked_inc(i)) {
+            rewardBalancesOut[i] = IERC20(rewardTokens[i]).balanceOf(address(this)) - rewardBalances[i];
+        }
+
+        return (rewardTokens, rewardBalancesOut);
+    }
+
+    function _withdrawVault(address vaultAddress, uint256 percentageOut) internal returns (uint256, address, uint256) {
+        IHarvestVault vault = IHarvestVault(vaultAddress);
+        IERC20 assetOut = IERC20(vault.underlying());
+
+        // Burn fASSET and withdraw corresponding asset from Vault
         uint256 assetBalanceBefore = assetOut.balanceOf(address(this));
-        uint256 assetAmountIn = vaultToken.balanceOf(address(this));
+        uint256 assetAmountIn = IERC20(vaultAddress).balanceOf(address(this)) * percentageOut / 100000;
         vault.withdraw(assetAmountIn);
         uint256 assetAmountOut = assetOut.balanceOf(address(this)) - assetBalanceBefore;
 
-        // Compute total rewards for each reward token
-        for(uint256 i = 0; i < rewardTokensLength; i = unchecked_inc(i)) {
-          rewardBalancesOut[i] = IERC20(rewardTokens[i]).balanceOf(address(this)) - rewardBalances[i];            
-        }
-
-        emit DEFIBASKET_HARVEST_WITHDRAW(address(assetOut), assetAmountOut, assetAmountIn, rewardTokens, rewardBalancesOut);
+        return (assetAmountIn, address(assetOut), assetAmountOut);
     }
 
-    
     /**
       * @notice Claim rewards from a pool without unstaking the fASSET
       *
@@ -112,30 +133,30 @@ contract HarvestDepositBridge is IHarvestDeposit {
       *
       * @param poolAddress The address of the Harvest pool.
       *
-      */    
-    function claimRewards(address poolAddress) external override { 
+      */
+    function claimRewards(address poolAddress) external override {
 
         IHarvestPool pool = IHarvestPool(poolAddress);
-                
+
         // Compute balance of reward tokens before exit is called 
         uint256 rewardTokensLength = pool.rewardTokensLength();
         address[] memory rewardTokens = new address[](rewardTokensLength);
         uint256[] memory rewardBalances = new uint256[](rewardTokensLength);
         uint256[] memory rewardBalancesOut = new uint256[](rewardTokensLength);
-        
-        for(uint256 i = 0; i < rewardTokensLength; i = unchecked_inc(i)) {
-          rewardTokens[i] = pool.rewardTokens(i);
-          rewardBalances[i] = IERC20(rewardTokens[i]).balanceOf(address(this));            
+
+        for (uint256 i = 0; i < rewardTokensLength; i = unchecked_inc(i)) {
+            rewardTokens[i] = pool.rewardTokens(i);
+            rewardBalances[i] = IERC20(rewardTokens[i]).balanceOf(address(this));
         }
-        
+
         pool.getAllRewards();
 
         // Compute total rewards for each reward token
-        for(uint256 i = 0; i < rewardTokensLength; i = unchecked_inc(i)) {
-          rewardBalancesOut[i] = IERC20(rewardTokens[i]).balanceOf(address(this)) - rewardBalances[i];            
+        for (uint256 i = 0; i < rewardTokensLength; i = unchecked_inc(i)) {
+            rewardBalancesOut[i] = IERC20(rewardTokens[i]).balanceOf(address(this)) - rewardBalances[i];
         }
 
-        emit DEFIBASKET_HARVEST_CLAIM(rewardTokens, rewardBalancesOut);        
+        emit DEFIBASKET_HARVEST_CLAIM(rewardTokens, rewardBalancesOut);
     }
 
     /**
@@ -144,9 +165,9 @@ contract HarvestDepositBridge is IHarvestDeposit {
       * @param i Integer to be incremented
     */
     function unchecked_inc(uint256 i) internal pure returns (uint256) {
-        unchecked {
-            return i + 1;
-        }
-    }    
-    
+    unchecked {
+        return i + 1;
+    }
+    }
+
 }
