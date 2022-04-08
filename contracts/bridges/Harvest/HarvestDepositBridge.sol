@@ -78,7 +78,7 @@ contract HarvestDepositBridge is IHarvestDeposit {
         }
         catch{
             // Burn fASSET and withdraw corresponding asset from Vault
-            _withdrawVault(poolAddress, percentageOut);
+            (amountIn, assetOut, amountOut) = _withdrawVault(poolAddress, percentageOut);
         }
 
         emit DEFIBASKET_HARVEST_WITHDRAW(assetOut, amountOut, amountIn, rewardTokens, rewardBalancesOut);
