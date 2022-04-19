@@ -128,8 +128,8 @@ contract KyberLiquidityBridge is IKyberLiquidity {
         IERC20(poolAddress).approve(zapOutAddress, liquidity);
 
         uint256 amountOut = zapOut.zapOut(
-            tokenOut, // tokenOut
             tokenIn, // tokenIn
+            tokenOut, // tokenOut
             liquidity, // liquidity,
             poolAddress, // pool
             address(this), // address to,
