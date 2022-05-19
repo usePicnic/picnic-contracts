@@ -18,7 +18,7 @@ import "../interfaces/IAutofarmDeposit.sol";
  * 2. Withdraw from AutofarmV2_CrossChain
  *
  */
-
+/// @custom:security-contact hi@defibasket.org
 contract AutofarmDepositBridge is IAutofarmDeposit {
     // Hardcoded to make less variables needed for the user to check (UI will help explain/debug it)
     address constant autofarmAddress = 0x89d065572136814230A55DdEeDDEC9DF34EB0B76;

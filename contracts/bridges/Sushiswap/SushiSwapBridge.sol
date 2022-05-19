@@ -15,7 +15,7 @@ import "../interfaces/IUniswapV2Swap.sol";
  * @dev This contract swaps ERC20 tokens to ERC20 tokens. Please notice that there are no payable functions.
  *
  */
-
+/// @custom:security-contact hi@defibasket.org
 contract SushiSwapBridge is IUniswapV2Swap {
     address constant routerAddress = 0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506;
     /**

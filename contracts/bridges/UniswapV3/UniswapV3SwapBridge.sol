@@ -6,7 +6,7 @@ pragma abicoder v2;
 import '@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol';
 import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
 import "../interfaces/IUniswapV3Swap.sol";
-
+/// @custom:security-contact hi@defibasket.org
 contract UniswapV3SwapBridge is IUniswapV3Swap {
     ISwapRouter constant swapRouter = ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
 

@@ -18,7 +18,7 @@ import "../interfaces/ITetuDeposit.sol";
  * 2. Withdraw from Tetu vault and claim rewards
  *
  */
-
+/// @custom:security-contact hi@defibasket.org
 contract TetuDepositBridge is ITetuDeposit {
 
     /**

@@ -26,7 +26,7 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
  * 2.2 Control the permissions for delegate calls to bridges
  * 3. Collect fees for the DeFi Basket protocol
  */
-
+/// @custom:security-contact hi@defibasket.org
 contract DeFiBasket is IDeFiBasket, ERC721, Ownable {
     using SafeERC20 for IERC20;
 

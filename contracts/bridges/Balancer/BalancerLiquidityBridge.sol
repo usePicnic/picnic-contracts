@@ -20,6 +20,7 @@ import "../interfaces/IBalancerLiquidity.sol";
  * 2. removeLiquidity works with multiple ERC20 tokens
  *
  */
+/// @custom:security-contact hi@defibasket.org
 contract BalancerLiquidityBridge is IBalancerLiquidity {
 
     address constant balancerV2Address = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;    

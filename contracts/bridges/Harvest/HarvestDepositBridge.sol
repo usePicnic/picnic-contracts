@@ -20,7 +20,7 @@ import "../interfaces/IHarvestDeposit.sol";
  * 2. Withdraw from Harvest vault and claim rewards
  *
  */
-
+/// @custom:security-contact hi@defibasket.org
 contract HarvestDepositBridge is IHarvestDeposit {
 
     /**

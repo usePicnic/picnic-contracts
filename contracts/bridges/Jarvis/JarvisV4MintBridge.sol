@@ -18,7 +18,7 @@ import "../interfaces/IJarvisV4Mint.sol";
  * 2. Redeem jTokens from Jarvis
  *
  */
-
+/// @custom:security-contact hi@defibasket.org
 contract JarvisV4MintBridge is IJarvisV4Mint {
     /**
       * @notice Mints jTokens using Jarvis from USDC.
