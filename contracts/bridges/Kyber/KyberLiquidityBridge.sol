@@ -18,7 +18,7 @@ import "./interfaces/ZapOut.sol";
  * @dev This contract swaps ERC20 tokens to ERC20 tokens. Please notice that there are no payable functions.
  *
  */
-
+/// @custom:security-contact hi@defibasket.org
 contract KyberLiquidityBridge is IKyberLiquidity {
     IKyberDMM constant router = IKyberDMM(0x546C79662E028B661dFB4767664d0273184E4dD1);
     address constant zapOutAddress = 0x83D4908c1B4F9Ca423BEE264163BC1d50F251c31;

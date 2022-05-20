@@ -22,7 +22,7 @@ import "../interfaces/IAaveV2Deposit.sol";
  * control mechanics to go along with it.
  *
  */
-
+/// @custom:security-contact hi@defibasket.org
 contract AaveV2DepositBridge is IAaveV2Deposit {
 
     address constant aaveLendingPoolAddress = 0x8dFf5E27EA6b7AC08EbFdf9eB090F32ee9a30fcf;

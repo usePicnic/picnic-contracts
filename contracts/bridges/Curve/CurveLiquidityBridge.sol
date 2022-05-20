@@ -18,6 +18,7 @@ import "../interfaces/ICurveLiquidity.sol";
  * @dev This contract adds or removes liquidity from Curve pools
  *
  */
+/// @custom:security-contact hi@defibasket.org
 contract CurveLiquidityBridge is ICurveLiquidity {
 
     address constant curveAddressRegistry = 0x0000000022D53366457F9d5E68Ec105046FC4383;

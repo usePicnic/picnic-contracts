@@ -15,7 +15,7 @@ import "../interfaces/IWMaticWrap.sol";
  * @dev This contract swaps ERC20 tokens to ERC20 tokens. Please notice that there are no payable functions.
  *
  */
-
+/// @custom:security-contact hi@defibasket.org
 contract WMaticWrapBridge is IWMaticWrap {
     address constant wMaticAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270;
     IWMatic constant wmatic = IWMatic(wMaticAddress);

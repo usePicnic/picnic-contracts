@@ -17,7 +17,7 @@ import "../interfaces/IKyberSwap.sol";
  * @dev This contract swaps ERC20 tokens to ERC20 tokens. Please notice that there are no payable functions.
  *
  */
-
+/// @custom:security-contact hi@defibasket.org
 contract KyberSwapBridge is IKyberSwap {
     IKyberDMM constant router = IKyberDMM(0x546C79662E028B661dFB4767664d0273184E4dD1);
 

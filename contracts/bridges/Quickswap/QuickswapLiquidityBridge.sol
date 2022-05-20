@@ -20,6 +20,7 @@ import "hardhat/console.sol";
  * 2. removeLiquidity works with 2 ERC20 tokens
  *
  */
+/// @custom:security-contact hi@defibasket.org
 contract QuickswapLiquidityBridge is IUniswapV2Liquidity {
 
     address constant public routerAddress = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;

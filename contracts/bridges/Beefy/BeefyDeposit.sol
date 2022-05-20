@@ -18,7 +18,7 @@ import "../interfaces/IBeefyDeposit.sol";
  * 2. Withdraw from Beefy vault 
  *
  */
-
+/// @custom:security-contact hi@defibasket.org
 contract BeefyDepositBridge is IBeefyDeposit {
 
     /**

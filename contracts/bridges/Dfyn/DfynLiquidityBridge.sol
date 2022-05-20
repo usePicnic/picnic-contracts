@@ -19,6 +19,7 @@ import "../interfaces/IUniswapV2Liquidity.sol";
  * 2. removeLiquidity works with 2 ERC20 tokens
  *
  */
+/// @custom:security-contact hi@defibasket.org
 contract DfynLiquidityBridge is IUniswapV2Liquidity {
 
     address constant public routerAddress = 0xA102072A4C07F06EC3B4900FDC4C7B80b6c57429;

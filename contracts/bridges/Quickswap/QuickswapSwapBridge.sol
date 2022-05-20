@@ -15,7 +15,7 @@ import "../interfaces/IUniswapV2Swap.sol";
  * @dev This contract swaps ERC20 tokens to ERC20 tokens. Please notice that there are no payable functions.
  *
  */
-
+/// @custom:security-contact hi@defibasket.org
 contract QuickswapSwapBridge is IUniswapV2Swap {
     address constant routerAddress = 0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff;
     /**
