@@ -3,7 +3,17 @@
 pragma solidity ^0.8.6;
 
 
-interface ZapOut {
+interface Zap {
+    function zapIn(
+        address tokenIn,
+        address tokenOut,
+        uint256 userIn,
+        address pool,
+        address to,
+        uint256 minLpQty,
+        uint256 deadline
+    ) external returns (uint256 lpQty);
+
     function zapOut(
         address tokenIn,
         address tokenOut,

@@ -7,7 +7,7 @@ import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
 import "../interfaces/IUniswapV2Swap.sol";
 import "./interfaces/IKyberDMM.sol";
 import "../interfaces/IKyberLiquidity.sol";
-import "./interfaces/ZapOut.sol";
+import "./interfaces/Zap.sol";
 
 /**
  * @title KyberLiquidityBridge
@@ -21,8 +21,8 @@ import "./interfaces/ZapOut.sol";
 /// @custom:security-contact hi@defibasket.org
 contract KyberLiquidityBridge is IKyberLiquidity {
     IKyberDMM constant router = IKyberDMM(0x546C79662E028B661dFB4767664d0273184E4dD1);
-    address constant zapOutAddress = 0x83D4908c1B4F9Ca423BEE264163BC1d50F251c31;
-    ZapOut constant zapOut = ZapOut(zapOutAddress);
+    address constant zapAddress = 0x83D4908c1B4F9Ca423BEE264163BC1d50F251c31;
+    Zap constant zap = Zap(zapAddress);
 
     /**
       * @notice Adds liquidity from 2 ERC20 tokens
@@ -40,7 +40,6 @@ contract KyberLiquidityBridge is IKyberLiquidity {
         uint256[] calldata minAmounts,
         uint256[2] calldata vReserveRatioBounds
     ) external override {
-
         uint256 amountA = IERC20(tokens[0]).balanceOf(address(this)) * percentages[0] / 100000;
         uint256 amountB = IERC20(tokens[1]).balanceOf(address(this)) * percentages[1] / 100000;
 
@@ -74,6 +73,32 @@ contract KyberLiquidityBridge is IKyberLiquidity {
         amountTokensArray[1] = routerOutputs[1];
 
         emit DEFIBASKET_KYBER_ADD_LIQUIDITY(amountTokensArray, routerOutputs[2]);
+    }
+
+    function addLiquidityOneCoin(
+        address tokenIn,
+        address tokenOut,
+        address poolAddress,
+        uint256 percentage,
+        uint256 minAmount
+    ) external override {
+        uint256 amountIn = IERC20(poolAddress).balanceOf(address(this)) * percentage / 100000;
+
+        // Approve 0 first as a few ERC20 tokens are requiring this pattern.
+        IERC20(tokenIn).approve(zapAddress, 0);
+        IERC20(tokenOut).approve(zapAddress, amountIn);
+
+        uint256 amountOut = zap.zapIn(
+            tokenIn, // IERC20 tokenIn,
+            tokenOut, // IERC20 tokenOut,
+            amountIn, // uint256 userIn,
+            poolAddress, // address pool,
+            address(this), // address to,
+            minAmount, // uint256 minLpQty,
+            block.timestamp + 100000  // uint256 deadline
+        );
+
+        emit DEFIBASKET_KYBER_ADD_LIQUIDITY_ONE_COIN(amountIn, amountOut);
     }
 
     /**
@@ -124,10 +149,10 @@ contract KyberLiquidityBridge is IKyberLiquidity {
         uint256 liquidity = IERC20(poolAddress).balanceOf(address(this)) * percentage / 100000;
 
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
-        IERC20(poolAddress).approve(zapOutAddress, 0);
-        IERC20(poolAddress).approve(zapOutAddress, liquidity);
+        IERC20(poolAddress).approve(zapAddress, 0);
+        IERC20(poolAddress).approve(zapAddress, liquidity);
 
-        uint256 amountOut = zapOut.zapOut(
+        uint256 amountOut = zap.zapOut(
             tokenIn, // tokenIn
             tokenOut, // tokenOut
             liquidity, // liquidity,
