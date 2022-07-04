@@ -1,7 +1,6 @@
 import deployLogic from "./utils/deployLogic";
 import {ethers} from "hardhat";
 import {BigNumber} from "ethers";
-import {MongoClient} from 'mongodb';
 
 const hre = require("hardhat");
 const prompts = require("prompts");
@@ -14,8 +13,8 @@ const weiToString = (wei) => {
         .toNumber() / Math.pow(10, 4);
 }
 
-function bridgeNameToFilePath(bridgeName : string) : string{
-    return `./artifacts/contracts/bridges/trusted/${bridgeName}/${bridgeName}.sol/${bridgeName}.json`;
+function bridgeNameToFilePath(protocolName: string, bridgeName: string): string {
+    return `./artifacts/contracts/bridges/${protocolName}/${bridgeName}.sol/${bridgeName}.json`;
 }
 
 const contractsToDeploy = [
@@ -27,27 +26,112 @@ const contractsToDeploy = [
     {
         contractName: "AaveV2DepositBridge",
         interfaceName: "IAaveV2Deposit",
-        filePath: bridgeNameToFilePath("AaveV2DepositBridge")
+        filePath: bridgeNameToFilePath("AaveV2", "AaveV2DepositBridge")
     },
     {
         contractName: "QuickswapSwapBridge",
         interfaceName: "IUniswapV2Swap",
-        filePath: bridgeNameToFilePath("QuickswapSwapBridge")
+        filePath: bridgeNameToFilePath("Quickswap", "QuickswapSwapBridge")
     },
     {
         contractName: "QuickswapLiquidityBridge",
         interfaceName: "IUniswapV2Liquidity",
-        filePath: bridgeNameToFilePath("QuickswapLiquidityBridge")
+        filePath: bridgeNameToFilePath("Quickswap", "QuickswapLiquidityBridge")
+    },
+    {
+        contractName: "SushiSwapBridge",
+        interfaceName: "IUniswapV2Swap",
+        filePath: bridgeNameToFilePath("Sushiswap", "SushiSwapBridge")
+    },
+    {
+        contractName: "SushiLiquidityBridge",
+        interfaceName: "IUniswapV2Liquidity",
+        filePath: bridgeNameToFilePath("Sushiswap", "SushiLiquidityBridge")
     },
     {
         contractName: "AutofarmDepositBridge",
         interfaceName: "IAutofarmDeposit",
-        filePath: bridgeNameToFilePath("AutofarmDepositBridge")
+        filePath: bridgeNameToFilePath("Autofarm", "AutofarmDepositBridge")
     },
     {
         contractName: "WMaticWrapBridge",
         interfaceName: "IWMaticWrap",
-        filePath: bridgeNameToFilePath("WMaticWrapBridge")
+        filePath: bridgeNameToFilePath("WMatic", "WMaticWrapBridge")
+    },
+    {
+        contractName: "BalancerSwapBridge",
+        interfaceName: "IBalancerSwap",
+        filePath: bridgeNameToFilePath("Balancer", "BalancerSwapBridge")
+    },
+    {
+        contractName: "BalancerLiquidityBridge",
+        interfaceName: "IBalancerLiquidity",
+        filePath: bridgeNameToFilePath("Balancer", "BalancerLiquidityBridge")
+    },
+    {
+        contractName: "ApeSwapBridge",
+        interfaceName: "IUniswapV2Swap",
+        filePath: bridgeNameToFilePath("ApeSwap", "ApeSwapBridge")
+    },
+    {
+        contractName: "ApeLiquidityBridge",
+        interfaceName: "IUniswapV2Liquidity",
+        filePath: bridgeNameToFilePath("ApeSwap", "ApeLiquidityBridge")
+    },
+    {
+        contractName: "DinoSwapBridge",
+        interfaceName: "IUniswapV2Swap",
+        filePath: bridgeNameToFilePath("DinoSwap", "DinoSwapBridge")
+    },
+    {
+        contractName: "DinoLiquidityBridge",
+        interfaceName: "IUniswapV2Liquidity",
+        filePath: bridgeNameToFilePath("DinoSwap", "DinoLiquidityBridge")
+    },
+    {
+        contractName: "DfynSwapBridge",
+        interfaceName: "IUniswapV2Swap",
+        filePath: bridgeNameToFilePath("Dfyn", "DfynSwapBridge")
+    },
+    {
+        contractName: "DfynLiquidityBridge",
+        interfaceName: "IUniswapV2Liquidity",
+        filePath: bridgeNameToFilePath("Dfyn", "DfynLiquidityBridge")
+    },
+    {
+        contractName: "HarvestDepositBridge",
+        interfaceName: "IHarvestDeposit",
+        filePath: bridgeNameToFilePath("Harvest", "HarvestDepositBridge")
+    },
+    {
+        contractName: "CurveLiquidityBridge",
+        interfaceName: "ICurveLiquidity",
+        filePath: bridgeNameToFilePath("Curve", "CurveLiquidityBridge")
+    },
+    {
+        contractName: "CurveSwapBridge",
+        interfaceName: "ICurveSwap",
+        filePath: bridgeNameToFilePath("Curve", "CurveSwapBridge")
+    },
+    {
+        contractName: "UniswapV3SwapBridge",
+        interfaceName: "IUniswapV3Swap",
+        filePath: bridgeNameToFilePath("UniswapV3", "UniswapV3SwapBridge")
+    },
+    {
+        contractName: "KyberSwapBridge",
+        interfaceName: "IKyberSwap",
+        filePath: bridgeNameToFilePath("Kyber", "KyberSwapBridge")
+    },
+    {
+        contractName: "KyberLiquidityBridge",
+        interfaceName: "IKyberLiquidity",
+        filePath: bridgeNameToFilePath("Kyber", "KyberLiquidityBridge")
+    },
+    {
+        contractName: "JarvisV4MintBridge",
+        interfaceName: "IJarvisV4Mint",
+        filePath: bridgeNameToFilePath("Kyber", "KyberLiquidityBridge")
     },
 ]
 
@@ -55,11 +139,9 @@ async function main() {
     const networkName = hre.hardhatArguments.network;
 
     if (networkName === undefined) {
-        console.log('Please set a network before deploying :D');
+        console.log('Please set --network :D');
         return;
     }
-
-    const startBlockNumber = await ethers.provider.getBlockNumber();
 
     const [deployer] = await ethers.getSigners();
     console.log("Deploying contracts with the account:", deployer.address);
@@ -71,63 +153,35 @@ async function main() {
     console.log('Starting nonce:', startingNonce);
 
     const response = await prompts({
-            type: 'confirm',
-            name: 'confirm',
-            message: `Are you sure you want to deploy to ${networkName}?`,
-            initial: false
-        }
-    )
+        type: 'text',
+        name: 'contractName',
+        message: `Which contract do you want to deploy and generate JSON for?`,
+    } )
 
-    console.log(response.confirm)
-    if (!response.confirm) {
+    const contractName = response.contractName;
+
+    if (!response.contractName) {
         console.log("Aborting");
         return;
     }
 
-    var allOk = true;
+    const contractToDeploy = contractsToDeploy.filter(contract => contract.contractName === contractName)[0];
 
-    for (var i = 0; i < contractsToDeploy.length; i++) {
-        let nonce = await deployer.getTransactionCount();
-        const isOk = await deployLogic({
-            networkName: networkName,
-            contractName: contractsToDeploy[i].contractName,
-            interfaceName: contractsToDeploy[i].interfaceName,
-            filePath: contractsToDeploy[i].filePath,
-            nonce: nonce
-        })
-        if (!isOk) {
-            allOk = false;
-        }
-    }
+    let nonce = await deployer.getTransactionCount();
+    const isOk = await deployLogic({
+        networkName: networkName,
+        contractName: contractToDeploy.contractName,
+        interfaceName: contractToDeploy.interfaceName,
+        filePath: contractToDeploy.filePath,
+        nonce: nonce
+    })
+
     const balanceEnd = await deployer.getBalance();
     console.log("Account balance:", weiToString(balanceEnd));
     console.log("Cost to deploy:", weiToString(balanceBegin.sub(balanceEnd)));
 
-    if (!allOk) {
-        console.log('There was a problem during deployment. Will not set network blockNumber.')
-    } else {
-        const client = new MongoClient(process.env.MONGODB_URI);
-        try {
-            await client.connect();
-
-            console.log(`Setting network blockNumber to ${startBlockNumber}`)
-
-            await client
-                .db(process.env.MONGODB_DATABASE_NAME)
-                .collection('networks')
-                .updateOne(
-                    {
-                        'name': networkName
-                    },
-                    {
-                        $set: {
-                            'latestBlock': startBlockNumber
-                        }
-                    }
-                );
-        } finally {
-            await client.close();
-        }
+    if (!isOk) {
+        console.log('There was a problem during deployment.')
     }
 }
 

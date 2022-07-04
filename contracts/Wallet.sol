@@ -15,7 +15,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
  * @dev Wallet holds the funds and is quite extensible as we decided to go with an architecture of delegate calls and
  * bridges, which are contracts that shape the interfaces we use to interact with other protocols.
  */
-
+/// @custom:security-contact hi@defibasket.org
 contract Wallet is IWallet {
     using SafeERC20 for IERC20;
 

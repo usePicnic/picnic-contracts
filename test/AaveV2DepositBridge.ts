@@ -128,6 +128,72 @@ describe("AaveV2DepositBridge", function () {
       expect(amTokenBalance).to.be.equal(0);
     });
 
+    it("Multi-Withdraw", async function () {
+
+      // Set bridges addresses
+      var _bridgeAddresses = [
+        wmaticBridge.address,
+        uniswapV2SwapBridge.address,
+        aaveV2DepositBridge.address,
+      ];
+
+      // Set path
+      let pathUniswap = [TOKENS["WMAIN"], TOKENS['DAI']];
+
+      // Set encoded calls
+      const _bridgeEncodedCalls = [
+        wmaticBridge.interface.encodeFunctionData(
+            "wrap",
+            [
+              100000
+            ],
+        ),
+        uniswapV2SwapBridge.interface.encodeFunctionData(
+            "swapTokenToToken",
+            [100000, 1, pathUniswap]
+        ),
+        aaveV2DepositBridge.interface.encodeFunctionData("deposit", [
+          TOKENS['DAI'],
+          100000,
+        ]),
+      ];
+
+      // Transfer money to wallet (similar as DeFi Basket contract would have done)
+      const transactionHash = await owner.sendTransaction({
+        to: wallet.address,
+        value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
+      });
+      await transactionHash.wait();
+
+      // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
+      await wallet.useBridges(_bridgeAddresses, _bridgeEncodedCalls);
+
+      // Set bridges addresses
+      let _bridgeAddresses2 = [aaveV2DepositBridge.address, aaveV2DepositBridge.address];
+
+      // Set encoded calls
+      let _bridgeEncodedCalls2 = [
+        aaveV2DepositBridge.interface.encodeFunctionData("withdraw", [
+          TOKENS[TOKEN_TO_TEST],
+          100000,
+        ]),
+        aaveV2DepositBridge.interface.encodeFunctionData("withdraw", [
+          TOKENS['DAI'],
+          100000,
+        ]),
+      ];
+
+      await wallet.useBridges(_bridgeAddresses2, _bridgeEncodedCalls2);
+
+      // Wallet token amount should be 0
+      let token = await ethers.getContractAt(
+          "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+          TOKENS['WMAIN']
+      );
+      let tokenBalance = await token.balanceOf(wallet.address);
+      //expect(tokenBalance).to.be.above(0);
+    });
+
     it("Harvest - Buys from TOKEN_TO_TEST and deposits on Aave, then withdraws from Aave", async function () {
       // Set bridges addresses
       let _bridgeAddresses = [aaveV2DepositBridge.address];
@@ -141,6 +207,72 @@ describe("AaveV2DepositBridge", function () {
       ];
 
       await wallet.useBridges(_bridgeAddresses, _bridgeEncodedCalls);
+
+      // Wallet token amount should be 0
+      let token = await ethers.getContractAt(
+          "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+          TOKENS['WMAIN']
+      );
+      let tokenBalance = await token.balanceOf(wallet.address);
+      expect(tokenBalance).to.be.above(0);
+    });
+
+    it("Multi-Harvest", async function () {
+
+      // Set bridges addresses
+      var _bridgeAddresses = [
+        wmaticBridge.address,
+        uniswapV2SwapBridge.address,
+        aaveV2DepositBridge.address,
+      ];
+
+      // Set path
+      let pathUniswap = [TOKENS["WMAIN"], TOKENS['DAI']];
+
+      // Set encoded calls
+      const _bridgeEncodedCalls = [
+        wmaticBridge.interface.encodeFunctionData(
+            "wrap",
+            [
+              100000
+            ],
+        ),
+        uniswapV2SwapBridge.interface.encodeFunctionData(
+            "swapTokenToToken",
+            [100000, 1, pathUniswap]
+        ),
+        aaveV2DepositBridge.interface.encodeFunctionData("deposit", [
+          TOKENS['DAI'],
+          100000,
+        ]),
+      ];
+
+      // Transfer money to wallet (similar as DeFi Basket contract would have done)
+      const transactionHash = await owner.sendTransaction({
+        to: wallet.address,
+        value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
+      });
+      await transactionHash.wait();
+
+      // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
+      await wallet.useBridges(_bridgeAddresses, _bridgeEncodedCalls);
+
+      // Set bridges addresses
+      let _bridgeAddresses2 = [aaveV2DepositBridge.address, aaveV2DepositBridge.address];
+
+      // Set encoded calls
+      let _bridgeEncodedCalls2 = [
+        aaveV2DepositBridge.interface.encodeFunctionData("withdraw", [
+          TOKENS[TOKEN_TO_TEST],
+          0,
+        ]),
+        aaveV2DepositBridge.interface.encodeFunctionData("withdraw", [
+          TOKENS['DAI'],
+          0,
+        ]),
+      ];
+
+      await wallet.useBridges(_bridgeAddresses2, _bridgeEncodedCalls2);
 
       // Wallet token amount should be 0
       let token = await ethers.getContractAt(

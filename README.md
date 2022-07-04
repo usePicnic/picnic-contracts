@@ -28,7 +28,7 @@ contributing or have any questions, ping us on [Twitter](https://twitter.com/def
 
 We use [Yarn](https://yarnpkg.com/) as a dependency manager and [Hardhat](https://hardhat.org/)
 as a development environment for compiling, testing, and deploying our contracts. The contracts were written in [Solidity v0.8.6](https://github.com/ethereum/solidity),
-and their interfaces are explained in our [documentation for developers](https://docs.defibasket.org/indexpool/developer/architecture). 
+and their interfaces are explained in our [documentation for developers](https://docs.defibasket.org/technical-ref/readme-2). 
 
 ## Maintainers
 
