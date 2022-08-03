@@ -1,9 +1,10 @@
+/* eslint-disable  @typescript-eslint/no-unused-vars */
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import constants from "../constants";
 import { getFirstEvent } from "./utils";
 
-describe("JarvisV4Mint", function () {
+describe("JarvisV6Mint", function () {
     let owner;
     let other;
     let uniswapV2SwapBridge;
@@ -27,7 +28,7 @@ describe("JarvisV4Mint", function () {
 
         // Instantiate Aave bridge
         JarvisV6MintBridge = await ethers.getContractFactory(
-            "JarvisV4MintBridge"
+            "JarvisV6MintBridge"
         );
         jarvisV6MintBridge = await JarvisV6MintBridge.deploy();
 
@@ -71,10 +72,10 @@ describe("JarvisV4Mint", function () {
                 [100000, 1, pathUniswap]
             ),
             jarvisV6MintBridge.interface.encodeFunctionData("mint", [
-                '0x6cA82a7E54053B102e7eC452788cC19204e831de',
+                '0xAEc757BF73cc1f4609a1459205835Dd40b4e3F29',
                 TOKENS['USDC'], // address assetIn,
                 100_000, // uint256 percentageIn,
-                '0x2076648e2d9d452d55f4252cba9b162a1850db48', // TOKENS['jEUR'],// address assetOut,
+                TOKENS['jJPY'], // TOKENS['jEUR'],// address assetOut,
                 0, // uint256 minAmountOut
             ]),
         ];
@@ -98,9 +99,8 @@ describe("JarvisV4Mint", function () {
 
         _bridgeEncodedCalls = [
             jarvisV6MintBridge.interface.encodeFunctionData("redeem", [
-                '0x6cA82a7E54053B102e7eC452788cC19204e831de',
+                '0xAEc757BF73cc1f4609a1459205835Dd40b4e3F29',
                 TOKENS['jJPY'], // address assetIn,
-                '0x2076648e2d9d452d55f4252cba9b162a1850db48',
                 100_000, // uint256 percentageIn,
                 TOKENS['USDC'], // TOKENS['jEUR'],// address assetOut,
                 0, // uint256 minAmountOut

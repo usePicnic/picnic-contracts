@@ -29,5 +29,4 @@ interface IJarvisV6Mint {
         address assetOut,
         uint256 minAmountOut
     ) external;
-
 }

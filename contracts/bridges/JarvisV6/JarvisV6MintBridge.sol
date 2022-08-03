@@ -5,7 +5,7 @@ pragma solidity ^0.8.6;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/ISynthereumV2.sol";
 import "../interfaces/IJarvisV6Mint.sol";
-
+import "hardhat/console.sol";
 /**
  * @title JarvisV4DepositBridge
  * @author DeFi Basket
@@ -19,7 +19,7 @@ import "../interfaces/IJarvisV6Mint.sol";
  *
  */
 /// @custom:security-contact hi@defibasket.org
-contract JarvisV4MintBridge is IJarvisV6Mint {
+contract JarvisV6MintBridge is IJarvisV6Mint {
     /**
       * @notice Mints jTokens using Jarvis from USDC.
       *
@@ -41,6 +41,8 @@ contract JarvisV4MintBridge is IJarvisV6Mint {
 
         uint256 amount = IERC20(assetIn).balanceOf(address(this)) * percentageIn / 100000;
 
+        console.log('ha', amount);
+
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
         IERC20(assetIn).approve(address(jarvis), 0);
         IERC20(assetIn).approve(address(jarvis), amount);
@@ -52,7 +54,11 @@ contract JarvisV4MintBridge is IJarvisV6Mint {
         address(this) // address recipient;
         );
 
+        console.log('he');
+
         (uint256 amountOut,) = jarvis.mint(mintParams);
+
+        console.log('hi', amountOut);
 
         emit DEFIBASKET_JARVISV6_MINT(amount, amountOut);
     }
@@ -75,20 +81,28 @@ contract JarvisV4MintBridge is IJarvisV6Mint {
     ) external override {
         ISynthereumV2 jarvis = ISynthereumV2(synthereumAddress);
 
+
         uint256 amount = IERC20(assetIn).balanceOf(address(this)) * percentageIn / 100000;
+
+        console.log('la', amount);
 
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
         IERC20(assetIn).approve(address(jarvis), 0);
         IERC20(assetIn).approve(address(jarvis), amount);
 
+        console.log('ba', amount);
+
+
         ISynthereumV2.RedeemParams memory redeemParams = ISynthereumV2.RedeemParams(
-            minAmountOut, // Minimium amount of collateral that user wants to redeem (anti-slippage)
             amount, // Amount of synthetic tokens that user wants to use for redeeming
+            minAmountOut, // Minimium amount of collateral that user wants to redeem (anti-slippage)
             block.timestamp + 100000, // Expiration time of the transaction
             address(this) // Address to which send collateral tokens redeemed
         );
 
         (uint256 amountOut,) = jarvis.redeem(redeemParams);
+
+        console.log('aa', amountOut);
 
         emit DEFIBASKET_JARVISV6_REDEEM(amount, amountOut);
     }
