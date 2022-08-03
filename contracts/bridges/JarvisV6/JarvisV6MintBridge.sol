@@ -41,8 +41,6 @@ contract JarvisV6MintBridge is IJarvisV6Mint {
 
         uint256 amount = IERC20(assetIn).balanceOf(address(this)) * percentageIn / 100000;
 
-        console.log('ha', amount);
-
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
         IERC20(assetIn).approve(address(jarvis), 0);
         IERC20(assetIn).approve(address(jarvis), amount);
@@ -54,11 +52,7 @@ contract JarvisV6MintBridge is IJarvisV6Mint {
         address(this) // address recipient;
         );
 
-        console.log('he');
-
         (uint256 amountOut,) = jarvis.mint(mintParams);
-
-        console.log('hi', amountOut);
 
         emit DEFIBASKET_JARVISV6_MINT(amount, amountOut);
     }
@@ -81,17 +75,11 @@ contract JarvisV6MintBridge is IJarvisV6Mint {
     ) external override {
         ISynthereumV2 jarvis = ISynthereumV2(synthereumAddress);
 
-
         uint256 amount = IERC20(assetIn).balanceOf(address(this)) * percentageIn / 100000;
-
-        console.log('la', amount);
 
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
         IERC20(assetIn).approve(address(jarvis), 0);
         IERC20(assetIn).approve(address(jarvis), amount);
-
-        console.log('ba', amount);
-
 
         ISynthereumV2.RedeemParams memory redeemParams = ISynthereumV2.RedeemParams(
             amount, // Amount of synthetic tokens that user wants to use for redeeming
@@ -101,8 +89,6 @@ contract JarvisV6MintBridge is IJarvisV6Mint {
         );
 
         (uint256 amountOut,) = jarvis.redeem(redeemParams);
-
-        console.log('aa', amountOut);
 
         emit DEFIBASKET_JARVISV6_REDEEM(amount, amountOut);
     }
