@@ -5,7 +5,7 @@ import {BigNumber} from "ethers";
 const hre = require("hardhat");
 const prompts = require("prompts");
 
-const weiToString = (wei) => {
+const weiToString = (wei: BigNumber) : number => {
     return wei
         .div(
             BigNumber.from(10).pow(14)
@@ -22,6 +22,11 @@ const contractsToDeploy = [
         contractName: "DeFiBasket",
         interfaceName: "IDeFiBasket",
         filePath: "./artifacts/contracts/DeFiBasket.sol/DeFiBasket.json"
+    },
+    {
+        contractName: "TxSimulator",
+        interfaceName: "TxSimulator",
+        filePath: "./artifacts/contracts/TxSimulator.sol/TxSimulator.json"
     },
     {
         contractName: "AaveV2DepositBridge",
