@@ -41,24 +41,25 @@ contract UniswapV3SwapBridge is IUniswapV3Swap {
         address[] calldata tokenPath,
         uint256 amountInPercentage,
         uint256 minAmountOut)
-    external override {
+    external  override {
         uint256 amountIn = IERC20(tokenPath[0]).balanceOf(address(this)) * amountInPercentage / 100000;
 
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
         IERC20(tokenPath[0]).approve(address(swapRouter), 0);
         IERC20(tokenPath[0]).approve(address(swapRouter), amountIn);
 
-        bytes memory encodedCall = abi.encode(tokenPath[0], UniV3Pool(pool).fee(), tokenPath[1]);
-
-        ISwapRouter.ExactInputParams memory params = ISwapRouter.ExactInputParams({
-            path : encodedCall,
+        ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
+            tokenIn : tokenPath[0],
+            tokenOut: tokenPath[1],
+            fee: UniV3Pool(pool).fee(),
             recipient : address(this),
             deadline : block.timestamp + 100000,
             amountIn : amountIn,
-            amountOutMinimum : minAmountOut
+            amountOutMinimum : minAmountOut,
+            sqrtPriceLimitX96: 0 // max uint160
         });
 
-        uint256 amountOut = swapRouter.exactInput(params);
+        uint256 amountOut = swapRouter.exactInputSingle(params);
         emit DEFIBASKET_UNISWAPV3_SWAP(amountIn, amountOut);
     }
 }

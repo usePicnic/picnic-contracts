@@ -4,5 +4,5 @@ pragma solidity ^0.8.6;
 
 interface UniV3Pool {
 
-    function fee() external returns (uint24);
+    function fee() external view returns (uint24);
 }
