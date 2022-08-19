@@ -81,7 +81,6 @@ contract TxSimulator is IERC721Receiver {
 
         DBDataTypes.TokenData memory inputsII = DBDataTypes.TokenData({tokens: tokens, amounts: amountsII});
 
-
         defiBasket.createPortfolio(inputsII, bridgeAddressesII, bridgeEncodedCallsII);
 
         address walletAddress = defiBasket.walletOf(defiBasket.tokenCounter() - 1);
