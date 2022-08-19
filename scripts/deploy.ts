@@ -136,7 +136,12 @@ const contractsToDeploy = [
     {
         contractName: "JarvisV4MintBridge",
         interfaceName: "IJarvisV4Mint",
-        filePath: bridgeNameToFilePath("Kyber", "KyberLiquidityBridge")
+        filePath: bridgeNameToFilePath("JarvisV4", "JarvisV4MintBridge")
+    },
+    {
+        contractName: "JarvisV6MintBridge",
+        interfaceName: "IJarvisV6Mint",
+        filePath: bridgeNameToFilePath("JarvisV6", "JarvisV6MintBridge")
     },
 ]
 

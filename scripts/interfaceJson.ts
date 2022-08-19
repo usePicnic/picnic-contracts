@@ -48,7 +48,15 @@ const interfaces = [
     {
         interfaceName: "IUniswapV3Swap",
         filePath: bridgeNameToFilePath("IUniswapV3Swap")
-    }
+    },
+    {
+        interfaceName: "IJarvisV4Mint",
+        filePath: bridgeNameToFilePath("IJarvisV4Mint")
+    },
+    {
+        interfaceName: "IJarvisV6Mint",
+        filePath: bridgeNameToFilePath("IJarvisV6Mint")
+    },
 ]
 
 async function main() {
