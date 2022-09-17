@@ -143,6 +143,11 @@ const contractsToDeploy = [
         interfaceName: "IJarvisV6Mint",
         filePath: bridgeNameToFilePath("JarvisV6", "JarvisV6MintBridge")
     },
+    {
+        contractName: "MMFSwapBridge",
+        interfaceName: "IUniswapV2Liquidity",
+        filePath: bridgeNameToFilePath("MMF", "MMFSwapBridge")
+    },
 ]
 
 async function main() {
