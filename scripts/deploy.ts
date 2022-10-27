@@ -133,6 +133,11 @@ const contractsToDeploy = [
         interfaceName: "IJarvisV4Mint",
         filePath: bridgeNameToFilePath("Kyber", "KyberLiquidityBridge")
     },
+    {
+        contractName: "ClearpoolDepositBridge",
+        interfaceName: "IClearpoolDepositBridge",
+        filePath: bridgeNameToFilePath("Clearpool", "ClearpoolDepositBridge")
+    }
 ]
 
 async function main() {
