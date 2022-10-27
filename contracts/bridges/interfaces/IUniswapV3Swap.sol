@@ -14,4 +14,11 @@ interface IUniswapV3Swap {
         uint256 amountInPercentage,
         uint256 minAmountOut
     ) external;
+
+    function swapTokenToTokenWithPool(
+        address pool,
+        address[] calldata tokenPath,
+        uint256 amountInPercentage,
+        uint256 minAmountOut
+    ) external;
 }
