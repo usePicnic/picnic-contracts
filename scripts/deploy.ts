@@ -5,7 +5,7 @@ import {BigNumber} from "ethers";
 const hre = require("hardhat");
 const prompts = require("prompts");
 
-const weiToString = (wei) => {
+const weiToString = (wei: BigNumber) : number => {
     return wei
         .div(
             BigNumber.from(10).pow(14)
@@ -22,6 +22,11 @@ const contractsToDeploy = [
         contractName: "DeFiBasket",
         interfaceName: "IDeFiBasket",
         filePath: "./artifacts/contracts/DeFiBasket.sol/DeFiBasket.json"
+    },
+    {
+        contractName: "TxSimulator",
+        interfaceName: "TxSimulator",
+        filePath: "./artifacts/contracts/TxSimulator.sol/TxSimulator.json"
     },
     {
         contractName: "AaveV2DepositBridge",
@@ -131,7 +136,27 @@ const contractsToDeploy = [
     {
         contractName: "JarvisV4MintBridge",
         interfaceName: "IJarvisV4Mint",
-        filePath: bridgeNameToFilePath("Kyber", "KyberLiquidityBridge")
+        filePath: bridgeNameToFilePath("JarvisV4", "JarvisV4MintBridge")
+    },
+    {
+        contractName: "JarvisV6MintBridge",
+        interfaceName: "IJarvisV6Mint",
+        filePath: bridgeNameToFilePath("JarvisV6", "JarvisV6MintBridge")
+    },
+    {
+        contractName: "MMFSwapBridge",
+        interfaceName: "IUniswapV2Swap",
+        filePath: bridgeNameToFilePath("MMF", "MMFSwapBridge")
+    },
+    {
+        contractName: "MeshSwapBridge",
+        interfaceName: "IUniswapV2Swap",
+        filePath: bridgeNameToFilePath("Mesh", "MeshSwapBridge")
+    },
+    {
+        contractName: "DodoV2SwapBridge",
+        interfaceName: "IDodoV2Swap",
+        filePath: bridgeNameToFilePath("DodoV2", "DodoV2SwapBridge")
     },
     {
         contractName: "ClearpoolDepositBridge",

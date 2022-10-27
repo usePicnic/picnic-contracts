@@ -6,6 +6,8 @@ pragma abicoder v2;
 import '@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol';
 import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
 import "../interfaces/IUniswapV3Swap.sol";
+import "./interfaces/UniV3Pool.sol";
+
 /// @custom:security-contact hi@defibasket.org
 contract UniswapV3SwapBridge is IUniswapV3Swap {
     ISwapRouter constant swapRouter = ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
@@ -31,6 +33,33 @@ contract UniswapV3SwapBridge is IUniswapV3Swap {
         });
 
         uint256 amountOut = swapRouter.exactInput(params);
+        emit DEFIBASKET_UNISWAPV3_SWAP(amountIn, amountOut);
+    }
+
+    function swapTokenToTokenWithPool(
+        address pool,
+        address[] calldata tokenPath,
+        uint256 amountInPercentage,
+        uint256 minAmountOut)
+    external  override {
+        uint256 amountIn = IERC20(tokenPath[0]).balanceOf(address(this)) * amountInPercentage / 100000;
+
+        // Approve 0 first as a few ERC20 tokens are requiring this pattern.
+        IERC20(tokenPath[0]).approve(address(swapRouter), 0);
+        IERC20(tokenPath[0]).approve(address(swapRouter), amountIn);
+
+        ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
+            tokenIn : tokenPath[0],
+            tokenOut: tokenPath[1],
+            fee: UniV3Pool(pool).fee(),
+            recipient : address(this),
+            deadline : block.timestamp + 100000,
+            amountIn : amountIn,
+            amountOutMinimum : minAmountOut,
+            sqrtPriceLimitX96: 0 // max uint160
+        });
+
+        uint256 amountOut = swapRouter.exactInputSingle(params);
         emit DEFIBASKET_UNISWAPV3_SWAP(amountIn, amountOut);
     }
 }
