@@ -57,6 +57,10 @@ const interfaces = [
         interfaceName: "IJarvisV6Mint",
         filePath: bridgeNameToFilePath("IJarvisV6Mint")
     },
+    {
+        interfaceName: "IClearpoolDeposit",
+        filePath: bridgeNameToFilePath("IClearpoolDeposit")
+    }
 ]
 
 async function main() {

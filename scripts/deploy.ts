@@ -158,6 +158,11 @@ const contractsToDeploy = [
         interfaceName: "IDodoV2Swap",
         filePath: bridgeNameToFilePath("DodoV2", "DodoV2SwapBridge")
     },
+    {
+        contractName: "ClearpoolDepositBridge",
+        interfaceName: "IClearpoolDepositBridge",
+        filePath: bridgeNameToFilePath("Clearpool", "ClearpoolDepositBridge")
+    }
 ]
 
 async function main() {
