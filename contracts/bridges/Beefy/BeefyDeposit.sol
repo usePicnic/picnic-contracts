@@ -5,6 +5,7 @@ pragma solidity ^0.8.6;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IBeefyVaultV6.sol";
 import "../interfaces/IBeefyDeposit.sol";
+import "hardhat/console.sol";
 
 /**
  * @title BeefyDepositBridge
@@ -37,6 +38,8 @@ contract BeefyDepositBridge is IBeefyDeposit {
         address assetIn = vault.want();
         IERC20 assetInContract = IERC20(assetIn);
         uint256 amountIn = assetInContract.balanceOf(address(this)) * percentageIn / 100000;
+        
+        require(amountIn > 0, "BeefyDepositBridge: amountIn needs to be more than 0");
 
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
         assetInContract.approve(vaultAddress, 0);
@@ -66,6 +69,8 @@ contract BeefyDepositBridge is IBeefyDeposit {
         IERC20 mooToken = IERC20(vaultAddress);
         
         uint256 burnAmount = mooToken.balanceOf(address(this)) * percentageOut / 100000;
+
+        require(burnAmount > 0, "BeefyDepositBridge: burnAmount needs to be more than 0");
 
         // Compute balance of underlying asset before withdraw
         address assetReceived = vault.want();

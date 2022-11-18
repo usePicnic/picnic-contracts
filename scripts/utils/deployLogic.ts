@@ -31,6 +31,7 @@ const deployLogic = async ({ networkName, contractName, interfaceName , filePath
         name: contractName,
         interfaceName: interfaceName,
         address: deployedContract.address,
+        isBridge: true,
         abi: contract['abi']
     }
     
