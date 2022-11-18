@@ -162,6 +162,11 @@ const contractsToDeploy = [
         contractName: "ClearpoolDepositBridge",
         interfaceName: "IClearpoolDepositBridge",
         filePath: bridgeNameToFilePath("Clearpool", "ClearpoolDepositBridge")
+    },
+    {
+        contractName: "JarvisRewards",
+        interfaceName: "IJarvisRewards",
+        filePath: bridgeNameToFilePath("JarvisRewards", "JarvisRewards")
     }
 ]
 
