@@ -5,23 +5,19 @@ pragma solidity ^0.8.6;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IJarvisRewardsAdapter.sol";
 import "../interfaces/IJarvisRewards.sol";
-import "hardhat/console.sol";
+
 /**
  * @title JarvisRewards
- * @author joao@usepicnic.com
+ * @author João Ferreira - joao@usepicnic.com
  *
- * @notice Mints and redeems jTokens using Jarvis Price feed.
+ * @notice claim rewards from Jarvis
  *
- * @dev This contract has 2 main functions:
- *
- * 1. Mint jTokens from Jarvis
- * 2. Redeem jTokens from Jarvis
+ * @dev This contract claim rewards from Jarvis
  *
  */
 /// @custom:security-contact hi@usepicnic.com
 
 contract JarvisRewards is IJarvisRewards {
-
     function claim(
         address tokenAddress,
         address rewardsPool
