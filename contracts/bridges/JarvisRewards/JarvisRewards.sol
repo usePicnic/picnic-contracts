@@ -30,8 +30,8 @@ contract JarvisRewards is IJarvisRewards {
             tokens[i] = jarvisRewards.tokensHeld(i);
         } 
 
-        uint256 amount = IERC20(tokenAddress).balanceOf(address(this));
-
+        uint256 amount = IERC20(tokenAddress).balanceOf(address(this));        
+        IERC20(tokenAddress).approve(rewardsPool, amount);        
         jarvisRewards.claim(amount);
 
         emit DEFIBASKET_JARVIS_CLAIM(tokens);
