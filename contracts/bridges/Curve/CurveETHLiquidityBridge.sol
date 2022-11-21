@@ -19,7 +19,7 @@ import "../interfaces/ICurveLiquidity.sol";
  *
  */
 /// @custom:security-contact hi@defibasket.org
-contract CurveLiquidityBridge is ICurveLiquidity {
+contract CurveETHLiquidityBridge is ICurveLiquidity {
     /**
       * @notice Joins a Curve pool using multiple ERC20 tokens and stake the received LP token
       *
