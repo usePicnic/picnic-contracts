@@ -30,6 +30,14 @@ interface ICurveBasePool {
     function remove_liquidity(uint256 _amount, uint256[7] calldata _min_amounts) external returns (uint256[7] memory);
     function remove_liquidity(uint256 _amount, uint256[8] calldata _min_amounts) external returns (uint256[8] memory);
 
-    function remove_liquidity_one_coin(uint256 _token_amount, int128 i, uint256 _min_amount) external returns (uint256);
+    function remove_liquidity(uint256 _amount, uint256[2] calldata _min_amounts, bool use_eth) external returns (uint256[2] memory);
+    function remove_liquidity(uint256 _amount, uint256[3] calldata _min_amounts, bool use_eth) external returns (uint256[3] memory);
+    function remove_liquidity(uint256 _amount, uint256[4] calldata _min_amounts, bool use_eth) external returns (uint256[4] memory);
+    function remove_liquidity(uint256 _amount, uint256[5] calldata _min_amounts, bool use_eth) external returns (uint256[5] memory);
+    function remove_liquidity(uint256 _amount, uint256[6] calldata _min_amounts, bool use_eth) external returns (uint256[6] memory);
+    function remove_liquidity(uint256 _amount, uint256[7] calldata _min_amounts, bool use_eth) external returns (uint256[7] memory);
+    function remove_liquidity(uint256 _amount, uint256[8] calldata _min_amounts, bool use_eth) external returns (uint256[8] memory);
 
+    function remove_liquidity_one_coin(uint256 _token_amount, int128 i, uint256 _min_amount) external returns (uint256);
+    function remove_liquidity_one_coin(uint256 _token_amount, int128 i, uint256 _min_amount, bool use_eth) external returns (uint256);
 }
