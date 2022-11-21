@@ -167,6 +167,11 @@ const contractsToDeploy = [
         contractName: "JarvisRewards",
         interfaceName: "IJarvisRewards",
         filePath: bridgeNameToFilePath("JarvisRewards", "JarvisRewards")
+    },
+    {
+        contractName: "CurveETHLiquidityBridge",
+        interfaceName: "ICurveLiquidity",
+        filePath: bridgeNameToFilePath("Curve", "CurveETHLiquidityBridge")
     }
 ]
 
