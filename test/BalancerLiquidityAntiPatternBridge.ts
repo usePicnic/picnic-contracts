@@ -141,7 +141,7 @@ describe("BalancerLiquidityBridge", function () {
                 [
                     "0x8159462d255C1D24915CB51ec361F700174cD994", // poolAddress
                     100_000, // percentageOut
-                    ["0","0","0"], // uint256[] calldata minAmountsOut
+                    ["1","0","0"], // uint256[] calldata minAmountsOut
                 ],
             ),
         ];

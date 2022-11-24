@@ -106,19 +106,23 @@ contract BalancerLiquidityAntiPatternBridge is IBalancerLiquidity {
         // Get pool tokens
         bytes32 poolId = IBasePool(poolAddress).getPoolId();
         (address[] memory tokens, , ) = _balancerVault.getPoolTokens(poolId);
-        uint256 numTokens = tokens.length;
-              
-        uint256[] memory amountsWithoutLast = new uint256[](numTokens - 1);
-        for (uint256 i = 0; i < numTokens - 1; i = unchecked_inc(i)) { 
-            amountsWithoutLast[i] = minAmountsOut[i];
-        } 
+        uint256 numTokens = tokens.length;              
+       
+        // Getting token index inside the contract to make interface compatible with old Balancer interfaces :)
+        uint256 tokenIndex = 0;
+        uint256 maxAmount = 0;
+        for (uint256 i = 0; i < numTokens; i = unchecked_inc(i)) { 
+            if (minAmountsOut[i] > maxAmount) {
+                maxAmount = minAmountsOut[i];
+                tokenIndex = i;
+            }
+        }
 
-        // amountsWithoutLast[i] = liquidity;
         // See https://dev.balancer.fi/resources/joins-and-exits/pool-joins#userdata for more information
         bytes memory userData = abi.encode(
             IVault.ExitKind.EXACT_BPT_IN_FOR_ONE_TOKEN_OUT, 
             liquidity,
-            0 // tokenIndex
+            tokenIndex // tokenIndex
         );
 
         IVault.ExitPoolRequest memory request = IVault.ExitPoolRequest(
