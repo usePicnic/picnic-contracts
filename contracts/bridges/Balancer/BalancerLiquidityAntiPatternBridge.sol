@@ -7,7 +7,7 @@ import "./interfaces/IVault.sol";
 import "./interfaces/IBasePool.sol";
 import "./interfaces/IMerkleOrchard.sol";
 import "../interfaces/IBalancerLiquidity.sol";
-
+import "hardhat/console.sol";
 /**
  * @title BalancerLiquidityBridge
  * @author DeFi Basket
@@ -100,7 +100,6 @@ contract BalancerLiquidityAntiPatternBridge is IBalancerLiquidity {
         uint256 percentageOut,
         uint256[] calldata minAmountsOut
     ) external override {
-
         // Get LP token amount
         uint256 liquidity = IERC20(poolAddress).balanceOf(address(this)) * percentageOut / 100000;
 
@@ -108,13 +107,7 @@ contract BalancerLiquidityAntiPatternBridge is IBalancerLiquidity {
         bytes32 poolId = IBasePool(poolAddress).getPoolId();
         (address[] memory tokens, , ) = _balancerVault.getPoolTokens(poolId);
         uint256 numTokens = tokens.length;
-
-        // Compute token balances for emitting difference after exit in the withdraw event
-        uint256[] memory tokenBalances = new uint256[](numTokens);
-        for(uint256 i = 0; i < numTokens; i = unchecked_inc(i)) {
-            tokenBalances[i] = IERC20(tokens[i]).balanceOf(address(this));
-        }
-
+              
         uint256[] memory amountsWithoutLast = new uint256[](numTokens - 1);
         for (uint256 i = 0; i < numTokens - 1; i = unchecked_inc(i)) { 
             amountsWithoutLast[i] = minAmountsOut[i];
@@ -123,9 +116,9 @@ contract BalancerLiquidityAntiPatternBridge is IBalancerLiquidity {
         // amountsWithoutLast[i] = liquidity;
         // See https://dev.balancer.fi/resources/joins-and-exits/pool-joins#userdata for more information
         bytes memory userData = abi.encode(
-            IVault.ExitKind.EXACT_BPT_IN_FOR_TOKENS_OUT, 
-            amountsWithoutLast,
-            liquidity
+            IVault.ExitKind.EXACT_BPT_IN_FOR_ONE_TOKEN_OUT, 
+            liquidity,
+            0 // tokenIndex
         );
 
         IVault.ExitPoolRequest memory request = IVault.ExitPoolRequest(
@@ -145,6 +138,7 @@ contract BalancerLiquidityAntiPatternBridge is IBalancerLiquidity {
             liquidity
         );
     }
+    
     /**
       * @notice Increment integer without checking for overflow - only use in loops where you know the value won't overflow
       *
