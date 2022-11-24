@@ -111,23 +111,23 @@ contract BalancerLiquidityAntiPatternBridge is IBalancerLiquidity {
 
         // Compute token balances for emitting difference after exit in the withdraw event
         uint256[] memory tokenBalances = new uint256[](numTokens);
-        uint256[] memory tokenAmountsOut = new uint256[](numTokens);
         for(uint256 i = 0; i < numTokens; i = unchecked_inc(i)) {
             tokenBalances[i] = IERC20(tokens[i]).balanceOf(address(this));
         }
 
-
-        // get tokens without last element
-        address[] memory tokens2 = new address[](numTokens - 1);
+        uint256[] memory amountsWithoutLast = new uint256[](numTokens - 1);
         for (uint256 i = 0; i < numTokens - 1; i = unchecked_inc(i)) { 
-            tokens2[i] = tokens[i];
-        }
+            amountsWithoutLast[i] = minAmountsOut[i];
+        } 
 
+        // amountsWithoutLast[i] = liquidity;
         // See https://dev.balancer.fi/resources/joins-and-exits/pool-joins#userdata for more information
         bytes memory userData = abi.encode(
             IVault.ExitKind.EXACT_BPT_IN_FOR_TOKENS_OUT, 
+            amountsWithoutLast,
             liquidity
         );
+
         IVault.ExitPoolRequest memory request = IVault.ExitPoolRequest(
             tokens,
             minAmountsOut, 
@@ -136,14 +136,12 @@ contract BalancerLiquidityAntiPatternBridge is IBalancerLiquidity {
         );
 
         _balancerVault.exitPool(poolId, address(this), payable(address(this)), request);       
-        for(uint256 i = 0; i < numTokens; i = unchecked_inc(i)) {
-            tokenAmountsOut[i] = IERC20(tokens[i]).balanceOf(address(this)) - tokenBalances[i];
-        }        
+  
         // Emit event        
         emit DEFIBASKET_BALANCER_REMOVE_LIQUIDITY(
             poolId,
             tokens,
-            tokenAmountsOut,
+            minAmountsOut,
             liquidity
         );
     }

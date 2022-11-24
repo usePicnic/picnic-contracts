@@ -1,4 +1,5 @@
 import {expect} from "chai";
+import { AbiCoder } from "ethers/lib/utils";
 import {ethers} from "hardhat";
 import constants from "../constants";
 
@@ -147,9 +148,9 @@ describe("BalancerLiquidityBridge", function () {
             balancerLiquidityBridge.interface.encodeFunctionData(
                 "removeLiquidity",
                 [
-                    "0x8159462d255C1D24915CB51ec361F700174cD994", // pool address
-                    100_000, // address[] tokens - should be sorted numerically
-                    [0, 0, 0], // uint256[] percentages
+                    "0x8159462d255C1D24915CB51ec361F700174cD994", // poolAddress
+                    100_000, // percentageOut
+                    ["0","1","0"], // uint256[] calldata minAmountsOut
                 ],
             ),
         ];
@@ -172,6 +173,7 @@ describe("BalancerLiquidityBridge", function () {
             "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
             "0x8159462d255C1D24915CB51ec361F700174cD994")
         let lpTokenBalance = await lpToken.balanceOf(wallet.address);
+        console.log(lpTokenBalance);
         expect(lpTokenBalance).to.be.eq(0);
     });
 });
