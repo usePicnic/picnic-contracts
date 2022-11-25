@@ -38,11 +38,10 @@ describe("BalancerLiquidityBridge", function () {
     });
 
     describe("Actions", function () {
-        it("Add Liquidity - WMATIC/stMATIC Balancer pool", async function () {
+        it("Add Liquidity - WMATIC/MATICX Balancer pool", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
                 wmaticBridge.address,
-                uniswapV3SwapBridge.address,
                 balancerLiquidityBridge.address,
             ];
 
@@ -53,24 +52,15 @@ describe("BalancerLiquidityBridge", function () {
                     [
                         100_000
                     ],
-                ),
-                uniswapV3SwapBridge.interface.encodeFunctionData(
-                    "swapTokenToTokenWithPool",
-                    [
-                        "0x59db5eA66958b19641b6891Fc373B44b567ea15C",
-                        [TOKENS['WMAIN'], "0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4"],
-                        50_000,
-                        1,                        
-                    ],
-                ),                           
+                ),                          
                 balancerLiquidityBridge.interface.encodeFunctionData(
                     "addLiquidity",
                     [
-                        "0x8159462d255C1D24915CB51ec361F700174cD994", // pool address
-                        ["0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
-                            "0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4",
-                            "0x8159462d255C1D24915CB51ec361F700174cD994",], // address[] tokens - should be sorted numerically
-                        [100_000, 100_000, 0], // uint256[] percentages
+                        "0xb20fC01D21A50d2C734C4a1262B4404d41fA7BF0", // pool address
+                        ["0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",                           
+                            "0xb20fC01D21A50d2C734C4a1262B4404d41fA7BF0",
+                            "0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6",], // address[] tokens - should be sorted numerically
+                        [100_000, 0, 0], // uint256[] percentages
                         1, // uint256 minimumBPTout
                     ],
                 ),               
@@ -92,7 +82,7 @@ describe("BalancerLiquidityBridge", function () {
             // Wallet LP token amount should be greater than 0
             let lpToken = await ethers.getContractAt(
                 "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-                "0x8159462d255C1D24915CB51ec361F700174cD994")
+                "0xb20fC01D21A50d2C734C4a1262B4404d41fA7BF0")
             let lpTokenBalance = await lpToken.balanceOf(wallet.address);
             expect(lpTokenBalance).to.be.above(0);
         });
@@ -103,7 +93,6 @@ describe("BalancerLiquidityBridge", function () {
         // Set bridges addresses
         var _bridgeAddresses = [
             wmaticBridge.address,
-            uniswapV3SwapBridge.address,
             balancerLiquidityBridge.address,
             balancerLiquidityBridge.address,
         ];
@@ -115,16 +104,7 @@ describe("BalancerLiquidityBridge", function () {
                 [
                     100_000
                 ],
-            ),
-            uniswapV3SwapBridge.interface.encodeFunctionData(
-                "swapTokenToTokenWithPool",
-                [
-                    "0x59db5eA66958b19641b6891Fc373B44b567ea15C",
-                    [TOKENS['WMAIN'], "0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4"],
-                    50_000,
-                    1,                        
-                ],
-            ),                           
+            ),                          
             balancerLiquidityBridge.interface.encodeFunctionData(
                 "addLiquidity",
                 [
@@ -132,7 +112,7 @@ describe("BalancerLiquidityBridge", function () {
                     ["0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
                         "0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4",
                         "0x8159462d255C1D24915CB51ec361F700174cD994",], // address[] tokens - should be sorted numerically
-                    [100_000, 100_000, 0], // uint256[] percentages
+                    [100_000, 0, 0], // uint256[] percentages
                     1, // uint256 minimumBPTout
                 ],
             ),
