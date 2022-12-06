@@ -38,8 +38,7 @@ describe("BalancerLiquidityBridge", function () {
         wallet = await Wallet.deploy();
     });
 
-    describe("Actions", function () {
-        it("Add Liquidity - WMATIC/MATICX Balancer pool", async function () {
+        it("Stake to Gauge - Balancer Aave USD", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
                 wmaticBridge.address,
@@ -112,5 +111,96 @@ describe("BalancerLiquidityBridge", function () {
             let lpTokenBalance = await lpToken.balanceOf(wallet.address);
             expect(lpTokenBalance).to.be.above(0);
         });
-   });
+
+   it("Unstake from gauge - Balancer Aave USD", async function () {
+    // Set bridges addresses
+    var _bridgeAddresses = [
+        wmaticBridge.address,
+        uniswapV2SwapBridge.address,
+        balancerLiquidityBridge.address,
+        balancerLiquidityBridge.address,
+        balancerGauge.address,
+        balancerGauge.address,
+        balancerLiquidityBridge.address,
+    ];
+
+    // Set encoded calls
+    var _bridgeEncodedCalls = [
+        wmaticBridge.interface.encodeFunctionData(
+            "wrap",
+            [
+                100_000
+            ],
+        ),
+        uniswapV2SwapBridge.interface.encodeFunctionData(
+            "swapTokenToToken",
+            [
+                100_000,
+                1,
+                [TOKENS['WMAIN'], TOKENS['DAI']]
+            ],
+        ),      
+        balancerLiquidityBridge.interface.encodeFunctionData(
+            "batchSwap",                    
+            [
+                "0x178e029173417b1f9c8bc16dcec6f697bc323746000000000000000000000758", // bytes32 poolId, 
+                100_000, // uint256 percentageIn,
+                ["0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063", "0x178E029173417b1F9C8bC16DCeC6f697bC323746"],    // address[] calldata assets,
+                ["916222499044873720000", -81622904487372]    // int256[] calldata limits                                           
+            ],
+        ), 
+        balancerLiquidityBridge.interface.encodeFunctionData(
+            "batchSwap",                    
+            [
+                "0x48e6b98ef6329f8f0a30ebb8c7c960330d64808500000000000000000000075b", // bytes32 poolId, 
+                100_000, // uint256 percentageIn,
+                ["0x178E029173417b1F9C8bC16DCeC6f697bC323746", "0x48e6B98ef6329f8f0A30eBB8c7C960330d648085"],    // address[] calldata assets,
+                ["916222499044873720000", -81622904487372]    // int256[] calldata limits                                           
+            ],
+        ),     
+        balancerGauge.interface.encodeFunctionData(
+            "deposit",
+            [
+                "0x48e6B98ef6329f8f0A30eBB8c7C960330d648085",
+                "0x1c514fEc643AdD86aeF0ef14F4add28cC3425306",
+                100_000,
+            ]),
+        balancerGauge.interface.encodeFunctionData(
+            "withdraw",
+            [
+                "0x1c514fEc643AdD86aeF0ef14F4add28cC3425306",
+                100_000,
+            ]),
+        balancerLiquidityBridge.interface.encodeFunctionData(
+            "batchSwap",                    
+            [
+                "0x48e6b98ef6329f8f0a30ebb8c7c960330d64808500000000000000000000075b", // bytes32 poolId, 
+                100_000, // uint256 percentageIn,
+                ["0x48e6B98ef6329f8f0A30eBB8c7C960330d648085", "0x178E029173417b1F9C8bC16DCeC6f697bC323746"],    // address[] calldata assets,
+                ["916222499044873720000", -81622904487372]    // int256[] calldata limits                                           
+            ],
+        ),                  
+    ];
+
+    // Transfer money to wallet (similar as DeFi Basket contract would have done)
+    const transactionHash = await owner.sendTransaction({
+        to: wallet.address,
+        value: ethers.utils.parseEther("1"), // Sends exactly 1.0 ether
+    });
+    await transactionHash.wait();
+
+    // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
+    await wallet.useBridges(
+        _bridgeAddresses,
+        _bridgeEncodedCalls,
+    );
+
+    // Wallet LP token amount should be greater than 0
+    let lpToken = await ethers.getContractAt(
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+        "0x178E029173417b1F9C8bC16DCeC6f697bC323746")
+    let lpTokenBalance = await lpToken.balanceOf(wallet.address);
+    expect(lpTokenBalance).to.be.above(0);
 });
+});
+
