@@ -167,6 +167,26 @@ const contractsToDeploy = [
         contractName: "JarvisRewards",
         interfaceName: "IJarvisRewards",
         filePath: bridgeNameToFilePath("JarvisRewards", "JarvisRewards")
+    },
+    {
+        contractName: "CurveETHLiquidityBridge",
+        interfaceName: "ICurveLiquidity",
+        filePath: bridgeNameToFilePath("Curve", "CurveETHLiquidityBridge")
+    },
+    {
+        contractName: "BalancerLiquidityAntiPatternBridge",
+        interfaceName: "IBalancerLiquidity",
+        filePath: bridgeNameToFilePath("Balancer", "BalancerLiquidityAntiPatternBridge")
+    },
+    {
+        contractName: "BalancerBatchSwap",
+        interfaceName: "IBalancerBatchSwap",
+        filePath: bridgeNameToFilePath("Balancer", "BalancerBatchSwap")
+    },
+    {
+        contractName: "BalancerGauge",
+        interfaceName: "IGauge",
+        filePath: bridgeNameToFilePath("Balancer", "BalancerGauge")
     }
 ]
 
