@@ -5,17 +5,19 @@ pragma solidity ^0.8.6;
 
 import "./interfaces/IVault.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "../interfaces/IBalancerBatchSwap.sol";
 
 
-contract BalancerBatchSwap {
+contract BalancerBatchSwap is IBalancerBatchSwap {
     address constant balancerV2Address = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;    
-    IVault constant _balancerVault = IVault(balancerV2Address);   
-function batchSwap(
+    IVault constant _balancerVault = IVault(balancerV2Address);  
+
+    function batchSwap(
         bytes32 poolId, 
         uint256 percentageIn,    
         address[] calldata assets,
-        int256[] calldata limits
-    ) external  {
+        uint256 minAmountOut
+    ) external override {
         uint256 amountIn = IERC20(assets[0]).balanceOf(address(this)) * percentageIn / 100000;
 
         IERC20(assets[0]).approve(balancerV2Address, 0);
@@ -36,6 +38,10 @@ function batchSwap(
             payable(address(this)), // recipient
             false // toInternalBalance
         );
+        
+        int256[] memory limits = new int256[](2);
+        limits[0] = int(amountIn);
+        limits[1] = -int(minAmountOut);
 
         _balancerVault.batchSwap(
             IVault.SwapKind.GIVEN_IN,
@@ -44,6 +50,9 @@ function batchSwap(
             funds,
             limits,
             block.timestamp + 100000
-        );
+        );  
+
+        uint256[] memory amounts = new uint256[](1);
+        emit DEFIBASKET_BALANCER_ADD_LIQUIDITY(poolId, amounts, minAmountOut);
     }
     }
