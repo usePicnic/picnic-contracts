@@ -6,7 +6,7 @@ import "./interfaces/IGauge.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract BalancerGauge {    
-    event DEFIBASKET_BALANCER_CLAIM_REWARDS(
+    event DEFIBASKET_CLAIM_REWARDS(
         address[] tokens
     );    
 
@@ -38,7 +38,7 @@ contract BalancerGauge {
             rewards[i] = rewardToken;
         }
 
-        emit DEFIBASKET_BALANCER_CLAIM_REWARDS(rewards);        
+        emit DEFIBASKET_CLAIM_REWARDS(rewards);        
     }
 
     function claimRewards(
@@ -55,6 +55,6 @@ contract BalancerGauge {
             rewards[i] = rewardToken;
         }
 
-        emit DEFIBASKET_BALANCER_CLAIM_REWARDS(rewards);        
+        emit DEFIBASKET_CLAIM_REWARDS(rewards);        
     }   
     }
