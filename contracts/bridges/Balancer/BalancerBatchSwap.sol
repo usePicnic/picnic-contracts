@@ -12,23 +12,20 @@ contract BalancerBatchSwap {
     IVault constant _balancerVault = IVault(balancerV2Address);   
 function batchSwap(
         bytes32 poolId, 
-        uint256 percentageIn,
-        address assetIn,
-        uint256 assetInIndex,
-        uint256 assetOutIndex,
+        uint256 percentageIn,    
         address[] calldata assets,
         int256[] calldata limits
     ) external  {
-        uint256 amountIn = IERC20(assetIn).balanceOf(address(this)) * percentageIn / 100000;
+        uint256 amountIn = IERC20(assets[0]).balanceOf(address(this)) * percentageIn / 100000;
 
-        IERC20(assetIn).approve(balancerV2Address, 0);
-        IERC20(assetIn).approve(balancerV2Address, amountIn);
+        IERC20(assets[0]).approve(balancerV2Address, 0);
+        IERC20(assets[0]).approve(balancerV2Address, amountIn);
 
         IVault.BatchSwapStep[] memory batchSwapSteps = new IVault.BatchSwapStep[](1);
         batchSwapSteps[0] = IVault.BatchSwapStep(
             poolId, // poolId
-            assetInIndex, // assetInIndex
-            assetOutIndex, // assetOutIndex
+            0, // assetInIndex
+            1, // assetOutIndex
             amountIn, // amount
             "0x" // userData
         );   

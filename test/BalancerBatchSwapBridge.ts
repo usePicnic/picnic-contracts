@@ -64,9 +64,6 @@ describe("BalancerLiquidityBridge", function () {
                     [
                         "0x178e029173417b1f9c8bc16dcec6f697bc323746000000000000000000000758", // bytes32 poolId, 
                         100_000, // uint256 percentageIn,
-                        "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",   // address assetIn,
-                        0,    // uint256 assetInIndex,
-                        1,    // uint256 assetOutIndex,
                         ["0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063", "0x178E029173417b1F9C8bC16DCeC6f697bC323746"],    // address[] calldata assets,
                         ["916222499044873720000", -81622904487372]    // int256[] calldata limits                                           
                     ],
