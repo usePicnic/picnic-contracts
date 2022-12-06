@@ -2,10 +2,8 @@
 
 pragma solidity ^0.8.6;
 
-
 import "./interfaces/IGauge.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
 
 contract BalancerGauge {
 
@@ -22,16 +20,15 @@ contract BalancerGauge {
 
     function withdraw(
         address gaugeAddress,
-        uint256 percentageIn
+        uint256 percentageOut
     ) external {
-        uint256 amountOut = IERC20(gaugeAddress).balanceOf(address(this)) * percentageIn / 100000;
+        uint256 amountOut = IERC20(gaugeAddress).balanceOf(address(this)) * percentageOut / 100000;
         IGauge(gaugeAddress).withdraw(amountOut, true);           
     }
 
     function claimRewards(
         address gaugeAddress
     ) external {
-        IGauge(gaugeAddress).claim_rewards();           
+        IGauge(gaugeAddress).claim_rewards();   
     }   
-
     }

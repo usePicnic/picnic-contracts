@@ -11,6 +11,7 @@ describe("BalancerLiquidityBridge", function () {
     let wallet;
     let balancerLiquidityBridge;
     let wmaticBridge;
+    let balancerGauge;
 
     const ADDRESSES = constants['POLYGON'];
     const TOKENS = constants['POLYGON']['TOKENS'];
@@ -25,6 +26,9 @@ describe("BalancerLiquidityBridge", function () {
 
         let BalancerBatchSwap = await ethers.getContractFactory("BalancerBatchSwap");
         balancerLiquidityBridge = await BalancerBatchSwap.deploy();
+
+        let BalancerGauge = await ethers.getContractFactory("BalancerGauge");
+        balancerGauge = await BalancerGauge.deploy();
 
         let WMaticBridge = await ethers.getContractFactory("WMaticWrapBridge");
         wmaticBridge = await WMaticBridge.deploy();
@@ -41,6 +45,8 @@ describe("BalancerLiquidityBridge", function () {
                 wmaticBridge.address,
                 uniswapV2SwapBridge.address,
                 balancerLiquidityBridge.address,
+                balancerLiquidityBridge.address,
+                balancerGauge.address,
             ];
 
             // Set encoded calls
@@ -76,7 +82,14 @@ describe("BalancerLiquidityBridge", function () {
                         ["0x178E029173417b1F9C8bC16DCeC6f697bC323746", "0x48e6B98ef6329f8f0A30eBB8c7C960330d648085"],    // address[] calldata assets,
                         ["916222499044873720000", -81622904487372]    // int256[] calldata limits                                           
                     ],
-                ),               
+                ),     
+                balancerGauge.interface.encodeFunctionData(
+                    "deposit",
+                    [
+                        "0x48e6B98ef6329f8f0A30eBB8c7C960330d648085",
+                        "0x1c514fEc643AdD86aeF0ef14F4add28cC3425306",
+                        100_000,
+                    ]),
             ];
 
             // Transfer money to wallet (similar as DeFi Basket contract would have done)
@@ -95,7 +108,7 @@ describe("BalancerLiquidityBridge", function () {
             // Wallet LP token amount should be greater than 0
             let lpToken = await ethers.getContractAt(
                 "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-                "0x178E029173417b1F9C8bC16DCeC6f697bC323746")
+                "0x1c514fEc643AdD86aeF0ef14F4add28cC3425306")
             let lpTokenBalance = await lpToken.balanceOf(wallet.address);
             expect(lpTokenBalance).to.be.above(0);
         });
