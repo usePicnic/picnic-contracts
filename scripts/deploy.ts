@@ -177,6 +177,16 @@ const contractsToDeploy = [
         contractName: "BalancerLiquidityAntiPatternBridge",
         interfaceName: "IBalancerLiquidity",
         filePath: bridgeNameToFilePath("Balancer", "BalancerLiquidityAntiPatternBridge")
+    },
+    {
+        contractName: "BalancerBatchSwap",
+        interfaceName: "IBalancerBatchSwap",
+        filePath: bridgeNameToFilePath("Balancer", "BalancerBatchSwap")
+    },
+    {
+        contractName: "BalancerGauge",
+        interfaceName: "IGauge",
+        filePath: bridgeNameToFilePath("Balancer", "BalancerGauge")
     }
 ]
 

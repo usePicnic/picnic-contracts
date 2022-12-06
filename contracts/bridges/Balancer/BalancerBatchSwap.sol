@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../interfaces/IBalancerBatchSwap.sol";
 
 
-contract BalancerBatchSwap is IBalancerBatchSwap {
+contract BalancerBatchSwap {
     address constant balancerV2Address = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;    
     IVault constant _balancerVault = IVault(balancerV2Address);  
 
@@ -17,7 +17,7 @@ contract BalancerBatchSwap is IBalancerBatchSwap {
         uint256 percentageIn,    
         address[] calldata assets,
         uint256 minAmountOut
-    ) external override {
+    ) external {
         uint256 amountIn = IERC20(assets[0]).balanceOf(address(this)) * percentageIn / 100000;
 
         IERC20(assets[0]).approve(balancerV2Address, 0);
@@ -52,4 +52,4 @@ contract BalancerBatchSwap is IBalancerBatchSwap {
             block.timestamp + 100000
         );  
     }
-    }
+}
