@@ -38,7 +38,7 @@ contract BalancerBatchSwap is IBalancerBatchSwap {
             payable(address(this)), // recipient
             false // toInternalBalance
         );
-        
+
         int256[] memory limits = new int256[](2);
         limits[0] = int(amountIn);
         limits[1] = -int(minAmountOut);
@@ -51,8 +51,5 @@ contract BalancerBatchSwap is IBalancerBatchSwap {
             limits,
             block.timestamp + 100000
         );  
-
-        uint256[] memory amounts = new uint256[](1);
-        emit DEFIBASKET_BALANCER_ADD_LIQUIDITY(poolId, amounts, minAmountOut);
     }
     }

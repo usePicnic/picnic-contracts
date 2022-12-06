@@ -4,4 +4,5 @@ interface IGauge {
     function deposit(uint256 _value) external;
     function withdraw(uint256 _value, bool _claim_rewards) external;
     function claim_rewards() external;
+    function reward_tokens(uint256 i ) external returns (address);
 }

@@ -168,6 +168,7 @@ describe("BalancerLiquidityBridge", function () {
         balancerGauge.interface.encodeFunctionData(
             "withdraw",
             [
+                "0x48e6B98ef6329f8f0A30eBB8c7C960330d648085",
                 "0x1c514fEc643AdD86aeF0ef14F4add28cC3425306",
                 100_000,
             ]),
