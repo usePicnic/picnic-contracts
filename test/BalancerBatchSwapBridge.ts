@@ -67,6 +67,15 @@ describe("BalancerLiquidityBridge", function () {
                         ["0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063", "0x178E029173417b1F9C8bC16DCeC6f697bC323746"],    // address[] calldata assets,
                         ["916222499044873720000", -81622904487372]    // int256[] calldata limits                                           
                     ],
+                ), 
+                balancerLiquidityBridge.interface.encodeFunctionData(
+                    "batchSwap",                    
+                    [
+                        "0x48e6b98ef6329f8f0a30ebb8c7c960330d64808500000000000000000000075b", // bytes32 poolId, 
+                        100_000, // uint256 percentageIn,
+                        ["0x178E029173417b1F9C8bC16DCeC6f697bC323746", "0x48e6B98ef6329f8f0A30eBB8c7C960330d648085"],    // address[] calldata assets,
+                        ["916222499044873720000", -81622904487372]    // int256[] calldata limits                                           
+                    ],
                 ),               
             ];
 
