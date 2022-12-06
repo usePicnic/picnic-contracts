@@ -21,6 +21,9 @@ function batchSwap(
     ) external  {
         uint256 amountIn = IERC20(assetIn).balanceOf(address(this)) * percentageIn / 100000;
 
+        IERC20(assetIn).approve(balancerV2Address, 0);
+        IERC20(assetIn).approve(balancerV2Address, amountIn);
+
         IVault.BatchSwapStep[] memory batchSwapSteps = new IVault.BatchSwapStep[](1);
         batchSwapSteps[0] = IVault.BatchSwapStep(
             poolId, // poolId
