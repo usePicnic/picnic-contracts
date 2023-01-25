@@ -187,6 +187,11 @@ const contractsToDeploy = [
         contractName: "BalancerGauge",
         interfaceName: "IGauge",
         filePath: bridgeNameToFilePath("Balancer", "BalancerGauge")
+    },
+    {
+        contractName: "JarvisWrap",
+        interfaceName: "IJarvisWrap",
+        filePath: bridgeNameToFilePath("JarvisWrap", "JarvisWrap")
     }
 ]
 
