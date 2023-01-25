@@ -5,7 +5,7 @@ pragma solidity ^0.8.6;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/ISynthereumV2.sol";
 import "../interfaces/IJarvisV6Mint.sol";
-import "hardhat/console.sol";
+
 /**
  * @title JarvisV4DepositBridge
  * @author DeFi Basket
