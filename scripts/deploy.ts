@@ -192,6 +192,11 @@ const contractsToDeploy = [
         contractName: "JarvisWrap",
         interfaceName: "IJarvisWrap",
         filePath: bridgeNameToFilePath("JarvisWrap", "JarvisWrap")
+    },
+    {
+        contractName: "OneInchBridge",
+        interfaceName: "IOneInchBridge",
+        filePath: bridgeNameToFilePath("OneInch", "OneInchBridge")
     }
 ]
 
