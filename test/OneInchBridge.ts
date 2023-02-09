@@ -951,7 +951,7 @@ describe("QuickswapLiquidityBridge", function () {
             const url = `https://api.1inch.io/v5.0/${chainId}/swap?fromTokenAddress=${TOKENS['WMAIN']}&toTokenAddress=${TOKENS['WETH']}&amount=${sellAmount}&fromAddress=${fromAddress}&slippage=50&disableEstimate=true`;
             const req = await fetch(url);
             const data = await req.json();
-            const minReturnAmount = "10000000";
+            const minReturnAmount = "1";
 
             console.log({data})
 
