@@ -36,6 +36,7 @@ struct SwapDescription {
 contract OneInchBridge {        
     function swap(
             address oneInchAddress,
+            uint256 minReturnAmount,
             IAggregationExecutor executor,
             SwapDescription calldata desc,
             bytes calldata permit,
@@ -52,7 +53,7 @@ contract OneInchBridge {
                 srcReceiver: desc.srcReceiver,
                 dstReceiver: payable(address(this)),
                 amount: amount,
-                minReturnAmount: 1000000,
+                minReturnAmount: minReturnAmount, // This needs to be improved eventually
                 flags: desc.flags
             });
            
