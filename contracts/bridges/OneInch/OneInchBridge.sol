@@ -1,6 +1,7 @@
 pragma solidity ^0.8.6;
 
 import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
+import "hardhat/console.sol";
 
 interface IAggregationExecutor {
     /// @notice propagates information about original msg.sender and executes arbitrary data
@@ -48,12 +49,14 @@ contract OneInchBridge {
                 srcToken: desc.srcToken,
                 dstToken: desc.dstToken,
                 srcReceiver: desc.srcReceiver,
-                dstReceiver: desc.dstReceiver,
-                amount: amount,
-                minReturnAmount: 1,
+                dstReceiver: payable(address(this)),
+                amount: desc.amount,
+                minReturnAmount: desc.minReturnAmount,
                 flags: desc.flags
             });
 
+            console.log("address", address(this));
+            
             OneInchInterface oneInch = OneInchInterface(oneInchAddress);
             oneInch.swap(
                 executor,
