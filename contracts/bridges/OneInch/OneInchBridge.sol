@@ -44,19 +44,18 @@ contract OneInchBridge {
         external
         {
             uint256 amount = desc.srcToken.balanceOf(address(this));
+            desc.srcToken.approve(oneInchAddress, amount);
 
             SwapDescription memory updatedDescription = SwapDescription({
                 srcToken: desc.srcToken,
                 dstToken: desc.dstToken,
                 srcReceiver: desc.srcReceiver,
                 dstReceiver: payable(address(this)),
-                amount: desc.amount,
-                minReturnAmount: desc.minReturnAmount,
+                amount: amount,
+                minReturnAmount: 1000000,
                 flags: desc.flags
             });
-
-            console.log("address", address(this));
-            
+           
             OneInchInterface oneInch = OneInchInterface(oneInchAddress);
             oneInch.swap(
                 executor,
