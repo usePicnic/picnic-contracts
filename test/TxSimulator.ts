@@ -1,7 +1,59 @@
 import {expect} from "chai";
 import {ethers} from "hardhat";
-import { getFirstEvent } from "./utils";
 import constants from "../constants";
+
+function getAllowIndex(
+    slot,
+    from,
+    to
+) {
+    const allowTemp = ethers.utils.solidityKeccak256(
+        ["uint256", "uint256"],
+        [from, slot]
+        );
+
+    return ethers.utils.solidityKeccak256(
+    ["uint256", "uint256"],
+    [to, allowTemp]
+    );
+}
+
+function getBalanceIndex(slot, from) {
+    return ethers.utils.solidityKeccak256(
+    ["uint256", "uint256"],
+    [from, slot]
+    );
+    
+  }
+
+function generateTokenApprovalStateDiff(
+    asset,
+    from,
+    to
+  ) {
+    const allowIndex = getAllowIndex(
+      asset.allowSlot, 
+      from,
+      to
+    );
+  
+    const balanceIndex = getBalanceIndex(
+      asset.balanceSlot, 
+      from,
+    );
+  
+  
+    const stateDiff = {
+      [asset.address]: {
+        stateDiff: {
+          [allowIndex]: "0x" + "f".repeat(64),
+          [balanceIndex]: "0x" + "f".repeat(64),
+        },
+      },
+    };
+  
+    return stateDiff;
+}
 
 describe("TxSimulator", function () {
     let owner : any;
@@ -29,13 +81,12 @@ describe("TxSimulator", function () {
         wmaticBridge = await WMaticBridge.deploy() as any;
 
         uniswapV2Router02 = await ethers.getContractAt("IUniswapV2Router02", ADDRESSES["UNISWAP_V2_ROUTER"]);
-    });
+    }); 
 
-    describe("From Network Token", function () {
+    describe("Simulator", function () {
         it("WMATIC -> USDC", async function () {
             // Set bridges addresses
             var _bridgeAddresses = [
-                wmaticBridge.address,
                 uniswapV2SwapBridge.address,
             ];
 
@@ -47,12 +98,6 @@ describe("TxSimulator", function () {
 
             // Set encoded calls
             var _bridgeEncodedCalls = [
-                wmaticBridge.interface.encodeFunctionData(
-                    "wrap",
-                    [
-                        100000
-                    ],
-                ),
                 uniswapV2SwapBridge.interface.encodeFunctionData(
                     "swapTokenToToken",
                     [
@@ -63,90 +108,40 @@ describe("TxSimulator", function () {
                 ),
             ];
 
-            // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
-            const balance = await txSimulator.callStatic.simulateFromNetworkToken(
-                {tokens:[], amounts:[]},
+            
+            const asset = {
+                address: TOKENS['WMAIN'],
+                allowSlot: 4,
+                balanceSlot: 3
+            }
+
+            const from = owner.address;
+
+            const stateOverrides = generateTokenApprovalStateDiff(
+                asset,
+                from,
+                txSimulator.address
+              );
+
+            const txSimulatorData = await txSimulator.populateTransaction.simulatePicnicTx(
+                {tokens:[TOKENS['WMAIN']], amounts:[ethers.utils.parseEther("100")]},
                 _bridgeAddresses,
                 _bridgeEncodedCalls,
                 TOKENS['USDC'],
-                {value: ethers.utils.parseEther("100")} // overrides
             );
-            // const tx = await pendingTx.wait();
-            console.log('balance', balance.toNumber())
-        
-            expect(balance).to.be.above(0);
-        })
-    })
 
-    describe("From Token", function () {
-        it("DAI -> USDC", async function () {
-            // Set bridges addresses
-            const _bridgeAddresses = [
-                wmaticBridge.address,
-                uniswapV2SwapBridge.address,
-            ];
+            const callData = {
+                from: owner.address,
+                to: txSimulator.address,
+                data: txSimulatorData.data,
+            }
 
-            // Set path
-            const pathUniswap = [
-                TOKENS['WMAIN'],
-                TOKENS['DAI'],
-            ];
+            const balance = await provider.send("eth_call", [
+                callData,
+                "latest",
+                stateOverrides,
+              ]);
 
-            // Set encoded calls
-            const _bridgeEncodedCalls = [
-                wmaticBridge.interface.encodeFunctionData(
-                    "wrap",
-                    [
-                        100000
-                    ],
-                ),
-                uniswapV2SwapBridge.interface.encodeFunctionData(
-                    "swapTokenToToken",
-                    [
-                        100000,
-                        1,
-                        pathUniswap
-                    ],
-                ),
-            ];
-
-        
-        // Bridge addresses
-        const _bridgeAddressesII = [
-            uniswapV2SwapBridge.address,
-        ];
-
-        // Set path
-        const pathUniswapII = [
-            TOKENS['DAI'],
-            TOKENS['USDC'],
-        ];
-
-        // Set encoded calls
-        const _bridgeEncodedCallsII = [
-            uniswapV2SwapBridge.interface.encodeFunctionData(
-                "swapTokenToToken",
-                [
-                    100000,
-                    1,
-                    pathUniswapII
-                ],
-            ),
-        ];
-
-            // Execute bridge calls (buys DAI on Uniswap and deposit on Aave)
-            const balance = await txSimulator.callStatic.simulateFromAnyToken(
-                {tokens:[], amounts:[]},
-                _bridgeAddresses,
-                _bridgeEncodedCalls,
-                TOKENS['DAI'],
-                ethers.utils.parseEther("1"),
-                _bridgeAddressesII,
-                _bridgeEncodedCallsII,
-                TOKENS['USDC'],
-                {value: ethers.utils.parseEther("100")} // overrides
-            );
-            // const tx = await pendingTx.wait();
             console.log('balance', balance.toNumber())
         
             expect(balance).to.be.above(0);
