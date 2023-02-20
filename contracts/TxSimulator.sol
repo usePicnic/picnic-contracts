@@ -20,6 +20,7 @@ contract TxSimulator is IERC721Receiver {
         bytes[] calldata bridgeEncodedCalls,
         address outputToken
     ) external returns (uint256) {
+        IERC20(inputs.tokens[0]).transferFrom(msg.sender, address(this), inputs.amounts[0]);
         IERC20(inputs.tokens[0]).approve(defiBasketAddress, inputs.amounts[0]);
         defiBasket.createPortfolio(inputs, bridgeAddresses, bridgeEncodedCalls);
         uint256 tokenCounter = defiBasket.tokenCounter();
