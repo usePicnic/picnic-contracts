@@ -7,12 +7,13 @@ contract OneInchBridge is IOneInchBridge {
     function swap(
         address oneInchAddress,
         uint256 minReturnAmount,
+        uint256 amountInPercentage,
         IAggregationExecutor executor,
         SwapDescription calldata desc,
         bytes calldata permit,
         bytes calldata data
     ) external override {
-        uint256 amount = desc.srcToken.balanceOf(address(this));
+        uint256 amount = desc.srcToken.balanceOf(address(this)) * amountInPercentage / 100000;
         desc.srcToken.approve(oneInchAddress, amount);
 
         SwapDescription memory updatedDescription = SwapDescription({

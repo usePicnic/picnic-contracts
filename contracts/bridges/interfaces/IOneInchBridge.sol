@@ -10,6 +10,7 @@ interface IOneInchBridge {
     function swap(
         address oneInchAddress,
         uint256 minReturnAmount,
+        uint256 amountInPercentage,
         IAggregationExecutor executor,
         SwapDescription calldata desc,
         bytes calldata permit,

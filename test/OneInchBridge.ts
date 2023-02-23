@@ -945,11 +945,11 @@ describe("QuickswapLiquidityBridge", function() {
 
   describe("Actions", function() {
     it("One Inch - Altered Swap", async function() {
-      const sellAmount = ethers.utils.parseEther("1").toString();
+      const sellAmount = ethers.utils.parseEther("122").toString();
       const fromAddress = "0x81ae7583f06c2bc141b9141fb9d701f0f2f59133";
       const chainId = 137;
 
-      const url = `https://api.1inch.io/v5.0/${chainId}/swap?fromTokenAddress=${TOKENS["WMAIN"]}&toTokenAddress=${TOKENS["WETH"]}&amount=${sellAmount}&fromAddress=${fromAddress}&slippage=50&disableEstimate=true`;
+      const url = `https://api.1inch.io/v5.0/${chainId}/swap?fromTokenAddress=${TOKENS["WMAIN"]}&toTokenAddress=${"0x491a4eB4f1FC3BfF8E1d2FC856a6A46663aD556f"}&amount=${sellAmount}&fromAddress=${fromAddress}&slippage=50&disableEstimate=true`;
       const req = await fetch(url);
       const data = await req.json();
       const minReturnAmount = "1";
@@ -963,7 +963,15 @@ describe("QuickswapLiquidityBridge", function() {
       });
 
       console.log({ decodedTx });
-      console.log(decodedTx.args.desc);
+      console.log('final args', [
+        data.tx.to, // address oneInchAddress,
+        minReturnAmount, // uint256 minReturnAmount,
+        100_000, //  uint256 amountInPercentage,        ,
+        decodedTx.args.executor, // IAggregationExecutor executor,
+        decodedTx.args.desc, // SwapDescription calldata desc,
+        decodedTx.args.permit, // bytes calldata permit,
+        decodedTx.args.data, // bytes calldata data
+      ]);
 
       // Set bridges addresses
       var _bridgeAddresses = [wmaticBridge.address, oneInchBridge.address];
@@ -994,7 +1002,7 @@ describe("QuickswapLiquidityBridge", function() {
       // Wallet DAI amount should be 0
       let lpToken = await ethers.getContractAt(
         "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-        TOKENS["WETH"]
+        "0x491a4eB4f1FC3BfF8E1d2FC856a6A46663aD556f"
       );
       let lpTokenBalance = await lpToken.balanceOf(wallet.address);
       expect(lpTokenBalance).to.be.above(0);
