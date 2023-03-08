@@ -197,6 +197,11 @@ const contractsToDeploy = [
         contractName: "OneInchBridge",
         interfaceName: "IOneInchBridge",
         filePath: bridgeNameToFilePath("OneInch", "OneInchBridge")
+    },
+    {
+        contractName: "ParaswapBridge",
+        interfaceName: "IParaswapBridge",
+        filePath: bridgeNameToFilePath("Paraswap", "ParaswapBridge")
     }
 ]
 
