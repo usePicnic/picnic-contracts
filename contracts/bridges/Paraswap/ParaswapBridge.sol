@@ -6,11 +6,12 @@ import "../interfaces/IParaswapBridge.sol";
 contract ParaswapBridge is IParaswapBridge {
     function swap(
         address paraswapAddress,
+        address approveAddress,
         SimpleData calldata paraswapParams,
         uint256 amountInPercentage
     ) external override {
         uint256 amount = IERC20(paraswapParams.fromToken).balanceOf(address(this))*amountInPercentage/100000;
-        IERC20(paraswapParams.fromToken).approve(paraswapAddress, amount);
+        IERC20(paraswapParams.fromToken).approve(approveAddress, amount);
 
         SimpleData memory updatedDescription = SimpleData({
             fromToken: paraswapParams.fromToken,

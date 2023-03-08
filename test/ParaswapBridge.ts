@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import constants from "../constants";
+import fetch from "node-fetch";
 
 const PARASWAP_ABI = [
     {
@@ -310,10 +311,6 @@ describe("ParaswapBridge", function(){
         // Get 2 signers to enable to test for permission rights
         [owner, other] = await ethers.getSigners();
 
-        // Instantiate Uniswap bridge
-        UniswapV2SwapBridge = await ethers.getContractFactory("QuickswapSwapBridge");
-        uniswapV2SwapBridge = await UniswapV2SwapBridge.deploy();
-
         // Instantiate Paraswap bridge
         ParaswapBridge = await ethers.getContractFactory("ParaswapBridge");
         ParaswapBridge = await ParaswapBridge.deploy();
@@ -332,7 +329,7 @@ describe("ParaswapBridge", function(){
 
         const sellToken = "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270";
         const buyToken = "0x2791bca1f2de4661ed88a30c99a7a9449aa84174";
-        const sellAmount = "1000000000000000000";
+        const sellAmount = ethers.utils.parseEther("1").toString();
         const priceUrl = `https://apiv5.paraswap.io/prices/?srcToken=${sellToken}&destToken=${buyToken}&amount=${sellAmount}&side=SELL&network=137`;
 
         const req = await fetch(priceUrl);
@@ -382,6 +379,7 @@ describe("ParaswapBridge", function(){
             wmaticBridge.interface.encodeFunctionData("wrap", [100000]),
             ParaswapBridge.interface.encodeFunctionData("swap", [
                 PARASWAP_ADDRESS,
+                body.tokenTransferProxy,
                 decodedFunctionCallList,
                 100000,
             ])

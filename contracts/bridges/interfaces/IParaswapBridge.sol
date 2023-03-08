@@ -9,6 +9,7 @@ interface IParaswapBridge{
 
     function swap(
         address paraswapAddress,
+        address approveAddress,
         SimpleData calldata paraswapParams,
         uint256 amountInPercentage
     ) external;
