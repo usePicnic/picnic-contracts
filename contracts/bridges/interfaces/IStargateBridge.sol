@@ -16,7 +16,7 @@ interface IStargateBridge {
         uint256 amountInPercentage,
         address tokenIn,
         address tokenOut,
-        uint16 _poolId
+        uint256 _poolId
     ) external;
 
     function removeLiquidity(
