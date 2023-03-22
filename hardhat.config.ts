@@ -46,7 +46,7 @@ module.exports = {
       accounts: {
         mnemonic: process.env.POLYGON_TEST_MNEMONIC
       },
-      gasPrice: 60*gwei
+      gasPrice: 250*gwei
     }
   },
   etherscan: {
