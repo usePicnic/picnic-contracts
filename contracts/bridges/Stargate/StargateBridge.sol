@@ -2,13 +2,13 @@
 
 pragma solidity ^0.8.6;
 
-import "./interfaces/StargateRouter.sol";
+import "./interfaces/IStargateRouter.sol";
 import "../interfaces/IStargateBridge.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
 
 contract StargateBridge is IStargateBridge {
-    address constant routerAddress = 0x45A01E4e04F14f7A4a6702c74187c5F6222033cd;
-    StargateRouter stargateRouter = StargateRouter(routerAddress);
+    address constant routerAddress = 0x45A01E4e04F14f7A4a6702c74187c5F6222033cd;   
+    IStargateRouter constant stargateRouter = IStargateRouter(routerAddress);
 
     function addLiquidity(
         uint256 amountInPercentage,
