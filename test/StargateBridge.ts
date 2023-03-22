@@ -81,7 +81,7 @@ describe("StargateDeposit", function () {
   });
 
   describe("Actions", function () {
-    it("Deposit - Buys TOKEN_TO_TEST and then deposits on Aave", async function () {
+    it("Deposit - Buys TOKEN_TO_TEST and then deposits on Stargate", async function () {
       // Wallet token amount should be 0
       let token = await ethers.getContractAt(
         "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
@@ -99,15 +99,17 @@ describe("StargateDeposit", function () {
       expect(amTokenBalance).to.be.above(0);
     });
 
-    it("Withdraw - Buys from TOKEN_TO_TEST and deposits on Aave, then withdraws from Aave", async function () {
+    it("Withdraw - Buys from TOKEN_TO_TEST and deposits on Stargate, then withdraws", async function () {
       // Set bridges addresses
       let _bridgeAddresses = [stargateBridge.address];
 
       // Set encoded calls
       let _bridgeEncodedCalls = [
         stargateBridge.interface.encodeFunctionData("removeLiquidity", [
-          TOKENS[TOKEN_TO_TEST],
-          100000,
+          100000, // uint256 amountOutPercentage,
+          tokenOut, // address tokenIn,
+          TOKENS[TOKEN_TO_TEST], // address tokenOut,
+          2 // uint16 _poolId
         ]),
       ];
 

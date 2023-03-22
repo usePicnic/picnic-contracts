@@ -202,7 +202,12 @@ const contractsToDeploy = [
         contractName: "ParaswapBridge",
         interfaceName: "IParaswapBridge",
         filePath: bridgeNameToFilePath("Paraswap", "ParaswapBridge")
-    }
+    },
+    {
+        contractName: "StargateBridge",
+        interfaceName: "IStargateBridge",
+        filePath: bridgeNameToFilePath("Stargate", "StargateBridge")
+    },
 ]
 
 async function main() {
