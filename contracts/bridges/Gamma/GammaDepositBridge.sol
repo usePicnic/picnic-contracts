@@ -24,9 +24,9 @@ contract GammaDepositBridge is IGammaDeposit {
         for (uint256 i = 0; i < numTokens; i++) { 
             amountsIn[i] = IERC20(tokens[i]).balanceOf(address(this)) * percentages[i] / 100_000;
             // Approve 0 first as a few ERC20 tokens are requiring this pattern.
-            IERC20(tokens[i]).approve(hypervisorRouterAddress, 0);
-            IERC20(tokens[i]).approve(hypervisorRouterAddress, amountsIn[i]);
-        }    
+            IERC20(tokens[i]).approve(hypervisorAddress, 0);
+            IERC20(tokens[i]).approve(hypervisorAddress, amountsIn[i]);
+        }         
 
         uint256 amountOut = hypervisorRouter.deposit(
             amountsIn[0],
