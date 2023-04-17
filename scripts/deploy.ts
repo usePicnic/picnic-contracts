@@ -208,6 +208,11 @@ const contractsToDeploy = [
         interfaceName: "IStargateBridge",
         filePath: bridgeNameToFilePath("Stargate", "StargateBridge")
     },
+    {
+        contractName: "GammaDepositBridge",
+        interfaceName: "IGammaDeposit",
+        filePath: bridgeNameToFilePath("IGammaDeposit", "GammaDepositBridge")
+    },
 ]
 
 async function main() {
