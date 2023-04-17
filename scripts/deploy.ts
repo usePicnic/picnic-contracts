@@ -211,7 +211,7 @@ const contractsToDeploy = [
     {
         contractName: "GammaDepositBridge",
         interfaceName: "IGammaDeposit",
-        filePath: bridgeNameToFilePath("IGammaDeposit", "GammaDepositBridge")
+        filePath: bridgeNameToFilePath("Gamma", "GammaDepositBridge")
     },
 ]
 
