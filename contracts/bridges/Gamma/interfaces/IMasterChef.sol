@@ -6,7 +6,7 @@ interface IMasterChef {
   function deposit(uint256 pid, uint256 amount, address to) external;
   function withdrawAndHarvest(uint256 pid, uint256 amount, address to) external;
   function harvest(uint256 pid, address to) external;
-
+  function getRewarder(uint256 pid) external view returns (address);
   function userInfo(
     uint256 poolId,
     address account

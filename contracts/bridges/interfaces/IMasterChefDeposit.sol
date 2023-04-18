@@ -9,9 +9,11 @@ interface IMasterChefDeposit {
     );
     event DEFIBASKET_MASTERCHEF_UNSTAKE(
         uint256 amountIn,
-        uint256 amountOut
+        uint256 amountOut,
+        address[] rewardTokens
     );
-    event DEFIBASKET_MASTERCHEF_CLAIM(        
+    event DEFIBASKET_MASTERCHEF_CLAIM(  
+        address[] rewardTokens
     );
 
     function stake(

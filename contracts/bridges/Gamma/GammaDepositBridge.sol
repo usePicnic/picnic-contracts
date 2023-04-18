@@ -41,6 +41,7 @@ contract GammaDepositBridge is IGammaDeposit {
 
     function withdraw(
         address hypervisorAddress, 
+        address[] calldata tokens,
         uint256 percentage,
         uint256[4] calldata minAmountsIn
     ) external override {
