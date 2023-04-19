@@ -26,11 +26,13 @@ contract GammaDepositBridge is IGammaDeposit {
             // Approve 0 first as a few ERC20 tokens are requiring this pattern.
             IERC20(tokens[i]).approve(hypervisorAddress, 0);
             IERC20(tokens[i]).approve(hypervisorAddress, amountsIn[i]);
-        }         
+        }     
+
+        (uint256 depositA, uint256 depositB) = capRatios(tokens, amountsIn, hypervisorAddress);
 
         uint256 amountOut = hypervisorRouter.deposit(
-            amountsIn[0],
-            amountsIn[1],
+            depositA,
+            depositB,
             address(this),
             hypervisorAddress,
             minAmountsin
@@ -58,4 +60,32 @@ contract GammaDepositBridge is IGammaDeposit {
 
         emit DEFIBASKET_GAMMA_WITHDRAW(amountIn, amountA, amountB);
     }
+
+    function capRatios( 
+        address[] calldata tokens, 
+        uint256[] memory amountsIn, 
+        address hypervisorAddress
+    ) internal view returns (uint256, uint256) {    
+        (uint256 startA, uint256 endA) = hypervisorRouter.getDepositAmount(
+            hypervisorAddress,
+            tokens[0],
+            amountsIn[0]            
+        );
+
+        (uint256 startB, uint256 endB) = hypervisorRouter.getDepositAmount(
+            hypervisorAddress,
+            tokens[1],
+            amountsIn[1]            
+        );              
+       
+        if (startB > amountsIn[0]) {
+            return (amountsIn[0], endA);
+        } 
+        else if (startA > amountsIn[1]) {
+            return (endB, amountsIn[1]);
+        } 
+        else {
+            return (endB, endA);
+        }        
+    }    
 }
