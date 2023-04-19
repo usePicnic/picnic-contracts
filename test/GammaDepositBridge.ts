@@ -154,6 +154,7 @@ describe("GammaDepositBridge", function () {
                     "withdraw",
                     [
                         poolAddress, // hypervisor
+                        [tokenA, tokenB], // addresses
                         100_000, // percentages
                         [0, 0, 0, 0],  // minAmounts,
                     ],
