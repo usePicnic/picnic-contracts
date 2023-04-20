@@ -4,10 +4,12 @@ pragma solidity ^0.8.6;
 
 interface IMasterChefDeposit {
     event DEFIBASKET_MASTERCHEF_STAKE(
+        uint256 poolId,
         uint256 amountIn,
         uint256 amountOut
     );
     event DEFIBASKET_MASTERCHEF_UNSTAKE(
+        uint256 poolId,
         uint256 amountIn,
         uint256 amountOut,
         address[] rewardTokens

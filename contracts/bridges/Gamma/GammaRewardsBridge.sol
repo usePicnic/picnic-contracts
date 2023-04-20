@@ -31,7 +31,7 @@ contract GammaRewardsBridge is IMasterChefDeposit {
 
         (uint256 currentAmountOut, ) = masterchef.userInfo(poolId, address(this)); 
 
-        emit DEFIBASKET_MASTERCHEF_STAKE(amountIn, currentAmountOut - prevAmountOut);
+        emit DEFIBASKET_MASTERCHEF_STAKE(poolId, amountIn, currentAmountOut - prevAmountOut);
     }
 
     function unstake(
@@ -54,7 +54,7 @@ contract GammaRewardsBridge is IMasterChefDeposit {
         address[] memory rewardTokens = _getRewardTokens(masterchefAddress);
         uint256 amountOut = IERC20(tokenAddress).balanceOf(address(this)) - prevAmountOut;
 
-        emit DEFIBASKET_MASTERCHEF_UNSTAKE(amountIn, amountOut, rewardTokens);
+        emit DEFIBASKET_MASTERCHEF_UNSTAKE(poolId, amountIn, amountOut, rewardTokens);
     }
 
     function claimRewards(
