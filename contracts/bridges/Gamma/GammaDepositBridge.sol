@@ -21,14 +21,14 @@ contract GammaDepositBridge is IGammaDeposit {
         uint256 numTokens = uint256(tokens.length);
         uint256[] memory amountsIn = new uint256[](numTokens);
 
-        for (uint256 i = 0; i < numTokens; i++) { 
+        for (uint256 i = 0; i < numTokens; i++) {
             amountsIn[i] = IERC20(tokens[i]).balanceOf(address(this)) * percentages[i] / 100_000;
             // Approve 0 first as a few ERC20 tokens are requiring this pattern.
             IERC20(tokens[i]).approve(hypervisorAddress, 0);
             IERC20(tokens[i]).approve(hypervisorAddress, amountsIn[i]);
-        }     
+        }
 
-        (uint256 depositA, uint256 depositB) = capRatios(tokens, amountsIn, hypervisorAddress);
+        (uint256 depositA, uint256 depositB) = capRatios(amountsIn, hypervisorAddress);
 
         uint256 amountOut = hypervisorRouter.deposit(
             depositA,
@@ -42,7 +42,7 @@ contract GammaDepositBridge is IGammaDeposit {
     }
 
     function withdraw(
-        address hypervisorAddress, 
+        address hypervisorAddress,
         address[] calldata tokens,
         uint256 percentage,
         uint256[4] calldata minAmountsIn
@@ -61,31 +61,31 @@ contract GammaDepositBridge is IGammaDeposit {
         emit DEFIBASKET_GAMMA_WITHDRAW(amountIn, amountA, amountB);
     }
 
-    function capRatios( 
-        address[] calldata tokens, 
-        uint256[] memory amountsIn, 
+    function capRatios(
+        uint256[] memory amountsIn,
         address hypervisorAddress
-    ) internal view returns (uint256, uint256) {    
-        (uint256 startA, uint256 endA) = hypervisorRouter.getDepositAmount(
-            hypervisorAddress,
-            tokens[0],
-            amountsIn[0]            
-        );
+    ) internal view returns (uint256, uint256) {
+        IHypervisor hypervisor = IHypervisor(hypervisorAddress);
+        uint256 _tmpA;
+        uint256 _tmpB;
 
-        (uint256 startB, uint256 endB) = hypervisorRouter.getDepositAmount(
-            hypervisorAddress,
-            tokens[1],
-            amountsIn[1]            
-        );              
-       
-        if (startB > amountsIn[0]) {
-            return (amountsIn[0], endA);
-        } 
-        else if (startA > amountsIn[1]) {
-            return (endB, amountsIn[1]);
-        } 
-        else {
-            return (endB, endA);
-        }        
-    }    
+        (_tmpA, _tmpB) = hypervisor.getTotalAmounts();
+
+        uint256 ratioA = 1_000_000 * _tmpA / _tmpB;
+        uint256 ratioB = 1_000_000 * _tmpB / _tmpA;
+
+        if (ratioB > ratioA) {
+            if (amountsIn[0] * ratioB / 1_000_000 > amountsIn[1]) {
+                return (amountsIn[1] * 1_000_000 / ratioB, amountsIn[1]);
+            } else {
+                return (amountsIn[0], amountsIn[0] * ratioB / 1_000_000);
+            }
+        } else {
+            if (amountsIn[1] * ratioA / 1_000_000 > amountsIn[0]) {
+                return (amountsIn[0], amountsIn[1] * 1_000_000 / ratioA );
+            } else {
+                return (amountsIn[1] * ratioA / 1_000_000, amountsIn[1]);
+            }
+        }
+    }
 }

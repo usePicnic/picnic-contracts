@@ -10,6 +10,8 @@ interface IHypervisor {
     uint256[4] memory minAmounts
   ) external returns (uint256, uint256);
 
+  function getTotalAmounts() external view returns (uint256, uint256);
+
   function balanceOf(
     address account
   ) external view returns (uint256);  
