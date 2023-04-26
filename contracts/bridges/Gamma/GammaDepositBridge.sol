@@ -71,20 +71,26 @@ contract GammaDepositBridge is IGammaDeposit {
 
         (_tmpA, _tmpB) = hypervisor.getTotalAmounts();
 
-        uint256 ratioA = 1_000_000 * _tmpA / _tmpB;
-        uint256 ratioB = 1_000_000 * _tmpB / _tmpA;
+        uint256 ratioA; 
+        uint256 ratioB; 
 
-        if (ratioB > ratioA) {
-            if (amountsIn[0] * ratioB / 1_000_000 > amountsIn[1]) {
-                return (amountsIn[1] * 1_000_000 / ratioB, amountsIn[1]);
+        if (_tmpA > _tmpB) {
+            ratioA = _tmpA * 1_000_000 / _tmpB;
+            ratioB = amountsIn[0] * 1_000_000 / amountsIn[1];
+
+            if (ratioA > ratioB) {
+                return (amountsIn[0], amountsIn[1] * ratioB / ratioA);
             } else {
-                return (amountsIn[0], amountsIn[0] * ratioB / 1_000_000);
+                return (amountsIn[0] * ratioA / ratioB, amountsIn[1]);
             }
         } else {
-            if (amountsIn[1] * ratioA / 1_000_000 > amountsIn[0]) {
-                return (amountsIn[0], amountsIn[1] * 1_000_000 / ratioA );
+            ratioA = _tmpB * 1_000_000 / _tmpA;
+            ratioB = amountsIn[1] * 1_000_000 / amountsIn[0];
+
+            if (ratioA > ratioB) {
+                return (amountsIn[0] * ratioB / ratioA, amountsIn[1]);
             } else {
-                return (amountsIn[1] * ratioA / 1_000_000, amountsIn[1]);
+                return (amountsIn[0], amountsIn[1] * ratioA / ratioB);
             }
         }
     }
