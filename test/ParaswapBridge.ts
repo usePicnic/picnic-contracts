@@ -361,22 +361,8 @@ describe("ParaswapBridge", function(){
           headers: { "Content-Type": "application/json" },
       });
   
-      const transactionAPIOutput = await req2.json();
-
-      console.log('zzz', transactionAPIOutput)
-
-      const paraswap = new ethers.Contract(PARASWAP_ADDRESS ,PARASWAP_ABI);
-      
+      const transactionAPIOutput = await req2.json();     
       const functionCallBytes = transactionAPIOutput.data;
-      const decodedFunctionCall = paraswap.interface.parseTransaction({
-          data: functionCallBytes,
-      });
-
-      console.log('zzzzzz', decodedFunctionCall.args);
-
-      const decodedFunctionCallList = decodedFunctionCall.args[0];
-      
-      console.log('yyy', decodedFunctionCallList[4]);
 
       // Set bridges addresses
       var _bridgeAddresses = [wmaticBridge.address, ParaswapBridge.address];
@@ -385,7 +371,7 @@ describe("ParaswapBridge", function(){
       var _bridgeEncodedCalls = [
           wmaticBridge.interface.encodeFunctionData("wrap", [100000]),
           ParaswapBridge.interface.encodeFunctionData("multiSwap", [
-              PARASWAP_ADDRESS,
+              body.contractAddress,
               body.tokenTransferProxy,
               functionCallBytes,
               100000,

@@ -48,12 +48,8 @@ contract ParaswapBridge is IParaswapBridge {
         uint256 amountInPercentage
     ) external override {
         address token = bytes32ToAddress(readBytesFromPosition(paraswapData, 36));
-        uint256 amount = IERC20(token).balanceOf(address(this)) * 25000 / 100000;
+        uint256 amount = IERC20(token).balanceOf(address(this)) * amountInPercentage / 100000;
         IERC20(token).approve(approveAddress, amount);    
-
-        console.log('this', address(this));
-
-        console.log('a', bytes32ToAddress(readBytesFromPosition(paraswapData, 164)));
 
         // Modify paraswapParams in memory
         assembly {
@@ -68,10 +64,6 @@ contract ParaswapBridge is IParaswapBridge {
             mstore(add(dataPointer, 176), shl(96, address()))
         }         
 
-        console.logBytes32(readBytesFromPosition(paraswapData, 68));
-
-        console.log('b', bytes32ToAddress(readBytesFromPosition(paraswapData, 164)));  
-
         (bool isSuccess, bytes memory result) = paraswapAddress.call(paraswapData);
         if (!isSuccess) {
                 assembly {
@@ -82,7 +74,7 @@ contract ParaswapBridge is IParaswapBridge {
                 }
             }        
 
-        // emit DEFIBASKET_PARASWAP_SWAP(receivedAmount);
+        emit DEFIBASKET_PARASWAP_SWAP(amount);
     }
 
     function readBytesFromPosition(bytes memory data, uint256 position) public pure returns (bytes32 result) {
