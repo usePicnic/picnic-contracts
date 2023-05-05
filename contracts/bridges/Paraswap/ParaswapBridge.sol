@@ -2,7 +2,6 @@ pragma solidity ^0.8.6;
 
 import "./interfaces/ParaswapIntefaces.sol";
 import "../interfaces/IParaswapBridge.sol";
-import "hardhat/console.sol";
 
 contract ParaswapBridge is IParaswapBridge {
     function simpleSwap(
@@ -41,7 +40,7 @@ contract ParaswapBridge is IParaswapBridge {
         emit DEFIBASKET_PARASWAP_SWAP(receivedAmount);
     }
 
-    function multiSwap(
+    function complexSwap(
         address paraswapAddress,
         address approveAddress,
         bytes memory paraswapData,

@@ -521,11 +521,11 @@ describe("ParaswapBridge", function() {
   });
 
   describe("Actions", function() {
-    it("Megaswap - Trade WMATIC for USDC", async function() {
+    it("Megaswap - Trade WMATIC for ETH", async function() {
       const sellToken = "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270";
-      const buyToken = "0x2791bca1f2de4661ed88a30c99a7a9449aa84174";
+      const buyToken = "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619";
       const sellAmount = ethers.utils.parseEther("1").toString();
-      const priceUrl = `https://apiv5.paraswap.io/prices/?destDecimals=6&srcToken=${sellToken}&destToken=${buyToken}&amount=${sellAmount}&side=SELL&network=137&includeContractMethods=MegaSwap`;
+      const priceUrl = `https://apiv5.paraswap.io/prices/?srcToken=${sellToken}&destToken=${buyToken}&amount=${sellAmount}&side=SELL&network=137&includeContractMethods=MegaSwap`;
       const req = await fetch(priceUrl);
       const rawBody = await req.json();
       const body = rawBody.priceRoute;
@@ -538,7 +538,6 @@ describe("ParaswapBridge", function() {
         destToken: body.destToken,
         destDecimals: body.destDecimals,
         destAmount: body.destAmount,
-        side: body.side,
         priceRoute: body,
         userAddress: owner.address,
       };
@@ -566,7 +565,7 @@ describe("ParaswapBridge", function() {
       // Set encoded calls
       var _bridgeEncodedCalls = [
         wmaticBridge.interface.encodeFunctionData("wrap", [100000]),
-        ParaswapBridge.interface.encodeFunctionData("multiSwap", [
+        ParaswapBridge.interface.encodeFunctionData("complexSwap", [
           body.contractAddress,
           body.tokenTransferProxy,
           functionCallBytes,
@@ -587,7 +586,7 @@ describe("ParaswapBridge", function() {
       // Wallet DAI amount should be 0
       let lpToken = await ethers.getContractAt(
         "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-        TOKENS["USDC"]
+        buyToken
       );
       let lpTokenBalance = await lpToken.balanceOf(wallet.address);
       expect(lpTokenBalance).to.be.above(0);
@@ -638,7 +637,7 @@ describe("ParaswapBridge", function() {
       // Set encoded calls
       var _bridgeEncodedCalls = [
         wmaticBridge.interface.encodeFunctionData("wrap", [100000]),
-        ParaswapBridge.interface.encodeFunctionData("multiSwap", [
+        ParaswapBridge.interface.encodeFunctionData("complexSwap", [
           body.contractAddress,
           body.tokenTransferProxy,
           functionCallBytes,
@@ -698,7 +697,6 @@ describe("ParaswapBridge", function() {
       });
 
       const transactionAPIOutput = await req2.json();
-
 
       const functionCallBytes = transactionAPIOutput.data;
 

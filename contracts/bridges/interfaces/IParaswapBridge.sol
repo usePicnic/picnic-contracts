@@ -14,7 +14,7 @@ interface IParaswapBridge{
         uint256 amountInPercentage
     ) external;
 
-    function multiSwap(
+    function complexSwap(
         address paraswapAddress,
         address approveAddress,
         bytes memory paraswapParams,
