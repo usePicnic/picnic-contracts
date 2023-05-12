@@ -566,6 +566,8 @@ describe("ParaswapBridge", function() {
       var _bridgeEncodedCalls = [
         wmaticBridge.interface.encodeFunctionData("wrap", [100000]),
         ParaswapBridge.interface.encodeFunctionData("complexSwap", [
+          body.srcToken,
+          body.destToken,
           body.contractAddress,
           body.tokenTransferProxy,
           functionCallBytes,
@@ -638,6 +640,8 @@ describe("ParaswapBridge", function() {
       var _bridgeEncodedCalls = [
         wmaticBridge.interface.encodeFunctionData("wrap", [100000]),
         ParaswapBridge.interface.encodeFunctionData("complexSwap", [
+          body.srcToken,
+          body.destToken,
           body.contractAddress,
           body.tokenTransferProxy,
           functionCallBytes,

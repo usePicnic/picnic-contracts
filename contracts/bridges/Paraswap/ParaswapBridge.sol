@@ -33,22 +33,23 @@ contract ParaswapBridge is IParaswapBridge {
 
         ParaswapInterface paraswap = ParaswapInterface(paraswapAddress);
 
-        uint256 receivedAmount = paraswap.simpleSwap(
+        paraswap.simpleSwap(
             updatedDescription
         );
 
-        emit DEFIBASKET_PARASWAP_SWAP(receivedAmount);
+        emit DEFIBASKET_PARASWAP_SWAP();
     }
 
     function complexSwap(
+        address fromToken,
+        address toToken,
         address paraswapAddress,
         address approveAddress,
         bytes memory paraswapData,
         uint256 amountInPercentage
     ) external override {
-        address token = bytes32ToAddress(readBytesFromPosition(paraswapData, 36));
-        uint256 amount = IERC20(token).balanceOf(address(this)) * amountInPercentage / 100000;
-        IERC20(token).approve(approveAddress, amount);    
+        uint256 amount = IERC20(fromToken).balanceOf(address(this)) * amountInPercentage / 100000;
+        IERC20(fromToken).approve(approveAddress, amount);    
 
         // Modify paraswapParams in memory
         assembly {
@@ -63,7 +64,7 @@ contract ParaswapBridge is IParaswapBridge {
             mstore(add(dataPointer, 176), shl(96, address()))
         }         
 
-        (bool isSuccess, bytes memory result) = paraswapAddress.call(paraswapData);
+        (bool isSuccess, ) = paraswapAddress.call(paraswapData);
         if (!isSuccess) {
                 assembly {
                     let ptr := mload(0x40)
@@ -73,7 +74,7 @@ contract ParaswapBridge is IParaswapBridge {
                 }
             }        
 
-        emit DEFIBASKET_PARASWAP_SWAP(amount);
+        emit DEFIBASKET_PARASWAP_SWAP();
     }
 
     function readBytesFromPosition(bytes memory data, uint256 position) public pure returns (bytes32 result) {
