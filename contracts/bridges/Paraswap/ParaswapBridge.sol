@@ -59,7 +59,7 @@ contract ParaswapBridge is IParaswapBridge {
             // Update toAmount
             mstore(add(dataPointer, 100), 1)
             // Update expectedAmount
-            mstore(add(dataPointer, 132), 1)
+            mstore(add(dataPointer, 132), 115792089237316195423570985008687907853269984665640564039457584007913129639935) // MAX_UINT
             // Update beneficiary
             mstore(add(dataPointer, 176), shl(96, address()))
         }         
