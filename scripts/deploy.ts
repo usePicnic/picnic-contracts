@@ -218,6 +218,11 @@ const contractsToDeploy = [
         interfaceName: "IMasterChefDeposit",
         filePath: bridgeNameToFilePath("Gamma", "GammaRewardsBridge")
     },
+    {
+        contractName: "ZeroXBridge",
+        interfaceName: "IZeroXBridge",
+        filePath: bridgeNameToFilePath("ZeroX", "ZeroXBridge")
+    },
 ]
 
 async function main() {
