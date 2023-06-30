@@ -49,8 +49,6 @@ describe("ZeroX", function(){
         });
         
         console.log(decodedFunctionCall);
-        console.log('zz', decodedFunctionCall.args[4]);
-
 
         // Set bridges addresses
         var _bridgeAddresses = [wmaticBridge.address, zeroXBridge.address];
@@ -60,11 +58,14 @@ describe("ZeroX", function(){
             wmaticBridge.interface.encodeFunctionData("wrap", [100000]),
             zeroXBridge.interface.encodeFunctionData("swap", [
                 body.to,
-                decodedFunctionCall.args[0],
-                decodedFunctionCall.args[1],
-                "100000",
-                "1",
-                decodedFunctionCall.args[4]
+                body.allowanceTarget,
+                [
+                  decodedFunctionCall.args[0],
+                  decodedFunctionCall.args[1],
+                  "100000",
+                  "1",
+                  decodedFunctionCall.args[4],
+                ]
             ])
         ];
         
