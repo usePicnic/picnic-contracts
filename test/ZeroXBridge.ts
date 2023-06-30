@@ -10,11 +10,7 @@ describe("ZeroX", function(){
   let other;
   let zeroXBridge;
   let wallet;
-  let ParaswapBridge;
   let wmaticBridge;
-
-  const ADDRESSES = constants["POLYGON"];
-  const TOKENS = constants["POLYGON"]["TOKENS"];
   
   this.beforeEach(async function() {
         // Get 2 signers to enable to test for permission rights
@@ -35,7 +31,6 @@ describe("ZeroX", function(){
 
   describe("Actions", function() {
     it("Trade WMATIC for USDC", async function () {
-
         const sellToken = "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270";
         const buyToken = "0x2791bca1f2de4661ed88a30c99a7a9449aa84174";
         const sellAmount = ethers.utils.parseEther("1").toString();
@@ -44,8 +39,7 @@ describe("ZeroX", function(){
         const req = await fetch(priceUrl);
         const body = await req.json();
      
-        console.log('zx', body)
-      
+        console.log('zx', body)      
     
        // TODO wtf is the allowance target?
        const zerox = new ethers.Contract(body.to, ZEROX_ABI);
@@ -69,8 +63,8 @@ describe("ZeroX", function(){
                 body.to,
                 decodedFunctionCall.args[0],
                 decodedFunctionCall.args[1],
-                decodedFunctionCall.args[2],
-                decodedFunctionCall.args[3],
+                "100000",
+                "1",
                 decodedFunctionCall.args[4]
             ])
         ];
