@@ -87,10 +87,10 @@ contract GammaDepositBridge is IGammaDeposit {
             amountsIn[1]            
         );              
        
-        if (startB > amountsIn[0]) {
+        if (startA > amountsIn[0]) {
             return (amountsIn[0], Math.min(amountsIn[1], endB));
         } 
-        else if (startA > amountsIn[1]) {
+        else if (startB > amountsIn[1]) {
             return (Math.min(amountsIn[0], endA), amountsIn[1]);
         } 
         else {
