@@ -85,16 +85,17 @@ contract GammaDepositBridge is IGammaDeposit {
             hypervisorAddress,
             tokens[1],
             amountsIn[1]            
-        );              
-       
-        if (startB > amountsIn[0]) {
-            return (amountsIn[0], Math.min(amountsIn[1], endB));
+        );    
+
+        // * 9999 / 10000 is a hack to deal with unprecise math and avoid "improper ratio bug")
+        if (startA > amountsIn[0]) {
+            return (amountsIn[0], Math.min(amountsIn[1], endB * 9999/10000 ));
         } 
-        else if (startA > amountsIn[1]) {
-            return (Math.min(amountsIn[0], endA), amountsIn[1]);
+        else if (startB > amountsIn[1]) {
+            return (Math.min(amountsIn[0], endA * 9999/10000 ), amountsIn[1]);
         } 
         else {
-            return (Math.min(amountsIn[0], endA), Math.min(amountsIn[1], endB));
+            return (Math.min(amountsIn[0], endA * 9999/10000 ), Math.min(amountsIn[1], endB * 9999/10000 ));
         }        
     }    
 }
