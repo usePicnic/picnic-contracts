@@ -75,26 +75,26 @@ contract GammaDepositBridge is IGammaDeposit {
         address hypervisorAddress,
         IHypervisorRouter hypervisorRouter
     ) internal view returns (uint256, uint256) {    
-        (uint256 startA, uint256 endA) = hypervisorRouter.getDepositAmount(
+        (uint256 startB, uint256 endB) = hypervisorRouter.getDepositAmount(
             hypervisorAddress,
             tokens[0],
             amountsIn[0]            
         );
 
-        (uint256 startB, uint256 endB) = hypervisorRouter.getDepositAmount(
+        (uint256 startA, uint256 endA) = hypervisorRouter.getDepositAmount(
             hypervisorAddress,
             tokens[1],
             amountsIn[1]            
         );              
        
         if (startB > amountsIn[0]) {
-            return (amountsIn[0], endA);
+            return (amountsIn[0], Math.min(amountsIn[1], endB));
         } 
         else if (startA > amountsIn[1]) {
-            return (endB, amountsIn[1]);
+            return (Math.min(amountsIn[0], endA), amountsIn[1]);
         } 
         else {
-            return (endB, endA);
+            return (Math.min(amountsIn[0], endA), Math.min(amountsIn[1], endB));
         }        
     }    
 }
