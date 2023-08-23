@@ -23,7 +23,8 @@ contract CompoundV3Bridge is ICompoundV3Bridge {
         emit DEFIBASKET_COMPOUND_SUPPLY(asset, amount);
     }
 
-    function withdraw(address asset, uint amount) external override {
+    function withdraw(address asset, uint256 percentageIn) external override {
+        uint256 amount = (balanceOf(address(this)) * percentageIn) / 100000;
         IComet _comet = IComet(cometAddress);
         _comet.withdraw(asset, amount);
 
