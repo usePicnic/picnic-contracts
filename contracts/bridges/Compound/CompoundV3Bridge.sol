@@ -7,13 +7,15 @@ import "./interfaces/IComet.sol";
 import "../interfaces/ICompoundV3Bridge.sol";
 
 contract CompoundV3Bridge is ICompoundV3Bridge {
-    address constant cometAddress = 0xf25212e676d1f7f89cd72ffee66158f541246445;
+    address constant cometAddress = 0xF25212E676D1F7F89Cd72fFEe66158f541246445;
 
-    function supply(address asset, uint amount) external override {
+    function supply(address asset, uint256 percentageIn) external override {
         IComet _comet = IComet(cometAddress);
+        uint256 amount = (IERC20(asset).balanceOf(address(this)) *
+            percentageIn) / 100000;
         // Approve 0 first as a few ERC20 tokens are requiring this pattern.
-        IERC20(asset).approve(compoundUSDCAddress, 0);
-        IERC20(asset).approve(compoundUSDCAddress, amount);
+        IERC20(asset).approve(cometAddress, 0);
+        IERC20(asset).approve(cometAddress, amount);
 
         // TODO: Is this contract the right one?
         _comet.supply(asset, amount);
@@ -26,5 +28,10 @@ contract CompoundV3Bridge is ICompoundV3Bridge {
         _comet.withdraw(asset, amount);
 
         emit DEFIBASKET_COMPOUND_WITHDRAW(asset, amount);
+    }
+
+    function balanceOf(address account) public view override returns (uint256) {
+        IComet _comet = IComet(cometAddress);
+        return _comet.balanceOf(account);
     }
 }

@@ -7,7 +7,9 @@ interface ICompoundV3Bridge {
 
     event DEFIBASKET_COMPOUND_WITHDRAW(address asset, uint amount);
 
-    function supply(address asset, uint amount) external override;
+    function supply(address asset, uint amount) external;
 
-    function withdraw(address asset, uint amount) external override;
+    function withdraw(address asset, uint amount) external;
+
+    function balanceOf(address account) external view returns (uint256);
 }
