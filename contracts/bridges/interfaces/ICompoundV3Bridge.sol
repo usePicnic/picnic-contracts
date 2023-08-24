@@ -4,12 +4,18 @@ pragma solidity ^0.8.6;
 
 interface ICompoundV3Bridge {
     event DEFIBASKET_COMPOUND_SUPPLY(address asset, uint amount);
-
     event DEFIBASKET_COMPOUND_WITHDRAW(address asset, uint amount);
+    event DEFIBASKET_COMPOUND_REWARDS_CLAIM(
+        address comet,
+        address src,
+        bool shouldAccrue
+    );
 
     function supply(address asset, uint amount) external;
 
     function withdraw(address asset, uint amount) external;
 
     function balanceOf(address account) external view returns (uint256);
+
+    function claim(address comet, address src, bool shouldAccrue) external;
 }
