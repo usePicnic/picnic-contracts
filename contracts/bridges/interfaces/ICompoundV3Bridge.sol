@@ -11,11 +11,17 @@ interface ICompoundV3Bridge {
         bool shouldAccrue
     );
 
-    function supply(address asset, uint amount) external;
+    function supply(
+        address asset,
+        uint256 percentageIn,
+        address cometAddress
+    ) external;
 
-    function withdraw(address asset, uint amount) external;
+    function withdraw(
+        address asset,
+        uint256 percentageIn,
+        address cometAddress
+    ) external;
 
-    function balanceOf(address account) external view returns (uint256);
-
-    function claim(address comet, address src, bool shouldAccrue) external;
+    function claim(address cometAddress) external;
 }
