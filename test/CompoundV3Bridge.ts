@@ -55,6 +55,7 @@ describe("CompoundV3Bridge", function () {
         compoundBridge.interface.encodeFunctionData("supply", [
           TOKENS["USDC"], // token address // amount in
           100_000, // percentage_in
+          "0xf25212e676d1f7f89cd72ffee66158f541246445", // cUSDC address
         ]),
       ];
 
@@ -73,11 +74,15 @@ describe("CompoundV3Bridge", function () {
         "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
         TOKENS["USDC"]
       );
+      let cUSDC = await ethers.getContractAt(
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
+        "0xf25212e676d1f7f89cd72ffee66158f541246445"
+      );
       let usdcBalance = await usdc.balanceOf(wallet.address);
       expect(usdcBalance).to.be.equal(0);
 
       // Amount of cUSDC should be > 0
-      let cUSDCBalance = await compoundBridge.balanceOf(wallet.address);
+      let cUSDCBalance = await cUSDC.balanceOf(wallet.address);
       expect(cUSDCBalance).to.be.above(0);
 
       // Withdraw cUSDC to wallet as USDC
@@ -87,11 +92,12 @@ describe("CompoundV3Bridge", function () {
           compoundBridge.interface.encodeFunctionData("withdraw", [
             TOKENS["USDC"],
             100_000,
+            "0xf25212e676d1f7f89cd72ffee66158f541246445",
           ]),
         ]
       );
 
-      cUSDCBalance = await compoundBridge.balanceOf(wallet.address);
+      cUSDCBalance = await cUSDC.balanceOf(wallet.address);
       usdcBalance = await usdc.balanceOf(wallet.address);
       expect(cUSDCBalance).to.be.equal(0);
       expect(usdcBalance).to.be.above(0);
