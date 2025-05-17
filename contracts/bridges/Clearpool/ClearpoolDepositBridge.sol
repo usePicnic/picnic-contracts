@@ -96,7 +96,7 @@ contract ClearpoolDepositBridge is IClearpoolDeposit {
     /**
      * @notice Claim rewards from a pool without unstaking principal
      *
-     * @dev Wraps Clearpool's withdrawReward and generate the necessary events to communicate with DeFi Basket's UI and0
+     * @dev Wraps Clearpool's withdrawReward and generate the necessary events to communicate with DeFi Basket's UI and
      * back-end.
      *
      * @param poolAddress The address of the Clearpool pool.
